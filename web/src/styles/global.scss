@@ -1,0 +1,39 @@
+@import '@modrinth/ui/src/styles/tailwind-utilities';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import '@modrinth/assets/styles/normalize.scss';
+@import '@modrinth/assets/styles/reset.scss';
+@import '@modrinth/assets/styles/variables.scss';
+@import '@modrinth/assets/styles/inter.scss';
+@import '@modrinth/assets/styles/defaults.scss';
+@import '@modrinth/assets/styles/classes.scss';
+@import '@modrinth/assets/styles/accessibility.scss';
+
+@layer base {
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+}
+
+:root {
+	--size-mobile-navbar-height: 0px;
+	--size-mobile-navbar-height-expanded: 0px;
+	--color-text: var(--color-base);
+	--color-text-secondary: var(--color-secondary);
+}
+
+html,
+body,
+#app {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	background-color: var(--color-bg);
+	color: var(--color-base);
+}

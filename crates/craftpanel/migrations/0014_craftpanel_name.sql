@@ -1,0 +1,33 @@
+-- The panel is called CraftPanel. Two places carried the old name into data
+-- somebody actually reads: `mail_settings.from_name` stands on every mail the
+-- panel sends, and `drive_settings.folder_name` is the folder the panel creates
+-- in the user's own Google Drive.
+--
+-- Why here and not in 0009 and 0012, where the two defaults are written: the
+-- panel runs `sqlx::migrate!` with the checksum check on (db.rs:27), and both of
+-- those files are long applied on the installation this is written for. A single
+-- character changed in them and that panel refuses to start. A migration is a
+-- record of what happened, not a draft — the new name arrives as a new step.
+--
+-- Only rows that still carry the old value are touched. An operator who typed a
+-- sender name of his own keeps it; the same rule the upgrade in docs/UPGRADE.md
+-- follows for the installation that is renamed from the outside.
+--
+-- On an empty database this runs after 0009 and 0012 have inserted their one
+-- seed row with the old default, so the fresh install and the existing one end
+-- up with the same two values. `updated_at` stays at the seed timestamp on
+-- purpose: nobody has configured anything yet, and the row should not claim
+-- otherwise.
+--
+-- What cannot be fixed here: SQLite has no ALTER TABLE ... ALTER COLUMN, so the
+-- DEFAULT clauses of both columns still read the old name. Neither can fire
+-- again. Both tables hold exactly one row (CHECK (id = 1)), that row was put
+-- there by 0009 and 0012, and every write that follows names the column —
+-- `UPDATE mail_settings SET from_name = ?` (mail/store.rs:101) and the upsert in
+-- drive/store.rs:41. The stale default would come back only if somebody deleted
+-- the seed row and inserted it again without the column, and nothing in the
+-- panel does that. A rebuild of both tables to correct two words of dead text
+-- would be the larger risk.
+
+UPDATE mail_settings  SET from_name   = 'CraftPanel'         WHERE from_name   = 'mcpanel';
+UPDATE drive_settings SET folder_name = 'craftpanel-backups' WHERE folder_name = 'mcpanel-backups';

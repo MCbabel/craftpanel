@@ -1,0 +1,2858 @@
+{
+  "account.at-least-no-limit": {
+    "defaultMessage": "at least {used}, no limit"
+  },
+  "account.at-least-of-bytes": {
+    "defaultMessage": "at least {used} of {total}"
+  },
+  "account.bytes-no-limit": {
+    "defaultMessage": "{used}, no limit"
+  },
+  "account.cores.cap": {
+    "defaultMessage": "{used, number} of {limit, plural, one {# core} other {# cores}}, hard cap"
+  },
+  "account.cores.none": {
+    "defaultMessage": "{used, plural, one {# core} other {# cores}}, no limit"
+  },
+  "account.cores.share": {
+    "defaultMessage": "{used, number} of {limit, plural, one {# core} other {# cores}} while the machine is busy, more while it is idle"
+  },
+  "account.cpu.title": {
+    "defaultMessage": "Processor"
+  },
+  "account.disk.detail": {
+    "defaultMessage": "{servers} in servers, {backups} in backups"
+  },
+  "account.disk.title": {
+    "defaultMessage": "Disk space"
+  },
+  "account.disk.unread": {
+    "defaultMessage": "Some folders were closed to the panel while it counted, so this is a lower bound. What is in them takes up disk all the same."
+  },
+  "account.drive.broken.body": {
+    "defaultMessage": "No backup can go into your Drive until you connect again. Backups that are already there stay where they are."
+  },
+  "account.drive.broken.header": {
+    "defaultMessage": "Google no longer accepts this connection"
+  },
+  "account.drive.check": {
+    "defaultMessage": "Check now"
+  },
+  "account.drive.checked-at": {
+    "defaultMessage": "Last confirmed {ago}"
+  },
+  "account.drive.checked-never": {
+    "defaultMessage": "Not confirmed yet"
+  },
+  "account.drive.connect": {
+    "defaultMessage": "Connect Google Drive"
+  },
+  "account.drive.connect-free": {
+    "defaultMessage": "Free, and it can be undone here at any time."
+  },
+  "account.drive.connected-intro": {
+    "defaultMessage": "Your backups go into your own Drive. You can open, download and delete them there yourself."
+  },
+  "account.drive.disconnect": {
+    "defaultMessage": "Disconnect"
+  },
+  "account.drive.disconnect.body": {
+    "defaultMessage": "The panel gives its access back to Google and forgets it. New backups then stay on this machine, if the operator allows that."
+  },
+  "account.drive.disconnect.delete": {
+    "defaultMessage": "Delete them and disconnect"
+  },
+  "account.drive.disconnect.files": {
+    "defaultMessage": "Backups that already lie in your Drive can be deleted along with it, or left where they are — they stay yours either way, and the panel will find them again if you connect this account later."
+  },
+  "account.drive.disconnect.keep": {
+    "defaultMessage": "Keep the backups"
+  },
+  "account.drive.external-off.body": {
+    "defaultMessage": "Google Drive is an outbound service. While an administrator keeps that switch off, nothing is uploaded and no connection can be made."
+  },
+  "account.drive.external-off.header": {
+    "defaultMessage": "Outbound services are switched off"
+  },
+  "account.drive.fact.account": {
+    "defaultMessage": "Google account"
+  },
+  "account.drive.fact.account-unknown": {
+    "defaultMessage": "Not known yet"
+  },
+  "account.drive.fact.folder": {
+    "defaultMessage": "Folder"
+  },
+  "account.drive.fact.storage": {
+    "defaultMessage": "Drive storage"
+  },
+  "account.drive.fact.storage-free": {
+    "defaultMessage": "{free} still free."
+  },
+  "account.drive.fact.storage-unlimited": {
+    "defaultMessage": "No limit"
+  },
+  "account.drive.fact.storage-value": {
+    "defaultMessage": "{used} of {limit}"
+  },
+  "account.drive.fact.storage-workspace": {
+    "defaultMessage": "This account reports no storage limit."
+  },
+  "account.drive.intro": {
+    "defaultMessage": "Connect your Google account and the backups of your servers go into your own Drive instead of onto this machine. The panel only ever sees the folder it made itself."
+  },
+  "account.drive.last-failure.header": {
+    "defaultMessage": "The last attempt to connect did not work"
+  },
+  "account.drive.link.accepted": {
+    "defaultMessage": "Confirmed. Your backups can go into your Drive from now on."
+  },
+  "account.drive.link.code": {
+    "defaultMessage": "Your code"
+  },
+  "account.drive.link.denied": {
+    "defaultMessage": "The request was declined at Google."
+  },
+  "account.drive.link.expired": {
+    "defaultMessage": "The code ran out before it was confirmed, so the panel stopped asking."
+  },
+  "account.drive.link.intro": {
+    "defaultMessage": "Open this page on any device, sign in to Google and type the code below. This page notices on its own."
+  },
+  "account.drive.link.retry": {
+    "defaultMessage": "New code"
+  },
+  "account.drive.link.title": {
+    "defaultMessage": "Connect Google Drive"
+  },
+  "account.drive.link.waiting": {
+    "defaultMessage": "Waiting for the confirmation at Google… {remaining} left"
+  },
+  "account.drive.load-failed": {
+    "defaultMessage": "Could not load the Drive status"
+  },
+  "account.drive.not-set-up": {
+    "defaultMessage": "The operator of this panel has not set up Google Drive, so backups stay on this machine."
+  },
+  "account.drive.point.once": {
+    "defaultMessage": "You confirm once with a code on any device. No password is typed into this panel."
+  },
+  "account.drive.point.unencrypted": {
+    "defaultMessage": "A backup holds your whole server directory, and it is not encrypted: anything in your configuration files is readable to whoever can read your Drive."
+  },
+  "account.drive.point.visible": {
+    "defaultMessage": "They land in a folder called “{folder}” that you can see, open and empty yourself."
+  },
+  "account.drive.point.yours": {
+    "defaultMessage": "The archives use your storage, not the operator’s disk."
+  },
+  "account.drive.state.broken": {
+    "defaultMessage": "Connection lost"
+  },
+  "account.drive.state.connected": {
+    "defaultMessage": "Connected"
+  },
+  "account.drive.title": {
+    "defaultMessage": "Backups in your own Google Drive"
+  },
+  "account.drive.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "account.error.unknown": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "account.limits.hint": {
+    "defaultMessage": "Memory is a budget you divide between your servers; disk space counts everything your servers and their backups hold together. Only an administrator can change these."
+  },
+  "account.limits.none": {
+    "defaultMessage": "This account has no limits at all: no memory ceiling, no processor cap, no process count and no disk quota. The figures below are what is measured, not what is allowed."
+  },
+  "account.limits.title": {
+    "defaultMessage": "Limits"
+  },
+  "account.memory.detail": {
+    "defaultMessage": "In use right now: {used}"
+  },
+  "account.memory.title": {
+    "defaultMessage": "Memory"
+  },
+  "account.mib-no-limit": {
+    "defaultMessage": "{value} MiB, no limit"
+  },
+  "account.of-bytes": {
+    "defaultMessage": "{used} of {total}"
+  },
+  "account.of-mib": {
+    "defaultMessage": "{value} of {total} MiB"
+  },
+  "account.over-limit.both": {
+    "defaultMessage": "Both the memory budget and the disk limit are exceeded. Nothing was stopped or deleted, but nothing new can be taken up either."
+  },
+  "account.over-limit.disk": {
+    "defaultMessage": "This account holds more on disk than it is allowed. Nothing was deleted and nothing was stopped, but uploads, installs and backups are refused until some room is freed."
+  },
+  "account.over-limit.header": {
+    "defaultMessage": "Over the limit"
+  },
+  "account.over-limit.memory": {
+    "defaultMessage": "More memory is handed out to servers than this account has. Nothing was stopped, but no new server can be created or started until a server is deleted or made smaller."
+  },
+  "account.pids.none": {
+    "defaultMessage": "{used}, no limit"
+  },
+  "account.pids.of": {
+    "defaultMessage": "{used} of {limit}"
+  },
+  "account.pids.title": {
+    "defaultMessage": "Processes"
+  },
+  "account.playit.disconnect.body": {
+    "defaultMessage": "The tunnel service stops and your key is deleted from this machine. Your servers stay up and stay reachable on the local network."
+  },
+  "account.playit.external-off.body": {
+    "defaultMessage": "playit.gg is an outbound service. While an administrator keeps that switch off, no address can be handed out and the tunnel service stays down."
+  },
+  "account.playit.intro": {
+    "defaultMessage": "playit.gg hands out an address that works from outside, without anyone touching a router. Connect your own account and your servers can ask for one."
+  },
+  "account.playit.not-self-managed.body": {
+    "defaultMessage": "playit.gg reports the agent as not self-managed, so the panel cannot create addresses for your servers. Disconnect and connect again; the panel always asks for a self-managed agent."
+  },
+  "account.playit.ports-for-others": {
+    "defaultMessage": "{count, plural, one {One of them belongs to a server somebody else owns} other {# of them belong to servers somebody else owns}} — from the account this panel used to share. You can give those back on the server’s own page."
+  },
+  "account.playit.quiet": {
+    "defaultMessage": "No server of yours has a public address, so the tunnel service is not running."
+  },
+  "account.playit.title": {
+    "defaultMessage": "Public addresses for your servers"
+  },
+  "account.role.admin": {
+    "defaultMessage": "Administrator"
+  },
+  "account.role.user": {
+    "defaultMessage": "User"
+  },
+  "account.servers.description": {
+    "defaultMessage": "{total, plural, one {# server} other {# servers}}, {running, plural, =0 {none running} other {# running}}."
+  },
+  "account.servers.memory": {
+    "defaultMessage": "{mib} MiB"
+  },
+  "account.servers.none": {
+    "defaultMessage": "No servers of your own yet."
+  },
+  "account.servers.title": {
+    "defaultMessage": "Where the budget went"
+  },
+  "account.subtitle": {
+    "defaultMessage": "What this account is allowed, and how much of it is in use."
+  },
+  "account.system-account": {
+    "defaultMessage": "Runs as the system user {name}"
+  },
+  "account.system-not-ready": {
+    "defaultMessage": "The system user behind this account is not ready yet, so no server can start. An administrator can retry it."
+  },
+  "account.title": {
+    "defaultMessage": "Your account"
+  },
+  "admin.drive.account.connected": {
+    "defaultMessage": "Connected"
+  },
+  "admin.drive.account.connecting": {
+    "defaultMessage": "Nothing connected"
+  },
+  "admin.drive.account.error": {
+    "defaultMessage": "Not working"
+  },
+  "admin.drive.account.revoked": {
+    "defaultMessage": "Access withdrawn"
+  },
+  "admin.drive.accounts.description": {
+    "defaultMessage": "One line per user who has connected a Google account. You cannot connect one for anybody — only the person in front of the browser can do that."
+  },
+  "admin.drive.accounts.empty": {
+    "defaultMessage": "Nobody has connected a Google account"
+  },
+  "admin.drive.accounts.empty-hint": {
+    "defaultMessage": "Whoever wants his backups in his own storage connects his Google account on his account page. There is nothing to do here for him."
+  },
+  "admin.drive.accounts.title": {
+    "defaultMessage": "Connected accounts"
+  },
+  "admin.drive.backups-value": {
+    "defaultMessage": "{count} · {bytes}"
+  },
+  "admin.drive.checked-never": {
+    "defaultMessage": "never"
+  },
+  "admin.drive.client-id": {
+    "defaultMessage": "Client ID"
+  },
+  "admin.drive.client-id.placeholder": {
+    "defaultMessage": "1234567890-abcdef.apps.googleusercontent.com"
+  },
+  "admin.drive.client-secret": {
+    "defaultMessage": "Client secret"
+  },
+  "admin.drive.client-secret.hint": {
+    "defaultMessage": "Leave empty to keep the stored secret. Saving with this field cleared removes it."
+  },
+  "admin.drive.client-secret.keep": {
+    "defaultMessage": "A secret is stored — leave empty to keep it"
+  },
+  "admin.drive.client-secret.placeholder": {
+    "defaultMessage": "GOCSPX-…"
+  },
+  "admin.drive.column.actions": {
+    "defaultMessage": "Actions"
+  },
+  "admin.drive.column.backups": {
+    "defaultMessage": "Backups there"
+  },
+  "admin.drive.column.checked": {
+    "defaultMessage": "Last checked"
+  },
+  "admin.drive.column.state": {
+    "defaultMessage": "State"
+  },
+  "admin.drive.column.storage": {
+    "defaultMessage": "Drive storage"
+  },
+  "admin.drive.column.user": {
+    "defaultMessage": "User"
+  },
+  "admin.drive.credentials.description": {
+    "defaultMessage": "The id is kept in the database; the secret is written to a file that only the panel can read, and it is never shown again."
+  },
+  "admin.drive.credentials.title": {
+    "defaultMessage": "Client credentials"
+  },
+  "admin.drive.cut": {
+    "defaultMessage": "Disconnect"
+  },
+  "admin.drive.cut.body": {
+    "defaultMessage": "The panel gives its access to {user}’s Google account back and forgets it. He can connect again himself at any time."
+  },
+  "admin.drive.cut.files": {
+    "defaultMessage": "His backups stay in his Drive. There is no button here that deletes files in somebody else’s storage, and that is on purpose: he can see them and throw them away himself."
+  },
+  "admin.drive.folder-hint": {
+    "defaultMessage": "The folder the panel makes in each user’s Drive. Renaming it here does not rename the folders that already exist."
+  },
+  "admin.drive.folder-name": {
+    "defaultMessage": "Folder name"
+  },
+  "admin.drive.forget": {
+    "defaultMessage": "Remove credentials"
+  },
+  "admin.drive.forget.body": {
+    "defaultMessage": "The client id and the secret are deleted, and the panel is “not set up” again."
+  },
+  "admin.drive.forget.warning": {
+    "defaultMessage": "The connections your users have made stay listed but stop working: no backup can go into a Drive and none can be fetched back out until credentials are entered again."
+  },
+  "admin.drive.load-failed": {
+    "defaultMessage": "Could not load the Drive settings"
+  },
+  "admin.drive.policy": {
+    "defaultMessage": "Where backups may go"
+  },
+  "admin.drive.policy.drive-only": {
+    "defaultMessage": "Google Drive only"
+  },
+  "admin.drive.policy.drive-only-hint": {
+    "defaultMessage": "Nothing is kept on this machine, and a user who has not connected a Drive cannot back up at all. That is deliberate: a silent fall back to this disk is how somebody ends up believing he is covered."
+  },
+  "admin.drive.policy.local-only": {
+    "defaultMessage": "This machine only"
+  },
+  "admin.drive.policy.local-only-hint": {
+    "defaultMessage": "The way out if Google causes trouble. Backups already in a Drive stay readable and restorable; only new ones stay here."
+  },
+  "admin.drive.policy.user-choice": {
+    "defaultMessage": "Let each server choose"
+  },
+  "admin.drive.policy.user-choice-hint": {
+    "defaultMessage": "Every server backs up here by default; whoever has connected a Drive can switch his servers over."
+  },
+  "admin.drive.publish.body": {
+    "defaultMessage": "While the consent screen is on “Testing”, Google hands out access that expires after seven days: every connection then breaks after a week, silently, and exactly when somebody needs a backup. The panel cannot ask Google for this setting; it can only tell you about it."
+  },
+  "admin.drive.publish.header": {
+    "defaultMessage": "Publishing the app is not optional"
+  },
+  "admin.drive.saved": {
+    "defaultMessage": "Saved."
+  },
+  "admin.drive.state.blank": {
+    "defaultMessage": "Not set up"
+  },
+  "admin.drive.state.blank-hint": {
+    "defaultMessage": "Backups stay on this machine, and nothing in the panel calls Google."
+  },
+  "admin.drive.state.ready": {
+    "defaultMessage": "Set up"
+  },
+  "admin.drive.state.ready-hint": {
+    "defaultMessage": "Users can connect their Google account on their own account page."
+  },
+  "admin.drive.step.api": {
+    "defaultMessage": "Switch on the Drive API — without it every call is refused:"
+  },
+  "admin.drive.step.client": {
+    "defaultMessage": "Create a client of type “TVs and Limited Input devices” and put its id and secret in below."
+  },
+  "admin.drive.step.consent": {
+    "defaultMessage": "Fill in the OAuth consent screen: audience “External”, an app name, a support address, and the scope .../auth/drive.file. That scope is not a sensitive one, so no review is needed."
+  },
+  "admin.drive.step.project": {
+    "defaultMessage": "Create a project at"
+  },
+  "admin.drive.step.publish": {
+    "defaultMessage": "Press “Publish app” so the publishing status is “In production”."
+  },
+  "admin.drive.storage-unlimited": {
+    "defaultMessage": "No limit"
+  },
+  "admin.drive.storage-value": {
+    "defaultMessage": "{used} of {limit}"
+  },
+  "admin.drive.subtitle": {
+    "defaultMessage": "Set up one Google project here; every user then connects his own account, and the backups go into his storage instead of onto this machine."
+  },
+  "admin.drive.title": {
+    "defaultMessage": "Google Drive"
+  },
+  "admin.drive.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.limits.cpu.cap-hint": {
+    "defaultMessage": "Hard cap: the account never gets more than {cores} cores, however idle the machine is."
+  },
+  "admin.limits.cpu.cores": {
+    "defaultMessage": "Cores"
+  },
+  "admin.limits.cpu.mode": {
+    "defaultMessage": "Mode"
+  },
+  "admin.limits.cpu.mode.cap": {
+    "defaultMessage": "Hard cap"
+  },
+  "admin.limits.cpu.mode.share": {
+    "defaultMessage": "Share"
+  },
+  "admin.limits.cpu.share-hint": {
+    "defaultMessage": "Share: {cores} cores worth while the machine is contended, more while it is idle. No ceiling."
+  },
+  "admin.limits.cpu.title": {
+    "defaultMessage": "Processor"
+  },
+  "admin.limits.cpu.used": {
+    "defaultMessage": "in use right now: {used} of {limit} cores"
+  },
+  "admin.limits.cpu.used-only": {
+    "defaultMessage": "in use right now: {used} cores"
+  },
+  "admin.limits.disk.description": {
+    "defaultMessage": "Everything this account keeps on disk: all its servers plus their backups. The kernel has no ceiling for disk space, so the panel refuses uploads, installs and backups once the limit is reached; nothing is deleted and no server is stopped."
+  },
+  "admin.limits.disk.over": {
+    "defaultMessage": "This is below what the account already holds. Saving is allowed and nothing is deleted, but the account can take up no more room until it frees some."
+  },
+  "admin.limits.disk.split": {
+    "defaultMessage": "{servers} in servers, {backups} in backups"
+  },
+  "admin.limits.disk.title": {
+    "defaultMessage": "Disk space"
+  },
+  "admin.limits.disk.used": {
+    "defaultMessage": "In use: {used} of {limit} MiB"
+  },
+  "admin.limits.disk.used-at-least": {
+    "defaultMessage": "In use: at least {used} of {limit} MiB — some folders were closed to the panel"
+  },
+  "admin.limits.memory.allocated": {
+    "defaultMessage": "Handed out to servers: {allocated} of {limit} MiB"
+  },
+  "admin.limits.memory.below-allocated": {
+    "defaultMessage": "This is below what the account has already handed out to its servers. Saving is allowed and nothing is killed, but the account counts as over limit until a server is deleted or shrunk, and it cannot start anything new."
+  },
+  "admin.limits.memory.description": {
+    "defaultMessage": "The ceiling for everything this account runs, in mebibytes."
+  },
+  "admin.limits.memory.title": {
+    "defaultMessage": "Memory"
+  },
+  "admin.limits.memory.used": {
+    "defaultMessage": "in use right now: {used}"
+  },
+  "admin.limits.pids.description": {
+    "defaultMessage": "How many processes and threads the account may have alive at once."
+  },
+  "admin.limits.pids.title": {
+    "defaultMessage": "Processes"
+  },
+  "admin.limits.pids.used": {
+    "defaultMessage": "in use right now: {used} of {limit}"
+  },
+  "admin.limits.pids.used-only": {
+    "defaultMessage": "in use right now: {used}"
+  },
+  "admin.mail.accepted-not-arrived": {
+    "defaultMessage": "“Accepted” means Resend took the mail, not that it reached the inbox. The panel cannot see a bounce."
+  },
+  "admin.mail.address-invalid": {
+    "defaultMessage": "That is not an address. The form is name@domain.tld."
+  },
+  "admin.mail.attempts": {
+    "defaultMessage": "{count, plural, one {# attempt} other {# attempts}}"
+  },
+  "admin.mail.column.actions": {
+    "defaultMessage": "Actions"
+  },
+  "admin.mail.column.detail": {
+    "defaultMessage": "Detail"
+  },
+  "admin.mail.column.mail": {
+    "defaultMessage": "Mail"
+  },
+  "admin.mail.column.state": {
+    "defaultMessage": "State"
+  },
+  "admin.mail.column.when": {
+    "defaultMessage": "Queued"
+  },
+  "admin.mail.daily-limit": {
+    "defaultMessage": "Mails a day at most"
+  },
+  "admin.mail.daily-limit-hint": {
+    "defaultMessage": "The panel’s own brake, counted over the last 24 hours. 100 matches Resend’s free tier; 0 switches it off and leaves only Resend’s own limit."
+  },
+  "admin.mail.delivery.failed": {
+    "defaultMessage": "failed"
+  },
+  "admin.mail.delivery.queued": {
+    "defaultMessage": "waiting"
+  },
+  "admin.mail.delivery.sending": {
+    "defaultMessage": "sending"
+  },
+  "admin.mail.delivery.sent": {
+    "defaultMessage": "accepted"
+  },
+  "admin.mail.example-link": {
+    "defaultMessage": "A link will look like:"
+  },
+  "admin.mail.failed-count": {
+    "defaultMessage": "Failed"
+  },
+  "admin.mail.free-tier": {
+    "defaultMessage": "Resend’s free tier: 100 mails a day, 3,000 a month, one domain. Until a domain is verified, the sender can only be onboarding@resend.dev and the only recipient is the address your Resend account was opened with — enough for the test button below, not enough for real sign-ups."
+  },
+  "admin.mail.from-address": {
+    "defaultMessage": "Sender address"
+  },
+  "admin.mail.from-name": {
+    "defaultMessage": "Sender name"
+  },
+  "admin.mail.how-to-description": {
+    "defaultMessage": "Four steps, and the first day works without a domain of your own."
+  },
+  "admin.mail.how-to-title": {
+    "defaultMessage": "Where to get a key"
+  },
+  "admin.mail.key-description": {
+    "defaultMessage": "Stored as a file with mode 0600 next to the database, never in the database itself. A copy of panel.db is then not a way into your Resend account."
+  },
+  "admin.mail.key-hint": {
+    "defaultMessage": "The field stays empty after saving: the panel never hands a key back out. Type a new one to replace it."
+  },
+  "admin.mail.key-label": {
+    "defaultMessage": "API key"
+  },
+  "admin.mail.key-set-at": {
+    "defaultMessage": "Key stored {when}"
+  },
+  "admin.mail.key-title": {
+    "defaultMessage": "The Resend key"
+  },
+  "admin.mail.kind.account-approved": {
+    "defaultMessage": "Account let in"
+  },
+  "admin.mail.kind.account-awaiting-review": {
+    "defaultMessage": "Sign-up waiting"
+  },
+  "admin.mail.kind.account-rejected": {
+    "defaultMessage": "Sign-up refused"
+  },
+  "admin.mail.kind.address-already-registered": {
+    "defaultMessage": "Address already in use"
+  },
+  "admin.mail.kind.password-changed": {
+    "defaultMessage": "Password was changed"
+  },
+  "admin.mail.kind.reset-password": {
+    "defaultMessage": "Password reset"
+  },
+  "admin.mail.kind.test": {
+    "defaultMessage": "Test mail"
+  },
+  "admin.mail.kind.verify-email": {
+    "defaultMessage": "Confirm address"
+  },
+  "admin.mail.last-error-header": {
+    "defaultMessage": "The last mail did not go"
+  },
+  "admin.mail.last-test": {
+    "defaultMessage": "Last test mail"
+  },
+  "admin.mail.link-base": {
+    "defaultMessage": "Panel address"
+  },
+  "admin.mail.link-insecure": {
+    "defaultMessage": "Over http the token in the link travels in the clear. On a home network that is often the only choice; on the open internet use https."
+  },
+  "admin.mail.link-missing": {
+    "defaultMessage": "Without this address no mail with a link goes out — that is the confirmation mail, the password reset and the note to administrators. The four mails without a link still work."
+  },
+  "admin.mail.link-no-scheme": {
+    "defaultMessage": "The address needs a scheme: https://panel.example (or http:// on a home network)."
+  },
+  "admin.mail.load-failed": {
+    "defaultMessage": "Could not load the mail settings"
+  },
+  "admin.mail.look": {
+    "defaultMessage": "Look at the mail"
+  },
+  "admin.mail.never": {
+    "defaultMessage": "never"
+  },
+  "admin.mail.no-key-yet": {
+    "defaultMessage": "No key here yet, so no mail leaves the panel."
+  },
+  "admin.mail.of-limit": {
+    "defaultMessage": "{used} of {limit}"
+  },
+  "admin.mail.outbox-description": {
+    "defaultMessage": "Kept for 30 days. The body of a delivered mail is cleared: it carried a link that is a secret while the mail is in flight."
+  },
+  "admin.mail.outbox-empty": {
+    "defaultMessage": "No mail yet"
+  },
+  "admin.mail.outbox-empty-hint": {
+    "defaultMessage": "Send the test mail above, and it will be the first line here."
+  },
+  "admin.mail.outbox-title": {
+    "defaultMessage": "The last mails"
+  },
+  "admin.mail.preview-cli": {
+    "defaultMessage": "On the machine itself: craftpanel mail preview --out /tmp/craftpanel-mail writes all sixteen files, HTML and text."
+  },
+  "admin.mail.preview-description": {
+    "defaultMessage": "Every mail with example values, in a new tab. Works without a key, without the network and without a single mail being sent."
+  },
+  "admin.mail.preview-title": {
+    "defaultMessage": "Look at the mails"
+  },
+  "admin.mail.remove-key": {
+    "defaultMessage": "Remove key"
+  },
+  "admin.mail.remove-key-body": {
+    "defaultMessage": "The key file is deleted. No mail goes out afterwards, and sign-ups are closed until a new key is here. Mail that is still waiting fails with a note saying why. Put a new key in and “try again” sends it."
+  },
+  "admin.mail.reply-to": {
+    "defaultMessage": "Reply address"
+  },
+  "admin.mail.reply-to-hint": {
+    "defaultMessage": "Where an answer goes. Left empty, an answer goes to the sender address — and if nobody reads that, say so in the mail rather than here."
+  },
+  "admin.mail.reply-to-placeholder": {
+    "defaultMessage": "optional"
+  },
+  "admin.mail.save-key": {
+    "defaultMessage": "Save key"
+  },
+  "admin.mail.send-test": {
+    "defaultMessage": "Send test mail"
+  },
+  "admin.mail.sender-description": {
+    "defaultMessage": "What your users see in their inbox, and where the links in a mail point."
+  },
+  "admin.mail.sender-preview": {
+    "defaultMessage": "In the inbox:"
+  },
+  "admin.mail.sender-title": {
+    "defaultMessage": "Sender and panel address"
+  },
+  "admin.mail.sent-today": {
+    "defaultMessage": "Sent in 24 h"
+  },
+  "admin.mail.sink-path": {
+    "defaultMessage": "Every mail is written to {path} and nothing goes to the network."
+  },
+  "admin.mail.state.configured": {
+    "defaultMessage": "key stored"
+  },
+  "admin.mail.state.file-sink": {
+    "defaultMessage": "writing files"
+  },
+  "admin.mail.state.not-configured": {
+    "defaultMessage": "not set up"
+  },
+  "admin.mail.step1": {
+    "defaultMessage": "Open an account at"
+  },
+  "admin.mail.step2": {
+    "defaultMessage": "Create an API key at"
+  },
+  "admin.mail.step3": {
+    "defaultMessage": "Give it the “Sending access” permission — the panel needs nothing more. The key begins with re_. Paste it below and save."
+  },
+  "admin.mail.step4": {
+    "defaultMessage": "To write to anybody but yourself, verify a domain (MX and TXT records for SPF and DKIM) at"
+  },
+  "admin.mail.subtitle": {
+    "defaultMessage": "The panel sends mail through Resend: a sign-up confirmation, a password reset, a note when an account is let in. Nothing here has to be set up; without a key the panel sends nothing."
+  },
+  "admin.mail.test-description": {
+    "defaultMessage": "Sent straight away, not queued: you are standing here, so you get the answer. It is a real mail with the real design, and it counts against the day’s allowance."
+  },
+  "admin.mail.test-failed-header": {
+    "defaultMessage": "The test mail did not go"
+  },
+  "admin.mail.test-sender-body": {
+    "defaultMessage": "onboarding@resend.dev is Resend’s address for a first try: it delivers only to the address your Resend account was opened with. For real sign-ups, verify a domain at resend.com/domains and put an address of that domain in here."
+  },
+  "admin.mail.test-sender-header": {
+    "defaultMessage": "This sender only reaches you"
+  },
+  "admin.mail.test-sent-body": {
+    "defaultMessage": "Resend’s id for it is {id}. If it does not arrive within a minute, look in the spam folder. That is what an unverified domain does."
+  },
+  "admin.mail.test-sent-header": {
+    "defaultMessage": "Resend took the mail for {to}"
+  },
+  "admin.mail.test-title": {
+    "defaultMessage": "Send a test mail"
+  },
+  "admin.mail.test-to": {
+    "defaultMessage": "To"
+  },
+  "admin.mail.test-to-placeholder": {
+    "defaultMessage": "the address on your account"
+  },
+  "admin.mail.title": {
+    "defaultMessage": "Mail"
+  },
+  "admin.mail.try-again": {
+    "defaultMessage": "Try again"
+  },
+  "admin.mail.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.mail.waiting": {
+    "defaultMessage": "Waiting"
+  },
+  "admin.playit.account.email-not-verified": {
+    "defaultMessage": "e-mail not verified"
+  },
+  "admin.playit.account.guest": {
+    "defaultMessage": "guest"
+  },
+  "admin.playit.account.verified": {
+    "defaultMessage": "verified"
+  },
+  "admin.playit.agent.absent": {
+    "defaultMessage": "not running"
+  },
+  "admin.playit.agent.failed": {
+    "defaultMessage": "failed"
+  },
+  "admin.playit.agent.running": {
+    "defaultMessage": "running"
+  },
+  "admin.playit.agent.starting": {
+    "defaultMessage": "starting"
+  },
+  "admin.playit.binary.absent": {
+    "defaultMessage": "not downloaded"
+  },
+  "admin.playit.binary.failed": {
+    "defaultMessage": "failed"
+  },
+  "admin.playit.binary.fetching": {
+    "defaultMessage": "downloading"
+  },
+  "admin.playit.binary.ready": {
+    "defaultMessage": "ready"
+  },
+  "admin.playit.checked-at": {
+    "defaultMessage": "Last confirmed {ago}"
+  },
+  "admin.playit.checked-never": {
+    "defaultMessage": "Not confirmed by playit.gg yet"
+  },
+  "admin.playit.claim.accepted": {
+    "defaultMessage": "Confirmed. The tunnel service is starting."
+  },
+  "admin.playit.claim.expired": {
+    "defaultMessage": "Nothing was confirmed within {minutes} minutes, so the panel stopped asking."
+  },
+  "admin.playit.claim.intro": {
+    "defaultMessage": "Open this address and confirm there. The page notices on its own."
+  },
+  "admin.playit.claim.rejected": {
+    "defaultMessage": "The request was turned down at playit.gg."
+  },
+  "admin.playit.claim.retry": {
+    "defaultMessage": "New link"
+  },
+  "admin.playit.claim.title": {
+    "defaultMessage": "Connect to playit.gg"
+  },
+  "admin.playit.claim.waiting": {
+    "defaultMessage": "Waiting for the confirmation in the browser… {remaining} left"
+  },
+  "admin.playit.column.account": {
+    "defaultMessage": "playit.gg account"
+  },
+  "admin.playit.column.actions": {
+    "defaultMessage": "Actions"
+  },
+  "admin.playit.column.agent": {
+    "defaultMessage": "Tunnel service"
+  },
+  "admin.playit.column.checked": {
+    "defaultMessage": "Last confirmed"
+  },
+  "admin.playit.column.ports": {
+    "defaultMessage": "Public addresses"
+  },
+  "admin.playit.column.user": {
+    "defaultMessage": "User"
+  },
+  "admin.playit.connect.button": {
+    "defaultMessage": "Connect to playit.gg"
+  },
+  "admin.playit.connect.free": {
+    "defaultMessage": "Free, and it can be undone here at any time."
+  },
+  "admin.playit.connect.point-once": {
+    "defaultMessage": "You confirm once in the browser. No password is typed into this panel."
+  },
+  "admin.playit.connect.point-per-server": {
+    "defaultMessage": "Nothing changes for servers that do not ask for one."
+  },
+  "admin.playit.connect.point-ports": {
+    "defaultMessage": "A free account carries {limit} public addresses at the same time."
+  },
+  "admin.playit.connected.description": {
+    "defaultMessage": "The tunnel service runs as a child of the panel and needs no attention."
+  },
+  "admin.playit.disconnect": {
+    "defaultMessage": "Disconnect"
+  },
+  "admin.playit.disconnect.body-user": {
+    "defaultMessage": "The tunnel service of {user} stops and the key is deleted from this machine. His servers stay up and stay reachable on the local network. He can connect an account again himself at any time."
+  },
+  "admin.playit.disconnect.delete": {
+    "defaultMessage": "Delete addresses and disconnect"
+  },
+  "admin.playit.disconnect.keep": {
+    "defaultMessage": "Keep addresses"
+  },
+  "admin.playit.disconnect.tunnels": {
+    "defaultMessage": "{count} address(es) are handed out. Delete them at playit.gg so their ports are free again, or keep them if playit.gg cannot be reached right now — they will then keep occupying ports on the account."
+  },
+  "admin.playit.external-off.body": {
+    "defaultMessage": "playit.gg is an outbound service. While the switch under panel settings is off, the agent stays down and nothing can be connected."
+  },
+  "admin.playit.external-off.header": {
+    "defaultMessage": "Outbound services are switched off"
+  },
+  "admin.playit.fact.account": {
+    "defaultMessage": "playit.gg account"
+  },
+  "admin.playit.fact.account-unknown": {
+    "defaultMessage": "Not known yet — waiting for the first answer from playit.gg."
+  },
+  "admin.playit.fact.agent": {
+    "defaultMessage": "Tunnel service"
+  },
+  "admin.playit.fact.agent-hint": {
+    "defaultMessage": "Restarts with the panel; connected players see a short interruption."
+  },
+  "admin.playit.fact.agent-id": {
+    "defaultMessage": "Agent"
+  },
+  "admin.playit.fact.binary": {
+    "defaultMessage": "Program file"
+  },
+  "admin.playit.fact.binary-hint": {
+    "defaultMessage": "{version} for {arch}, checked against a checksum built into the panel."
+  },
+  "admin.playit.fact.ports": {
+    "defaultMessage": "Public addresses"
+  },
+  "admin.playit.fact.ports-full": {
+    "defaultMessage": "All used up. A server can only get an address once another gives one back."
+  },
+  "admin.playit.fact.ports-left": {
+    "defaultMessage": "{count} still free."
+  },
+  "admin.playit.fact.ports-value": {
+    "defaultMessage": "{used} of {limit}"
+  },
+  "admin.playit.guest-hint": {
+    "defaultMessage": "A guest account is not tied to an e-mail address and can be lost. Sign in at"
+  },
+  "admin.playit.last-error": {
+    "defaultMessage": "Last reported problem"
+  },
+  "admin.playit.load-failed": {
+    "defaultMessage": "Could not load the playit status"
+  },
+  "admin.playit.nobody": {
+    "defaultMessage": "Nobody has connected an account"
+  },
+  "admin.playit.nobody-hint": {
+    "defaultMessage": "A user who wants an address that works from outside connects his own playit.gg account on his account page. Nothing has to be set up here."
+  },
+  "admin.playit.not-configured": {
+    "defaultMessage": "no key"
+  },
+  "admin.playit.not-self-managed.header": {
+    "defaultMessage": "This agent may not manage its own tunnels"
+  },
+  "admin.playit.open-settings": {
+    "defaultMessage": "Panel settings"
+  },
+  "admin.playit.own-account-hint": {
+    "defaultMessage": "Your own account is on your account page. Nobody can connect one for somebody else — the confirmation happens in that person’s browser at playit.gg."
+  },
+  "admin.playit.ports-for-others": {
+    "defaultMessage": "{count, plural, one {# for a server somebody else owns} other {# for servers other people own}}"
+  },
+  "admin.playit.premium": {
+    "defaultMessage": "premium"
+  },
+  "admin.playit.quiet": {
+    "defaultMessage": "No server of his has an address, so nothing is running."
+  },
+  "admin.playit.restart": {
+    "defaultMessage": "Restart tunnel service"
+  },
+  "admin.playit.subtitle-all": {
+    "defaultMessage": "Every user connects his own playit.gg account, and his ports are his. This is who has one — you can look, and you can cut somebody loose."
+  },
+  "admin.playit.title-all": {
+    "defaultMessage": "Public addresses (all users)"
+  },
+  "admin.playit.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.playit.unnamed": {
+    "defaultMessage": "Account already deleted"
+  },
+  "admin.registrations.approve": {
+    "defaultMessage": "Let in"
+  },
+  "admin.registrations.closed-body": {
+    "defaultMessage": "Nobody can sign up at the moment, so nothing new will appear here. What is listed can still be let in or turned away."
+  },
+  "admin.registrations.closed-header": {
+    "defaultMessage": "Sign-ups are switched off"
+  },
+  "admin.registrations.column.applicant": {
+    "defaultMessage": "Applicant"
+  },
+  "admin.registrations.column.from": {
+    "defaultMessage": "From"
+  },
+  "admin.registrations.column.state": {
+    "defaultMessage": "State"
+  },
+  "admin.registrations.column.when": {
+    "defaultMessage": "Signed up"
+  },
+  "admin.registrations.confirmed-at": {
+    "defaultMessage": "confirmed {when}"
+  },
+  "admin.registrations.error.email-taken": {
+    "defaultMessage": "That address is already on an account."
+  },
+  "admin.registrations.error.failed": {
+    "defaultMessage": "That did not work. Please try again."
+  },
+  "admin.registrations.error.invalid-state": {
+    "defaultMessage": "This one has not confirmed its address yet, so it cannot be let in."
+  },
+  "admin.registrations.error.not-found": {
+    "defaultMessage": "That sign-up is gone — somebody else decided, or it was swept."
+  },
+  "admin.registrations.error.username-taken": {
+    "defaultMessage": "That name has been taken in the meantime. The applicant has to sign up again."
+  },
+  "admin.registrations.failed": {
+    "defaultMessage": "That did not work. Please try again."
+  },
+  "admin.registrations.load-failed": {
+    "defaultMessage": "Could not load the sign-ups"
+  },
+  "admin.registrations.no-address": {
+    "defaultMessage": "not recorded"
+  },
+  "admin.registrations.nobody": {
+    "defaultMessage": "Nobody is waiting"
+  },
+  "admin.registrations.nobody-hint": {
+    "defaultMessage": "New sign-ups appear here as soon as somebody fills the form in."
+  },
+  "admin.registrations.open-settings": {
+    "defaultMessage": "Panel settings"
+  },
+  "admin.registrations.reason-hint": {
+    "defaultMessage": "Stays in the panel. The mail never carries it."
+  },
+  "admin.registrations.reason-label": {
+    "defaultMessage": "Reason (optional, for you)"
+  },
+  "admin.registrations.reject": {
+    "defaultMessage": "Turn away"
+  },
+  "admin.registrations.reject-body": {
+    "defaultMessage": "{username} gets a short, neutral mail without a reason, and the address is blocked for thirty days."
+  },
+  "admin.registrations.same-address": {
+    "defaultMessage": "{count} from this address"
+  },
+  "admin.registrations.state.unverified": {
+    "defaultMessage": "Address not confirmed"
+  },
+  "admin.registrations.state.waiting": {
+    "defaultMessage": "Waiting for you"
+  },
+  "admin.registrations.subtitle": {
+    "defaultMessage": "People who signed themselves up. A confirmed one waits here until you let it in; nothing exists as an account before that."
+  },
+  "admin.registrations.sweep-hint": {
+    "defaultMessage": "Unconfirmed sign-ups disappear after seven days, confirmed ones after thirty; the name and the address are free again then."
+  },
+  "admin.registrations.title": {
+    "defaultMessage": "Sign-ups"
+  },
+  "admin.registrations.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.registrations.waiting-count": {
+    "defaultMessage": "{count, plural, one {# sign-up is} other {# sign-ups are}} waiting for you."
+  },
+  "admin.settings.ceilings.description": {
+    "defaultMessage": "Bounds the panel enforces on everyone, admins included."
+  },
+  "admin.settings.ceilings.title": {
+    "defaultMessage": "Ceilings"
+  },
+  "admin.settings.defaults.description": {
+    "defaultMessage": "What a new account gets when no limits are given at creation. Changing this leaves existing accounts alone."
+  },
+  "admin.settings.defaults.title": {
+    "defaultMessage": "Defaults for new accounts"
+  },
+  "admin.settings.external.description": {
+    "defaultMessage": "Lets the panel reach Modrinth for content, and the crash log service."
+  },
+  "admin.settings.external.off": {
+    "defaultMessage": "With this off, browsing and installing content is unavailable and crash reports cannot be shared. Servers keep running."
+  },
+  "admin.settings.external.title": {
+    "defaultMessage": "Outbound services"
+  },
+  "admin.settings.invalid": {
+    "defaultMessage": "Some values are out of range. Fix the fields marked in red."
+  },
+  "admin.settings.load-failed": {
+    "defaultMessage": "Could not load the panel settings"
+  },
+  "admin.settings.max-backups": {
+    "defaultMessage": "Backups per server"
+  },
+  "admin.settings.max-backups.hint": {
+    "defaultMessage": "Once the count is reached, a new backup is refused until one is deleted."
+  },
+  "admin.settings.max-operations": {
+    "defaultMessage": "Operations at the same time"
+  },
+  "admin.settings.max-operations.hint": {
+    "defaultMessage": "Installs, backups and extractions queue up behind this number."
+  },
+  "admin.settings.max-upload": {
+    "defaultMessage": "Largest upload"
+  },
+  "admin.settings.max-upload.hint": {
+    "defaultMessage": "Holds for file writes and content uploads alike. Currently {size}."
+  },
+  "admin.settings.network.description": {
+    "defaultMessage": "The address players connect to, and the ports servers may be given."
+  },
+  "admin.settings.network.title": {
+    "defaultMessage": "Network"
+  },
+  "admin.settings.port-count": {
+    "defaultMessage": "{count} port(s)"
+  },
+  "admin.settings.port-from": {
+    "defaultMessage": "From"
+  },
+  "admin.settings.port-pool": {
+    "defaultMessage": "Port pool"
+  },
+  "admin.settings.port-pool.description": {
+    "defaultMessage": "Every server port is handed out from this range."
+  },
+  "admin.settings.port-pool.invalid": {
+    "defaultMessage": "The range must run upwards and stay between 1024 and 65535. A range that leaves out an already assigned port is refused when saving."
+  },
+  "admin.settings.port-to": {
+    "defaultMessage": "To"
+  },
+  "admin.settings.public-address": {
+    "defaultMessage": "Public address"
+  },
+  "admin.settings.public-address.empty": {
+    "defaultMessage": "No address is set, so the network page has nothing to show next to the port."
+  },
+  "admin.settings.public-address.hint": {
+    "defaultMessage": "Shown next to every server port. A name is allowed. The panel does not guess it: behind NAT or a reverse proxy every guess would be wrong."
+  },
+  "admin.settings.public-address.placeholder": {
+    "defaultMessage": "play.example.com"
+  },
+  "admin.settings.registration.approval-description": {
+    "defaultMessage": "A confirmed sign-up waits in a list until you say yes. Without this the account works the moment the address is confirmed."
+  },
+  "admin.settings.registration.approval-title": {
+    "defaultMessage": "I let every new account in myself"
+  },
+  "admin.settings.registration.description": {
+    "defaultMessage": "Let people create their own account instead of you typing every one in."
+  },
+  "admin.settings.registration.mail-missing-body": {
+    "defaultMessage": "A sign-up needs a confirmation mail, so the form stays closed until sending works — this switch alone does nothing."
+  },
+  "admin.settings.registration.mail-missing-link": {
+    "defaultMessage": "Set up mail"
+  },
+  "admin.settings.registration.mail-missing-title": {
+    "defaultMessage": "No mail, no sign-ups"
+  },
+  "admin.settings.registration.queue-hint": {
+    "defaultMessage": "Sign-ups that are waiting are listed under"
+  },
+  "admin.settings.registration.queue-link": {
+    "defaultMessage": "Sign-ups"
+  },
+  "admin.settings.registration.title": {
+    "defaultMessage": "Sign-ups"
+  },
+  "admin.settings.registration.without-approval": {
+    "defaultMessage": "Anybody with an email address then gets an account and the default limits, without you seeing it first."
+  },
+  "admin.settings.seconds": {
+    "defaultMessage": "seconds"
+  },
+  "admin.settings.stop-grace": {
+    "defaultMessage": "Grace period when stopping"
+  },
+  "admin.settings.stop-grace.hint": {
+    "defaultMessage": "How long a server may take to shut down before it is killed."
+  },
+  "admin.settings.subtitle": {
+    "defaultMessage": "The rules that hold for the whole panel, not for a single server."
+  },
+  "admin.settings.title": {
+    "defaultMessage": "Panel settings"
+  },
+  "admin.settings.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.users.admin-has-no-limits": {
+    "defaultMessage": "An administrator has no limits: no memory ceiling, no processor cap, no process count and no disk quota. There is nothing to set here."
+  },
+  "admin.users.column.actions": {
+    "defaultMessage": "Actions"
+  },
+  "admin.users.column.memory": {
+    "defaultMessage": "Memory handed out"
+  },
+  "admin.users.column.role": {
+    "defaultMessage": "Role"
+  },
+  "admin.users.column.servers": {
+    "defaultMessage": "Servers"
+  },
+  "admin.users.column.system": {
+    "defaultMessage": "System account"
+  },
+  "admin.users.column.usage": {
+    "defaultMessage": "In use"
+  },
+  "admin.users.column.user": {
+    "defaultMessage": "User"
+  },
+  "admin.users.count": {
+    "defaultMessage": "{count} account(s)"
+  },
+  "admin.users.cpu-and-pids": {
+    "defaultMessage": "{used} of {limit} cores ({mode}) · {pids} of {pidsLimit} processes"
+  },
+  "admin.users.cpu-and-pids-no-limit": {
+    "defaultMessage": "{used} cores · {pids} processes · no limits"
+  },
+  "admin.users.create": {
+    "defaultMessage": "Create user"
+  },
+  "admin.users.created-at": {
+    "defaultMessage": "Created {time}"
+  },
+  "admin.users.default-limits.description": {
+    "defaultMessage": "Turn this off to set memory, processor and processes for this account."
+  },
+  "admin.users.default-limits.title": {
+    "defaultMessage": "Use the panel defaults"
+  },
+  "admin.users.delete": {
+    "defaultMessage": "Delete user"
+  },
+  "admin.users.delete.choice-delete": {
+    "defaultMessage": "Delete them, with their files and backups"
+  },
+  "admin.users.delete.choice-description": {
+    "defaultMessage": "Either they move to another account, or they go with the account."
+  },
+  "admin.users.delete.choice-title": {
+    "defaultMessage": "What happens to these servers"
+  },
+  "admin.users.delete.choice-transfer": {
+    "defaultMessage": "Transfer them to another account"
+  },
+  "admin.users.delete.intro": {
+    "defaultMessage": "{username} and their system account will be removed. This cannot be undone."
+  },
+  "admin.users.delete.no-transfer-target": {
+    "defaultMessage": "There is no other account to transfer to."
+  },
+  "admin.users.delete.owned": {
+    "defaultMessage": "Servers of this account"
+  },
+  "admin.users.delete.running-body": {
+    "defaultMessage": "Stop every server of this account first. The panel does not kill them for you."
+  },
+  "admin.users.delete.running-header": {
+    "defaultMessage": "A server of this account is running"
+  },
+  "admin.users.delete.transfer-hint": {
+    "defaultMessage": "If this pushes the new owner over their limit, the transfer still happens; they then count as over limit."
+  },
+  "admin.users.delete.transfer-placeholder": {
+    "defaultMessage": "Pick an account"
+  },
+  "admin.users.delete.transfer-target": {
+    "defaultMessage": "New owner"
+  },
+  "admin.users.delete.type-to-confirm": {
+    "defaultMessage": "Type {username} to confirm"
+  },
+  "admin.users.disk-no-limit": {
+    "defaultMessage": "{used} on disk, no limit"
+  },
+  "admin.users.disk-of": {
+    "defaultMessage": "{used} of {total} MiB on disk"
+  },
+  "admin.users.edit": {
+    "defaultMessage": "Edit account"
+  },
+  "admin.users.edit-limits": {
+    "defaultMessage": "Limits"
+  },
+  "admin.users.email": {
+    "defaultMessage": "Email address (optional)"
+  },
+  "admin.users.email-hint": {
+    "defaultMessage": "The only way this account can recover a forgotten password itself. No confirmation mail goes out: an address an administrator types counts as usable."
+  },
+  "admin.users.email-remove-warning": {
+    "defaultMessage": "Saving now takes the address off the account. It then has no way back over mail: a new password, shown once, is all that is left for it."
+  },
+  "admin.users.empty": {
+    "defaultMessage": "No accounts yet"
+  },
+  "admin.users.empty-hint": {
+    "defaultMessage": "Create the first account to hand out part of this machine."
+  },
+  "admin.users.error.email-taken": {
+    "defaultMessage": "That address is already on another account or on an open sign-up. An open sign-up is somebody waiting for a decision. Approve or reject it under Administration → Sign-ups."
+  },
+  "admin.users.error.invalid-email": {
+    "defaultMessage": "That does not look like an email address."
+  },
+  "admin.users.host.cpu": {
+    "defaultMessage": "Cores handed out"
+  },
+  "admin.users.host.cpu-all-capped": {
+    "defaultMessage": "Every account is on a hard cap, so this sum is a real ceiling."
+  },
+  "admin.users.host.cpu-mixed": {
+    "defaultMessage": "Includes {count} account(s) on a share, which have no ceiling; the sum is only an indication."
+  },
+  "admin.users.host.cpu-used": {
+    "defaultMessage": "{used} cores in use"
+  },
+  "admin.users.host.description": {
+    "defaultMessage": "What the machine has, and how much of it has already been handed out."
+  },
+  "admin.users.host.measured": {
+    "defaultMessage": "Measured at {time}"
+  },
+  "admin.users.host.memory": {
+    "defaultMessage": "Memory handed out"
+  },
+  "admin.users.host.memory-used": {
+    "defaultMessage": "{used} of {total} in use"
+  },
+  "admin.users.host.processes": {
+    "defaultMessage": "Processes running"
+  },
+  "admin.users.host.processes-hint": {
+    "defaultMessage": "Across every account."
+  },
+  "admin.users.host.title": {
+    "defaultMessage": "This machine"
+  },
+  "admin.users.host.users": {
+    "defaultMessage": "Accounts"
+  },
+  "admin.users.in-use": {
+    "defaultMessage": "{used} memory"
+  },
+  "admin.users.last-login": {
+    "defaultMessage": "Last signed in {time}"
+  },
+  "admin.users.limits.header": {
+    "defaultMessage": "Limits for {username}"
+  },
+  "admin.users.load-failed": {
+    "defaultMessage": "Could not load"
+  },
+  "admin.users.mib-no-limit": {
+    "defaultMessage": "{value} MiB, no limit"
+  },
+  "admin.users.must-change.description": {
+    "defaultMessage": "The account cannot go anywhere else until the password is changed."
+  },
+  "admin.users.must-change.title": {
+    "defaultMessage": "Change password at next sign-in"
+  },
+  "admin.users.never": {
+    "defaultMessage": "never"
+  },
+  "admin.users.no-matches": {
+    "defaultMessage": "No account matches"
+  },
+  "admin.users.no-matches-hint": {
+    "defaultMessage": "Try a different username."
+  },
+  "admin.users.of-cores": {
+    "defaultMessage": "{value} of {total} cores"
+  },
+  "admin.users.of-mib": {
+    "defaultMessage": "{value} of {total} MiB"
+  },
+  "admin.users.over-limit": {
+    "defaultMessage": "Over limit"
+  },
+  "admin.users.over-limit.hint": {
+    "defaultMessage": "More memory is handed out to servers than the limit allows. Nothing is killed, but this account cannot create or start a server until a server is deleted or shrunk."
+  },
+  "admin.users.overbooked.body": {
+    "defaultMessage": "{allocated} MiB is promised to accounts, but only {assignable} MiB is assignable. That is allowed — nothing is refused — but if everyone uses their share at once, the machine will not keep up."
+  },
+  "admin.users.overbooked.header": {
+    "defaultMessage": "This machine is overbooked"
+  },
+  "admin.users.password-generated": {
+    "defaultMessage": "A password is generated for the account and shown once, right after creation."
+  },
+  "admin.users.password.done": {
+    "defaultMessage": "I have copied it"
+  },
+  "admin.users.password.header": {
+    "defaultMessage": "The new password"
+  },
+  "admin.users.password.once": {
+    "defaultMessage": "This is the only time this password is shown. Copy it and pass it on now — the panel cannot show it again."
+  },
+  "admin.users.reset-password.action": {
+    "defaultMessage": "Generate a new password"
+  },
+  "admin.users.reset-password.change-own": {
+    "defaultMessage": "Change your own password"
+  },
+  "admin.users.reset-password.description": {
+    "defaultMessage": "Either a link by mail, after which nobody but the owner knows the password — or a new password shown here once, which ends every session of the account immediately."
+  },
+  "admin.users.reset-password.self": {
+    "defaultMessage": "Setting a password ends every session of the account — for your own account that includes this one, and the new password would be gone before you could read it."
+  },
+  "admin.users.reset-password.title": {
+    "defaultMessage": "Password"
+  },
+  "admin.users.role": {
+    "defaultMessage": "Role"
+  },
+  "admin.users.role.admin": {
+    "defaultMessage": "Admin"
+  },
+  "admin.users.role.user": {
+    "defaultMessage": "User"
+  },
+  "admin.users.row-actions": {
+    "defaultMessage": "Actions for {username}"
+  },
+  "admin.users.running": {
+    "defaultMessage": "{count} running"
+  },
+  "admin.users.running-now": {
+    "defaultMessage": "running"
+  },
+  "admin.users.save-and-remove-email": {
+    "defaultMessage": "Save and remove the address"
+  },
+  "admin.users.search": {
+    "defaultMessage": "Search by username..."
+  },
+  "admin.users.send-link.action": {
+    "defaultMessage": "Send a reset link"
+  },
+  "admin.users.send-link.error.mail-not-configured": {
+    "defaultMessage": "Mail is not set up on this panel. Put a key in under Administration → Mail, or generate a password here."
+  },
+  "admin.users.send-link.error.no-email-address": {
+    "defaultMessage": "There is no address on this account, so nothing could be sent."
+  },
+  "admin.users.send-link.error.user-not-found": {
+    "defaultMessage": "This account is gone — somebody removed it in the meantime."
+  },
+  "admin.users.send-link.goes-to": {
+    "defaultMessage": "A link goes to {email}. It works once and for {minutes} minutes, and no session ends until a new password is set."
+  },
+  "admin.users.send-link.no-address": {
+    "defaultMessage": "There is no address on this account, so no link can go anywhere — a generated password is the only way for it."
+  },
+  "admin.users.send-link.no-link-base": {
+    "defaultMessage": "Mail works, but the panel does not know its own address, so a link cannot be built."
+  },
+  "admin.users.send-link.no-mail": {
+    "defaultMessage": "This panel cannot send mail yet, so no link can go out."
+  },
+  "admin.users.send-link.sent": {
+    "defaultMessage": "A link is on its way to {email}. Older links of this account stopped working."
+  },
+  "admin.users.send-link.set-up-mail": {
+    "defaultMessage": "Set up mail"
+  },
+  "admin.users.send-link.unsaved-address": {
+    "defaultMessage": "Save first: the link goes to the address on the account, not to what is typed above."
+  },
+  "admin.users.subtitle": {
+    "defaultMessage": "Every account on this machine, what it may use, and what it uses."
+  },
+  "admin.users.system.error": {
+    "defaultMessage": "Error"
+  },
+  "admin.users.system.not-ready-hint": {
+    "defaultMessage": "Without a system account this user can sign in but cannot create servers."
+  },
+  "admin.users.system.provisioning": {
+    "defaultMessage": "Provisioning"
+  },
+  "admin.users.system.ready": {
+    "defaultMessage": "Ready"
+  },
+  "admin.users.system.retry": {
+    "defaultMessage": "Create the system account again"
+  },
+  "admin.users.title": {
+    "defaultMessage": "Users"
+  },
+  "admin.users.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "admin.users.username-rule": {
+    "defaultMessage": "3 to 39 characters, lowercase letters, digits, hyphen and underscore."
+  },
+  "admin.users.you": {
+    "defaultMessage": "That is you"
+  },
+  "auth.change-password.current": {
+    "defaultMessage": "Current password"
+  },
+  "auth.change-password.error.network-unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "auth.change-password.error.weak-password": {
+    "defaultMessage": "The new password is too short."
+  },
+  "auth.change-password.error.wrong-password": {
+    "defaultMessage": "The current password is incorrect."
+  },
+  "auth.change-password.failed": {
+    "defaultMessage": "The password could not be changed. Please try again."
+  },
+  "auth.change-password.length-hint": {
+    "defaultMessage": "At least {length} characters."
+  },
+  "auth.change-password.mismatch": {
+    "defaultMessage": "The two new passwords do not match."
+  },
+  "auth.change-password.new": {
+    "defaultMessage": "New password"
+  },
+  "auth.change-password.required": {
+    "defaultMessage": "You need a new password before you can use the panel."
+  },
+  "auth.change-password.subtitle": {
+    "defaultMessage": "Every other session of yours is signed out."
+  },
+  "auth.change-password.title": {
+    "defaultMessage": "Change password"
+  },
+  "auth.forgot-password.again": {
+    "defaultMessage": "Send it again"
+  },
+  "auth.forgot-password.again-in": {
+    "defaultMessage": "Send again in {seconds} s"
+  },
+  "auth.forgot-password.back": {
+    "defaultMessage": "Back to signing in"
+  },
+  "auth.forgot-password.email": {
+    "defaultMessage": "Email address"
+  },
+  "auth.forgot-password.error.network-unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "auth.forgot-password.error.too-many-attempts": {
+    "defaultMessage": "Too many attempts. Wait a few minutes before trying again."
+  },
+  "auth.forgot-password.failed": {
+    "defaultMessage": "That did not work. Please try again."
+  },
+  "auth.forgot-password.loading": {
+    "defaultMessage": "One moment…"
+  },
+  "auth.forgot-password.not-set-up": {
+    "defaultMessage": "This panel has no password recovery set up. Ask the administrator to let you back in."
+  },
+  "auth.forgot-password.on-its-way": {
+    "defaultMessage": "If there is an account for that address, a mail is on its way."
+  },
+  "auth.forgot-password.submit": {
+    "defaultMessage": "Send the link"
+  },
+  "auth.forgot-password.subtitle": {
+    "defaultMessage": "Give us the address on your account and we send a link."
+  },
+  "auth.forgot-password.title": {
+    "defaultMessage": "Forgot your password?"
+  },
+  "auth.forgot-password.valid-for": {
+    "defaultMessage": "The link works once and for {minutes} minutes. It sometimes lands in the spam folder."
+  },
+  "auth.login.create-one": {
+    "defaultMessage": "Create one"
+  },
+  "auth.login.email-unverified": {
+    "defaultMessage": "Check your inbox: your address is not confirmed yet, so the account cannot be used."
+  },
+  "auth.login.error.invalid-credentials": {
+    "defaultMessage": "Incorrect username or password."
+  },
+  "auth.login.error.network-unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "auth.login.error.rate-limited": {
+    "defaultMessage": "Too many requests. Wait a moment before trying again."
+  },
+  "auth.login.error.too-many-attempts": {
+    "defaultMessage": "Too many attempts. Wait a few minutes before trying again."
+  },
+  "auth.login.failed": {
+    "defaultMessage": "Sign-in failed. Please try again."
+  },
+  "auth.login.forgot": {
+    "defaultMessage": "Forgot your password?"
+  },
+  "auth.login.mail-sent": {
+    "defaultMessage": "If that address has a sign-up waiting, a new link is on its way. Check your inbox."
+  },
+  "auth.login.no-account": {
+    "defaultMessage": "No account yet?"
+  },
+  "auth.login.password-set": {
+    "defaultMessage": "Your password is set. Sign in with the new one."
+  },
+  "auth.login.resend": {
+    "defaultMessage": "Send the confirmation mail again"
+  },
+  "auth.login.resend-email": {
+    "defaultMessage": "The address you signed up with"
+  },
+  "auth.login.subtitle": {
+    "defaultMessage": "Sign in with your panel account."
+  },
+  "auth.login.title": {
+    "defaultMessage": "Sign in"
+  },
+  "auth.new-password.ask-again": {
+    "defaultMessage": "Ask for a new link"
+  },
+  "auth.new-password.checking": {
+    "defaultMessage": "Checking the link…"
+  },
+  "auth.new-password.dead": {
+    "defaultMessage": "This link is no longer valid: it has been used, or it has run out. Ask for a new one."
+  },
+  "auth.new-password.error.invalid-token": {
+    "defaultMessage": "This link is no longer valid. Ask for a new one."
+  },
+  "auth.new-password.error.too-many-attempts": {
+    "defaultMessage": "Too many attempts. Wait a few minutes before trying again."
+  },
+  "auth.new-password.error.weak-password": {
+    "defaultMessage": "That password is too short."
+  },
+  "auth.new-password.failed": {
+    "defaultMessage": "That did not work. Please try again."
+  },
+  "auth.new-password.for-whom": {
+    "defaultMessage": "For {username}."
+  },
+  "auth.new-password.length-hint": {
+    "defaultMessage": "At least {length} characters."
+  },
+  "auth.new-password.new-password": {
+    "defaultMessage": "New password"
+  },
+  "auth.new-password.sign-in-afterwards": {
+    "defaultMessage": "Afterwards you sign in with the new password. Every open session is closed."
+  },
+  "auth.new-password.submit": {
+    "defaultMessage": "Set password"
+  },
+  "auth.new-password.title": {
+    "defaultMessage": "Set a new password"
+  },
+  "auth.new-password.unreachable": {
+    "defaultMessage": "The panel could not be reached. Try the link again in a moment."
+  },
+  "auth.register.approval-follows": {
+    "defaultMessage": "After you confirm your address an administrator has to let the account in. You will get a mail either way."
+  },
+  "auth.register.check-your-inbox": {
+    "defaultMessage": "Check your inbox: we sent a link that confirms your address."
+  },
+  "auth.register.closed": {
+    "defaultMessage": "This panel is not taking sign-ups at the moment. Ask the administrator for an account."
+  },
+  "auth.register.email": {
+    "defaultMessage": "Email address"
+  },
+  "auth.register.email-hint": {
+    "defaultMessage": "You need it to confirm the account and to recover a forgotten password."
+  },
+  "auth.register.error.disabled": {
+    "defaultMessage": "This panel is not taking sign-ups at the moment."
+  },
+  "auth.register.error.invalid-email": {
+    "defaultMessage": "That does not look like an email address."
+  },
+  "auth.register.error.invalid-request": {
+    "defaultMessage": "Check the name: 3 to 39 characters, lower case letters, digits, - and _"
+  },
+  "auth.register.error.network-unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "auth.register.error.rate-limited": {
+    "defaultMessage": "Too many attempts from here. Try again later."
+  },
+  "auth.register.error.username-taken": {
+    "defaultMessage": "That name is taken. Pick another one."
+  },
+  "auth.register.error.weak-password": {
+    "defaultMessage": "That password is too short."
+  },
+  "auth.register.failed": {
+    "defaultMessage": "That did not work. Please try again."
+  },
+  "auth.register.have-an-account": {
+    "defaultMessage": "Already have one?"
+  },
+  "auth.register.loading": {
+    "defaultMessage": "One moment…"
+  },
+  "auth.register.name-hint": {
+    "defaultMessage": "3 to 39 characters: lower case letters, digits, - and _"
+  },
+  "auth.register.password-hint": {
+    "defaultMessage": "At least {length} characters."
+  },
+  "auth.register.resend": {
+    "defaultMessage": "Send the mail again"
+  },
+  "auth.register.resend-in": {
+    "defaultMessage": "Send again in {seconds} s"
+  },
+  "auth.register.spam-hint": {
+    "defaultMessage": "It can take a minute, and it sometimes lands in the spam folder."
+  },
+  "auth.register.submit": {
+    "defaultMessage": "Create account"
+  },
+  "auth.register.subtitle": {
+    "defaultMessage": "Pick a name, confirm your address, and the panel is yours."
+  },
+  "auth.register.title": {
+    "defaultMessage": "Create an account"
+  },
+  "auth.registration-pending.body": {
+    "defaultMessage": "Your address is confirmed. On this panel an administrator looks at every new account before it works."
+  },
+  "auth.registration-pending.mail": {
+    "defaultMessage": "You will get a mail as soon as that has happened. There is nothing to do here."
+  },
+  "auth.registration-pending.title": {
+    "defaultMessage": "Waiting to be let in"
+  },
+  "auth.verify-email.checking": {
+    "defaultMessage": "One moment…"
+  },
+  "auth.verify-email.closed": {
+    "defaultMessage": "This panel is not taking sign-ups at the moment."
+  },
+  "auth.verify-email.done": {
+    "defaultMessage": "Your account is ready. Sign in and the panel is yours."
+  },
+  "auth.verify-email.email": {
+    "defaultMessage": "Your email address"
+  },
+  "auth.verify-email.expired": {
+    "defaultMessage": "This link has run out. Ask for a new one and check your inbox again."
+  },
+  "auth.verify-email.failed": {
+    "defaultMessage": "That did not work. Please try the link again."
+  },
+  "auth.verify-email.missing": {
+    "defaultMessage": "This page needs the link out of the mail we sent you."
+  },
+  "auth.verify-email.new-mail": {
+    "defaultMessage": "Send a new link"
+  },
+  "auth.verify-email.new-mail-sent": {
+    "defaultMessage": "If that address has a sign-up waiting, a new link is on its way. Check your inbox."
+  },
+  "auth.verify-email.title": {
+    "defaultMessage": "Confirm your address"
+  },
+  "auth.verify-email.unknown": {
+    "defaultMessage": "This link is not valid. If you have already confirmed, just sign in."
+  },
+  "craftpanel.access.action-failed": {
+    "defaultMessage": "The change was refused"
+  },
+  "craftpanel.access.add-user": {
+    "defaultMessage": "Add user"
+  },
+  "craftpanel.access.audit-failed": {
+    "defaultMessage": "Failed to load the audit log"
+  },
+  "craftpanel.access.audit-help": {
+    "defaultMessage": "Everything that happened on this server, newest first."
+  },
+  "craftpanel.access.audit-title": {
+    "defaultMessage": "Audit log"
+  },
+  "craftpanel.access.members-failed": {
+    "defaultMessage": "Failed to load the members"
+  },
+  "craftpanel.access.members-help": {
+    "defaultMessage": "Who may see and change this server. An invite has to be accepted first."
+  },
+  "craftpanel.access.members-title": {
+    "defaultMessage": "Access"
+  },
+  "craftpanel.access.resend-cooldown": {
+    "defaultMessage": "The invite was sent recently, try again in {seconds} seconds."
+  },
+  "craftpanel.access.role-editor": {
+    "defaultMessage": "Editor"
+  },
+  "craftpanel.access.role-editor-description": {
+    "defaultMessage": "Content, files, backups and settings — everything except deleting the server."
+  },
+  "craftpanel.access.role-owner": {
+    "defaultMessage": "Owner"
+  },
+  "craftpanel.access.role-viewer": {
+    "defaultMessage": "Limited"
+  },
+  "craftpanel.access.role-viewer-description": {
+    "defaultMessage": "Watch the console and start or stop the server. No changes."
+  },
+  "craftpanel.backups.action-failed": {
+    "defaultMessage": "The action was refused"
+  },
+  "craftpanel.backups.at-hour": {
+    "defaultMessage": "At (hour UTC)"
+  },
+  "craftpanel.backups.busy": {
+    "defaultMessage": "A backup is already running."
+  },
+  "craftpanel.backups.clear-selection": {
+    "defaultMessage": "Clear"
+  },
+  "craftpanel.backups.create": {
+    "defaultMessage": "Create backup"
+  },
+  "craftpanel.backups.creating": {
+    "defaultMessage": "Creating backup..."
+  },
+  "craftpanel.backups.deleted": {
+    "defaultMessage": "Backup deleted"
+  },
+  "craftpanel.backups.drive-broken": {
+    "defaultMessage": "Backups of this server cannot be made right now"
+  },
+  "craftpanel.backups.drive-broken.not-configured": {
+    "defaultMessage": "This server backs up into a Google Drive, but the operator has taken the panel’s Google credentials away. Nothing can be uploaded or fetched back until they are entered again."
+  },
+  "craftpanel.backups.drive-broken.not-connected": {
+    "defaultMessage": "This server backs up into its owner’s Google Drive, and no Google account is connected. The owner can connect one on his account page; until then every backup of this server fails."
+  },
+  "craftpanel.backups.drive-broken.not-connected-owner": {
+    "defaultMessage": "You need to connect a Google account before this server can be backed up: its backups go into your Google Drive, and until one is connected every backup of this server fails."
+  },
+  "craftpanel.backups.drive-connect": {
+    "defaultMessage": "Connect Google Drive"
+  },
+  "craftpanel.backups.drive-gone-hint": {
+    "defaultMessage": "Put it back in your Drive to restore it from here."
+  },
+  "craftpanel.backups.empty-description": {
+    "defaultMessage": "A backup holds the whole server directory and can be restored at any time."
+  },
+  "craftpanel.backups.empty-heading": {
+    "defaultMessage": "No backups yet"
+  },
+  "craftpanel.backups.every": {
+    "defaultMessage": "Every (hours)"
+  },
+  "craftpanel.backups.failed": {
+    "defaultMessage": "The last attempt failed"
+  },
+  "craftpanel.backups.filter-all": {
+    "defaultMessage": "All"
+  },
+  "craftpanel.backups.filter-auto": {
+    "defaultMessage": "Auto"
+  },
+  "craftpanel.backups.filter-manual": {
+    "defaultMessage": "Manual"
+  },
+  "craftpanel.backups.keep-last": {
+    "defaultMessage": "Keep last"
+  },
+  "craftpanel.backups.load-failed": {
+    "defaultMessage": "Failed to load the backups"
+  },
+  "craftpanel.backups.next-run": {
+    "defaultMessage": "Next run {time}"
+  },
+  "craftpanel.backups.open-in-drive": {
+    "defaultMessage": "Open in Google Drive"
+  },
+  "craftpanel.backups.quota": {
+    "defaultMessage": "{used} of {total} used"
+  },
+  "craftpanel.backups.quota-full": {
+    "defaultMessage": "No backup slots left."
+  },
+  "craftpanel.backups.restore-not-done": {
+    "defaultMessage": "Only a finished backup can be restored."
+  },
+  "craftpanel.backups.restore-running": {
+    "defaultMessage": "Wait until the running backup operation is done."
+  },
+  "craftpanel.backups.restoring": {
+    "defaultMessage": "Restoring backup..."
+  },
+  "craftpanel.backups.retry-impossible": {
+    "defaultMessage": "A new attempt cannot get anywhere until there is a Google Drive to put it in."
+  },
+  "craftpanel.backups.schedule": {
+    "defaultMessage": "Backup schedule"
+  },
+  "craftpanel.backups.schedule-help": {
+    "defaultMessage": "Automatic backups run in the background and clean up after themselves."
+  },
+  "craftpanel.backups.schedule-impossible": {
+    "defaultMessage": "An automatic backup cannot be switched on while this server has no Google Drive to back up into — it would fail every time."
+  },
+  "craftpanel.backups.selected": {
+    "defaultMessage": "{count} selected"
+  },
+  "craftpanel.backups.state.in-drive": {
+    "defaultMessage": "In Google Drive"
+  },
+  "craftpanel.backups.state.missing": {
+    "defaultMessage": "Gone from the Drive"
+  },
+  "craftpanel.backups.state.trashed": {
+    "defaultMessage": "In the Drive’s bin"
+  },
+  "craftpanel.backups.state.unreachable": {
+    "defaultMessage": "Drive not connected"
+  },
+  "craftpanel.backups.target": {
+    "defaultMessage": "Where new backups go"
+  },
+  "craftpanel.backups.target-switched": {
+    "defaultMessage": "Target changed"
+  },
+  "craftpanel.backups.target.drive": {
+    "defaultMessage": "Into the Google Drive of whoever owns this server."
+  },
+  "craftpanel.backups.target.local": {
+    "defaultMessage": "Onto this machine."
+  },
+  "craftpanel.backups.target.not-configured": {
+    "defaultMessage": "The operator has not set up Google Drive."
+  },
+  "craftpanel.backups.target.not-connected": {
+    "defaultMessage": "The owner of this server has not connected a Google account."
+  },
+  "craftpanel.backups.target.policy": {
+    "defaultMessage": "The operator decided this for the whole panel."
+  },
+  "craftpanel.backups.title": {
+    "defaultMessage": "Backups"
+  },
+  "craftpanel.browse.back": {
+    "defaultMessage": "Back to content"
+  },
+  "craftpanel.browse.catalogue-failed-text": {
+    "defaultMessage": "Modrinth is fetched by the panel, not by your browser. This machine did not reach it."
+  },
+  "craftpanel.browse.catalogue-failed-title": {
+    "defaultMessage": "The catalogue could not be opened"
+  },
+  "craftpanel.browse.install-failed": {
+    "defaultMessage": "The installation could not be started"
+  },
+  "craftpanel.browse.install-started": {
+    "defaultMessage": "{count, plural, one {Installing # project} other {Installing # projects}}"
+  },
+  "craftpanel.browse.install-started-text": {
+    "defaultMessage": "Progress is shown above the content page."
+  },
+  "craftpanel.browse.locked.game-version": {
+    "defaultMessage": "The game version comes from this server"
+  },
+  "craftpanel.browse.locked.loader": {
+    "defaultMessage": "The loader comes from this server"
+  },
+  "craftpanel.browse.locked.provided-by": {
+    "defaultMessage": "Set by this server"
+  },
+  "craftpanel.browse.locked.sync": {
+    "defaultMessage": "Match the server again"
+  },
+  "craftpanel.browse.no-write-permission": {
+    "defaultMessage": "You do not have permission to install content on this server"
+  },
+  "craftpanel.browse.search-failed-title": {
+    "defaultMessage": "The search failed"
+  },
+  "craftpanel.browse.skip.already-installed": {
+    "defaultMessage": "already installed"
+  },
+  "craftpanel.browse.skip.conflicting-dependency": {
+    "defaultMessage": "two versions wanted at once"
+  },
+  "craftpanel.browse.skip.duplicate-project": {
+    "defaultMessage": "selected twice"
+  },
+  "craftpanel.browse.skip.missing-version": {
+    "defaultMessage": "the requested version is gone"
+  },
+  "craftpanel.browse.skip.no-compatible-version": {
+    "defaultMessage": "no version for this game version and loader"
+  },
+  "craftpanel.browse.skip.quilt-fabric-api": {
+    "defaultMessage": "Quilt brings Fabric API itself"
+  },
+  "craftpanel.browse.skipped-entry": {
+    "defaultMessage": "{name}: {reason}"
+  },
+  "craftpanel.browse.skipped-title": {
+    "defaultMessage": "Not everything could be installed"
+  },
+  "craftpanel.content.change-failed": {
+    "defaultMessage": "Failed to change content"
+  },
+  "craftpanel.content.config-none": {
+    "defaultMessage": "No configuration yet"
+  },
+  "craftpanel.content.config-none-tooltip": {
+    "defaultMessage": "Nothing has been written to {path} yet. A plugin or mod creates its files the first time the server runs."
+  },
+  "craftpanel.content.config-own": {
+    "defaultMessage": "Open configuration"
+  },
+  "craftpanel.content.config-shared": {
+    "defaultMessage": "Open configuration folder"
+  },
+  "craftpanel.content.config-shared-tooltip": {
+    "defaultMessage": "{name} has none of its own — this opens {path}"
+  },
+  "craftpanel.content.entry-gone": {
+    "defaultMessage": "This entry is no longer on the server."
+  },
+  "craftpanel.content.load-failed": {
+    "defaultMessage": "Failed to load content"
+  },
+  "craftpanel.content.modpack-failed": {
+    "defaultMessage": "Failed to change the modpack"
+  },
+  "craftpanel.content.no-version-list": {
+    "defaultMessage": "No versions to choose from"
+  },
+  "craftpanel.content.no-write-permission": {
+    "defaultMessage": "You do not have permission to change this server’s content"
+  },
+  "craftpanel.content.partially-failed": {
+    "defaultMessage": "{count, number} of {total, number} files could not be changed"
+  },
+  "craftpanel.content.restart-body": {
+    "defaultMessage": "The server is running. Installing or updating content replaces the files right away, but the running server keeps the old ones until you restart it."
+  },
+  "craftpanel.content.restart-header": {
+    "defaultMessage": "Updates need a restart"
+  },
+  "craftpanel.content.truncated-body": {
+    "defaultMessage": "This server has more than {limit, number} files. Filters, counts and bulk actions only cover the ones listed here."
+  },
+  "craftpanel.content.truncated-header": {
+    "defaultMessage": "Not all content is shown"
+  },
+  "craftpanel.content.update-failed": {
+    "defaultMessage": "Failed to update content"
+  },
+  "craftpanel.content.update-warning": {
+    "defaultMessage": "Updating can break your world. Review the changelog and back up first. The server is running, so the new version only takes effect after a restart."
+  },
+  "craftpanel.content.upload-failed": {
+    "defaultMessage": "Failed to upload files"
+  },
+  "craftpanel.content.versions-failed": {
+    "defaultMessage": "Failed to load versions from Modrinth"
+  },
+  "craftpanel.content.without-project": {
+    "defaultMessage": "This file is not linked to a Modrinth project, so there is no version list for it. Upload a newer file to replace it."
+  },
+  "craftpanel.files.cancel-failed": {
+    "defaultMessage": "Could not cancel the extraction"
+  },
+  "craftpanel.files.open-failed": {
+    "defaultMessage": "Could not open {file}"
+  },
+  "craftpanel.files.open-missing": {
+    "defaultMessage": "There is no {file} on this server yet. A server writes it when it starts for the first time."
+  },
+  "craftpanel.files.upload-conflict": {
+    "defaultMessage": "{file} already exists in this folder."
+  },
+  "craftpanel.files.upload-too-large": {
+    "defaultMessage": "{file} is larger than the upload limit."
+  },
+  "craftpanel.installation.load-failed": {
+    "defaultMessage": "Failed to load installation options"
+  },
+  "craftpanel.installation.loader-version": {
+    "defaultMessage": "{loader} version"
+  },
+  "craftpanel.installation.modpack": {
+    "defaultMessage": "Modpack"
+  },
+  "craftpanel.installation.modpack-failed": {
+    "defaultMessage": "Failed to change the modpack"
+  },
+  "craftpanel.installation.preview-failed": {
+    "defaultMessage": "Failed to check which content survives the change"
+  },
+  "craftpanel.installation.proxy-ignores-properties": {
+    "defaultMessage": "A proxy does not read server.properties; those settings will be ignored."
+  },
+  "craftpanel.installation.repair-failed": {
+    "defaultMessage": "Failed to repair the server"
+  },
+  "craftpanel.installation.save-failed": {
+    "defaultMessage": "Failed to change the installation"
+  },
+  "craftpanel.installation.unknown-loader": {
+    "defaultMessage": "The loader catalogue is not loaded yet"
+  },
+  "craftpanel.installation.versions-failed": {
+    "defaultMessage": "Failed to load versions from Modrinth"
+  },
+  "craftpanel.playit.checked-at": {
+    "defaultMessage": "Last confirmed {ago}"
+  },
+  "craftpanel.playit.failed": {
+    "defaultMessage": "The address could not be set up"
+  },
+  "craftpanel.playit.give-back": {
+    "defaultMessage": "Give the address back"
+  },
+  "craftpanel.playit.give-back-body": {
+    "defaultMessage": "The address stops working for everyone who has it, and the port goes back to the playit.gg account. The server itself is not touched."
+  },
+  "craftpanel.playit.missing": {
+    "defaultMessage": "The address was removed at playit.gg"
+  },
+  "craftpanel.playit.none": {
+    "defaultMessage": "This server has no address that works from outside. Friends can only reach it from this network."
+  },
+  "craftpanel.playit.offline": {
+    "defaultMessage": "The address is not carrying"
+  },
+  "craftpanel.playit.online-hint": {
+    "defaultMessage": "This is what your friends enter in their Minecraft client."
+  },
+  "craftpanel.playit.others-hint": {
+    "defaultMessage": "These point at the same relay, but Minecraft sends the address it was given and playit only forwards the tunnel’s own name, so they do not connect from the game."
+  },
+  "craftpanel.playit.others-summary": {
+    "defaultMessage": "{count, plural, one {One more address} other {# more addresses}} from playit"
+  },
+  "craftpanel.playit.owner-only-account": {
+    "defaultMessage": "Only the owner of this server can request one: it opens the server to the whole internet, and the address is handed out on his own playit.gg account."
+  },
+  "craftpanel.playit.pending": {
+    "defaultMessage": "The address is being set up at playit.gg…"
+  },
+  "craftpanel.playit.recreate": {
+    "defaultMessage": "Set up again"
+  },
+  "craftpanel.playit.request": {
+    "defaultMessage": "Request public address"
+  },
+  "craftpanel.playit.setup-button": {
+    "defaultMessage": "Set up playit.gg"
+  },
+  "craftpanel.playit.setup-foreign": {
+    "defaultMessage": "The panel can hand out an address through playit.gg that needs no port forwarding. The owner of this server has not connected a playit.gg account."
+  },
+  "craftpanel.playit.setup-owner": {
+    "defaultMessage": "The panel can hand out an address through playit.gg that needs no port forwarding. Connect your own playit.gg account once — it is free — and up to {limit} of your servers can each get an address."
+  },
+  "craftpanel.playit.state-unknown": {
+    "defaultMessage": "playit.gg gave no reason."
+  },
+  "craftpanel.playit.title": {
+    "defaultMessage": "Public address"
+  },
+  "craftpanel.playit.unknown-error": {
+    "defaultMessage": "Something went wrong. Try again."
+  },
+  "craftpanel.playit.unknown-host": {
+    "defaultMessage": "If a friend gets “Unknown host”, their internet provider does not resolve the name. It is fixed on their machine, by using another DNS server — playit explains how:"
+  },
+  "craftpanel.settings.advanced.command": {
+    "defaultMessage": "Startup command"
+  },
+  "craftpanel.settings.advanced.command-help": {
+    "defaultMessage": "The command that runs when your server starts."
+  },
+  "craftpanel.settings.advanced.command-is-admins": {
+    "defaultMessage": "The startup command and its flags belong to the panel administrator. One flag Java does not know and the server stops starting, with nothing in the console to say why, so the panel keeps that field to itself and sets the memory from the slider above."
+  },
+  "craftpanel.settings.advanced.default": {
+    "defaultMessage": "Default"
+  },
+  "craftpanel.settings.advanced.java-automatic": {
+    "defaultMessage": "Automatic"
+  },
+  "craftpanel.settings.advanced.java-installed": {
+    "defaultMessage": "Java {major}"
+  },
+  "craftpanel.settings.advanced.java-not-installed": {
+    "defaultMessage": "Java {major} (will be downloaded)"
+  },
+  "craftpanel.settings.advanced.java-version": {
+    "defaultMessage": "Java version"
+  },
+  "craftpanel.settings.advanced.java-version-help": {
+    "defaultMessage": "Only versions this machine can provide are offered."
+  },
+  "craftpanel.settings.advanced.load-failed": {
+    "defaultMessage": "Failed to load the startup options"
+  },
+  "craftpanel.settings.advanced.managed": {
+    "defaultMessage": "Flags set by the panel"
+  },
+  "craftpanel.settings.advanced.managed-help": {
+    "defaultMessage": "These are added on every start and cannot be edited here."
+  },
+  "craftpanel.settings.advanced.memory": {
+    "defaultMessage": "Memory"
+  },
+  "craftpanel.settings.advanced.memory-help": {
+    "defaultMessage": "The slider ends at what this server may still be given: what is left of the owner’s memory budget, or what the machine can hand out if he has none."
+  },
+  "craftpanel.settings.advanced.no-memory-left": {
+    "defaultMessage": "There is not a whole gigabyte left for this server — the other servers on this account hold the rest of the memory budget."
+  },
+  "craftpanel.settings.advanced.runtime": {
+    "defaultMessage": "Java runtime"
+  },
+  "craftpanel.settings.advanced.runtime-help": {
+    "defaultMessage": "Which build of Java your server runs on."
+  },
+  "craftpanel.settings.advanced.save-failed": {
+    "defaultMessage": "Failed to update the startup options"
+  },
+  "craftpanel.settings.advanced.saved": {
+    "defaultMessage": "Startup options updated"
+  },
+  "craftpanel.settings.advanced.stripped-body": {
+    "defaultMessage": "The memory comes from the slider above, and beside it only Java flags are kept. Dropped: {flags}"
+  },
+  "craftpanel.settings.advanced.stripped-header": {
+    "defaultMessage": "This save dropped some of what you typed"
+  },
+  "craftpanel.settings.general.address": {
+    "defaultMessage": "Address"
+  },
+  "craftpanel.settings.general.backups": {
+    "defaultMessage": "Backups"
+  },
+  "craftpanel.settings.general.busy": {
+    "defaultMessage": "Wait until the running operation is done."
+  },
+  "craftpanel.settings.general.danger": {
+    "defaultMessage": "Danger zone"
+  },
+  "craftpanel.settings.general.danger-description": {
+    "defaultMessage": "These actions destroy data. The server has to be stopped for all of them."
+  },
+  "craftpanel.settings.general.info": {
+    "defaultMessage": "Info"
+  },
+  "craftpanel.settings.general.name": {
+    "defaultMessage": "Server name"
+  },
+  "craftpanel.settings.general.name-empty": {
+    "defaultMessage": "Server name cannot be empty."
+  },
+  "craftpanel.settings.general.not-installed": {
+    "defaultMessage": "This server has no installation yet."
+  },
+  "craftpanel.settings.general.not-owner": {
+    "defaultMessage": "Only the owner of the server can do this."
+  },
+  "craftpanel.settings.general.remove": {
+    "defaultMessage": "Delete server"
+  },
+  "craftpanel.settings.general.remove-confirm": {
+    "defaultMessage": "{name} and everything belonging to it will be deleted."
+  },
+  "craftpanel.settings.general.remove-description": {
+    "defaultMessage": "Removes the server, its files and its backups. This cannot be undone."
+  },
+  "craftpanel.settings.general.remove-failed": {
+    "defaultMessage": "Failed to delete"
+  },
+  "craftpanel.settings.general.remove-started": {
+    "defaultMessage": "The server is being deleted"
+  },
+  "craftpanel.settings.general.reset": {
+    "defaultMessage": "Reset server"
+  },
+  "craftpanel.settings.general.reset-confirm": {
+    "defaultMessage": "Everything on {name} except its backups will be deleted and reinstalled."
+  },
+  "craftpanel.settings.general.reset-description": {
+    "defaultMessage": "Deletes world, content and configuration and installs the same version again. Backups remain."
+  },
+  "craftpanel.settings.general.reset-failed": {
+    "defaultMessage": "Failed to reset"
+  },
+  "craftpanel.settings.general.reset-started": {
+    "defaultMessage": "The server is being reset"
+  },
+  "craftpanel.settings.general.running": {
+    "defaultMessage": "Stop the server first."
+  },
+  "craftpanel.settings.general.save-failed": {
+    "defaultMessage": "Failed to update the server"
+  },
+  "craftpanel.settings.general.saved": {
+    "defaultMessage": "Server settings updated"
+  },
+  "craftpanel.settings.general.server-id": {
+    "defaultMessage": "Server ID"
+  },
+  "craftpanel.settings.general.unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "craftpanel.settings.general.update-channel": {
+    "defaultMessage": "Update channel"
+  },
+  "craftpanel.settings.general.update-channel.alpha": {
+    "defaultMessage": "Release, beta, and alpha versions will be shown as available updates."
+  },
+  "craftpanel.settings.general.update-channel.beta": {
+    "defaultMessage": "Release and beta versions will be shown as available updates."
+  },
+  "craftpanel.settings.general.update-channel.release": {
+    "defaultMessage": "Only release versions will be shown as available updates."
+  },
+  "craftpanel.settings.general.version": {
+    "defaultMessage": "Version"
+  },
+  "craftpanel.settings.network.action-failed": {
+    "defaultMessage": "The change was refused"
+  },
+  "craftpanel.settings.network.address": {
+    "defaultMessage": "Connection address"
+  },
+  "craftpanel.settings.network.address-help": {
+    "defaultMessage": "This is what players enter in their Minecraft client."
+  },
+  "craftpanel.settings.network.address-help-tunnelled": {
+    "defaultMessage": "This is what players on this network enter. From outside, they use the public address below."
+  },
+  "craftpanel.settings.network.allocations": {
+    "defaultMessage": "Allocations"
+  },
+  "craftpanel.settings.network.allocations-help": {
+    "defaultMessage": "Extra ports for things like map viewers or voice chat. A deleted port returns to the pool."
+  },
+  "craftpanel.settings.network.column-actions": {
+    "defaultMessage": "Actions"
+  },
+  "craftpanel.settings.network.column-name": {
+    "defaultMessage": "Name"
+  },
+  "craftpanel.settings.network.column-port": {
+    "defaultMessage": "Port"
+  },
+  "craftpanel.settings.network.copied": {
+    "defaultMessage": "Copied to clipboard"
+  },
+  "craftpanel.settings.network.create": {
+    "defaultMessage": "Create allocation"
+  },
+  "craftpanel.settings.network.create-hint": {
+    "defaultMessage": "Enter a name to create an allocation."
+  },
+  "craftpanel.settings.network.created": {
+    "defaultMessage": "Allocation created"
+  },
+  "craftpanel.settings.network.delete-body": {
+    "defaultMessage": "Port {port} goes back into the pool and can be handed out again."
+  },
+  "craftpanel.settings.network.delete-title": {
+    "defaultMessage": "Delete allocation"
+  },
+  "craftpanel.settings.network.deleted": {
+    "defaultMessage": "Allocation deleted"
+  },
+  "craftpanel.settings.network.load-failed": {
+    "defaultMessage": "Failed to load the allocations"
+  },
+  "craftpanel.settings.network.make-primary": {
+    "defaultMessage": "Make primary"
+  },
+  "craftpanel.settings.network.name-label": {
+    "defaultMessage": "Name"
+  },
+  "craftpanel.settings.network.name-placeholder": {
+    "defaultMessage": "e.g. Voice chat"
+  },
+  "craftpanel.settings.network.only-that-one-port": {
+    "defaultMessage": "Only that one port. A server gets one tunnel, so every other allocation below stays reachable from this network alone."
+  },
+  "craftpanel.settings.network.port-placeholder": {
+    "defaultMessage": "Port"
+  },
+  "craftpanel.settings.network.primary": {
+    "defaultMessage": "Primary"
+  },
+  "craftpanel.settings.network.promoted": {
+    "defaultMessage": "Primary port changed"
+  },
+  "craftpanel.settings.network.public-title": {
+    "defaultMessage": "Published through playit.gg"
+  },
+  "craftpanel.settings.network.published-at": {
+    "defaultMessage": "Port {port}, the primary one, is open to the internet as {address}. Everyone who has that address reaches this server."
+  },
+  "craftpanel.settings.network.publishing": {
+    "defaultMessage": "Port {port}, the primary one, is being published. playit.gg has not named the address yet."
+  },
+  "craftpanel.settings.network.rename": {
+    "defaultMessage": "Rename allocation"
+  },
+  "craftpanel.settings.network.renamed": {
+    "defaultMessage": "Allocation renamed"
+  },
+  "craftpanel.settings.network.restart-body": {
+    "defaultMessage": "The new primary port takes effect the next time the server starts."
+  },
+  "craftpanel.settings.network.restart-header": {
+    "defaultMessage": "Restart required"
+  },
+  "craftpanel.settings.network.swap-blocked": {
+    "defaultMessage": "The public address holds the primary port"
+  },
+  "craftpanel.settings.network.swap-needs-give-back": {
+    "defaultMessage": "While that address stands, the primary port cannot be moved: where the tunnel points is kept at playit.gg and cannot be changed from here. The owner or a panel administrator gives the address back on the overview page; until then the panel refuses the swap."
+  },
+  "panel.copy.failed": {
+    "defaultMessage": "Nothing was copied"
+  },
+  "panel.copy.failed-hint": {
+    "defaultMessage": "This browser would not put the text on the clipboard. Select it and copy it by hand."
+  },
+  "panel.menu.account": {
+    "defaultMessage": "Your account"
+  },
+  "panel.menu.change-password": {
+    "defaultMessage": "Change password"
+  },
+  "panel.menu.drive": {
+    "defaultMessage": "Google Drive"
+  },
+  "panel.menu.mail": {
+    "defaultMessage": "Mail"
+  },
+  "panel.menu.panel-settings": {
+    "defaultMessage": "Panel settings"
+  },
+  "panel.menu.playit-all": {
+    "defaultMessage": "Public addresses (all users)"
+  },
+  "panel.menu.registrations": {
+    "defaultMessage": "Sign-ups"
+  },
+  "panel.menu.users": {
+    "defaultMessage": "Users"
+  },
+  "panel.not-found.back": {
+    "defaultMessage": "Back to servers"
+  },
+  "panel.not-found.description": {
+    "defaultMessage": "This address does not lead anywhere."
+  },
+  "panel.not-found.heading": {
+    "defaultMessage": "Page not found"
+  },
+  "panel.operation.backup-create": {
+    "defaultMessage": "Backing up"
+  },
+  "panel.operation.backup-restore": {
+    "defaultMessage": "Restoring backup"
+  },
+  "panel.operation.change-game-version": {
+    "defaultMessage": "Changing game version"
+  },
+  "panel.operation.install-content": {
+    "defaultMessage": "Installing content"
+  },
+  "panel.operation.install-java": {
+    "defaultMessage": "Installing Java"
+  },
+  "panel.operation.install-loader": {
+    "defaultMessage": "Installing loader"
+  },
+  "panel.operation.install-modpack": {
+    "defaultMessage": "Installing modpack"
+  },
+  "panel.operation.repair-content": {
+    "defaultMessage": "Repairing"
+  },
+  "panel.operation.reset-server": {
+    "defaultMessage": "Resetting"
+  },
+  "panel.operation.server-create": {
+    "defaultMessage": "Setting up"
+  },
+  "panel.operation.server-delete": {
+    "defaultMessage": "Deleting"
+  },
+  "panel.operation.unarchive": {
+    "defaultMessage": "Extracting"
+  },
+  "panel.operation.update-content": {
+    "defaultMessage": "Updating content"
+  },
+  "panel.phase.addons": {
+    "defaultMessage": "Fetching content"
+  },
+  "panel.phase.analyzing": {
+    "defaultMessage": "Resolving the version"
+  },
+  "panel.phase.installing-loader": {
+    "defaultMessage": "Downloading"
+  },
+  "panel.phase.installing-pack": {
+    "defaultMessage": "Unpacking the modpack"
+  },
+  "panel.phase.running-installer": {
+    "defaultMessage": "Running the installer"
+  },
+  "panel.phase.verifying": {
+    "defaultMessage": "Checking the download"
+  },
+  "panel.phase.writing-config": {
+    "defaultMessage": "Writing the configuration"
+  },
+  "panel.server-new.blocked.header": {
+    "defaultMessage": "You cannot create a server right now"
+  },
+  "panel.server-new.blocked.over-limit": {
+    "defaultMessage": "Your servers already claim your whole memory budget. Free some up before making another one."
+  },
+  "panel.server-new.blocked.system-user": {
+    "defaultMessage": "Your system account is not ready yet. Nothing can run until an administrator has fixed it."
+  },
+  "panel.server-new.build.label": {
+    "defaultMessage": "Build"
+  },
+  "panel.server-new.build.latest-stable": {
+    "defaultMessage": "Latest stable build"
+  },
+  "panel.server-new.build.truncated": {
+    "defaultMessage": "Only the 500 newest builds are shown."
+  },
+  "panel.server-new.cancelled": {
+    "defaultMessage": "Setup was cancelled. The server exists but has nothing on it yet. Set it up again or delete it."
+  },
+  "panel.server-new.catalog-failed": {
+    "defaultMessage": "The loader catalogue could not be loaded"
+  },
+  "panel.server-new.create": {
+    "defaultMessage": "Create server"
+  },
+  "panel.server-new.difficulty.easy": {
+    "defaultMessage": "Easy"
+  },
+  "panel.server-new.difficulty.hard": {
+    "defaultMessage": "Hard"
+  },
+  "panel.server-new.difficulty.label": {
+    "defaultMessage": "Difficulty"
+  },
+  "panel.server-new.difficulty.normal": {
+    "defaultMessage": "Normal"
+  },
+  "panel.server-new.difficulty.peaceful": {
+    "defaultMessage": "Peaceful"
+  },
+  "panel.server-new.error.budget-exceeded": {
+    "defaultMessage": "That is more memory than your budget has left."
+  },
+  "panel.server-new.error.invalid-request": {
+    "defaultMessage": "The name may not be empty or longer than 64 characters."
+  },
+  "panel.server-new.error.network-unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "panel.server-new.error.over-limit": {
+    "defaultMessage": "Your servers already claim more memory than your budget allows."
+  },
+  "panel.server-new.error.port-in-use": {
+    "defaultMessage": "The port is taken. Try again."
+  },
+  "panel.server-new.error.port-pool-exhausted": {
+    "defaultMessage": "No free port is left in the pool. An administrator has to widen it."
+  },
+  "panel.server-new.error.unknown-loader": {
+    "defaultMessage": "This loader is unknown to the panel."
+  },
+  "panel.server-new.error.unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "panel.server-new.error.unsupported-game-version": {
+    "defaultMessage": "This loader does not offer that game version."
+  },
+  "panel.server-new.error.upstream-unavailable": {
+    "defaultMessage": "The download source could not be reached. Try again in a moment."
+  },
+  "panel.server-new.eula.label": {
+    "defaultMessage": "I accept Minecraft's End User Licence Agreement."
+  },
+  "panel.server-new.eula.link": {
+    "defaultMessage": "Read the agreement"
+  },
+  "panel.server-new.failed-description": {
+    "defaultMessage": "The server exists but has nothing on it yet."
+  },
+  "panel.server-new.gamemode.creative": {
+    "defaultMessage": "Creative"
+  },
+  "panel.server-new.gamemode.hardcore": {
+    "defaultMessage": "Hardcore"
+  },
+  "panel.server-new.gamemode.label": {
+    "defaultMessage": "Game mode"
+  },
+  "panel.server-new.gamemode.survival": {
+    "defaultMessage": "Survival"
+  },
+  "panel.server-new.install-failed": {
+    "defaultMessage": "Setting the server up failed"
+  },
+  "panel.server-new.loader-not-wired": {
+    "defaultMessage": "This loader needs an installer step and is not available yet."
+  },
+  "panel.server-new.memory.budget": {
+    "defaultMessage": "{free} left in your budget"
+  },
+  "panel.server-new.memory.host-unavailable": {
+    "defaultMessage": "The machine's memory could not be read, so the slider is not measured against it. Creating a server still works. Pick a value the machine can carry."
+  },
+  "panel.server-new.memory.label": {
+    "defaultMessage": "Memory"
+  },
+  "panel.server-new.memory.none-left": {
+    "defaultMessage": "Your budget has no room for another server. Free some memory first."
+  },
+  "panel.server-new.memory.over-budget": {
+    "defaultMessage": "This goes past your own budget and into the machine. It will be allowed, but the memory is then overcommitted."
+  },
+  "panel.server-new.name.label": {
+    "defaultMessage": "Name"
+  },
+  "panel.server-new.name.placeholder": {
+    "defaultMessage": "My server"
+  },
+  "panel.server-new.no-builds": {
+    "defaultMessage": "No builds available"
+  },
+  "panel.server-new.no-versions": {
+    "defaultMessage": "No versions available"
+  },
+  "panel.server-new.open-server": {
+    "defaultMessage": "Open server"
+  },
+  "panel.server-new.retry": {
+    "defaultMessage": "Try again"
+  },
+  "panel.server-new.seed.label": {
+    "defaultMessage": "World seed"
+  },
+  "panel.server-new.seed.placeholder": {
+    "defaultMessage": "Leave empty for a random world"
+  },
+  "panel.server-new.title": {
+    "defaultMessage": "New server"
+  },
+  "panel.server-new.warning.memory-overcommitted": {
+    "defaultMessage": "The machine now promises more memory than it has."
+  },
+  "panel.server-new.warning.properties-ignored": {
+    "defaultMessage": "This loader has no server.properties, so the world settings were dropped."
+  },
+  "panel.server-new.working": {
+    "defaultMessage": "Your server is being set up. This usually takes a minute or two."
+  },
+  "panel.server.connection.lost.body": {
+    "defaultMessage": "Console, metrics and progress are no longer updating."
+  },
+  "panel.server.connection.lost.title": {
+    "defaultMessage": "No live connection"
+  },
+  "panel.server.connection.reconnect": {
+    "defaultMessage": "Reconnect"
+  },
+  "panel.server.connection.reconnecting.body": {
+    "defaultMessage": "The live connection dropped. Console and metrics stand still until it is back."
+  },
+  "panel.server.connection.reconnecting.title": {
+    "defaultMessage": "Reconnecting to the server"
+  },
+  "panel.server.console": {
+    "defaultMessage": "Console"
+  },
+  "panel.server.error.back": {
+    "defaultMessage": "Back to servers"
+  },
+  "panel.server.forbidden.description": {
+    "defaultMessage": "Your access to this server was removed."
+  },
+  "panel.server.forbidden.title": {
+    "defaultMessage": "No access to this server"
+  },
+  "panel.server.gone.access-removed": {
+    "defaultMessage": "Your access to this server was removed."
+  },
+  "panel.server.gone.deleted": {
+    "defaultMessage": "This server has been deleted."
+  },
+  "panel.server.install.retry-failed": {
+    "defaultMessage": "The installation could not be started again."
+  },
+  "panel.server.missing.description": {
+    "defaultMessage": "This server does not exist, or it has been deleted."
+  },
+  "panel.server.missing.title": {
+    "defaultMessage": "Server not found"
+  },
+  "panel.server.notice.broken": {
+    "defaultMessage": "The last installation did not finish, so this server cannot start. Install it again under Settings."
+  },
+  "panel.server.notice.delete-failed": {
+    "defaultMessage": "This server could not be deleted: {reason} Its files are still there and still count against your disk. Delete it again under Settings."
+  },
+  "panel.server.notice.deleting": {
+    "defaultMessage": "This server is being deleted."
+  },
+  "panel.server.notice.setup-pending": {
+    "defaultMessage": "This server has no installation yet. Pick a loader and a version under Settings."
+  },
+  "panel.server.tabs.access": {
+    "defaultMessage": "Access"
+  },
+  "panel.server.tabs.backups": {
+    "defaultMessage": "Backups"
+  },
+  "panel.server.tabs.files": {
+    "defaultMessage": "Files"
+  },
+  "panel.server.tabs.overview": {
+    "defaultMessage": "Overview"
+  },
+  "panel.server.unreachable.description": {
+    "defaultMessage": "The panel did not answer. Try again in a moment."
+  },
+  "panel.server.unreachable.title": {
+    "defaultMessage": "The server could not be loaded"
+  },
+  "panel.servers.blocked.over-limit": {
+    "defaultMessage": "Your servers already claim your whole memory budget. Free some up before making another one."
+  },
+  "panel.servers.blocked.system-user": {
+    "defaultMessage": "Your system account is not ready yet. Nothing can run until an administrator has fixed it."
+  },
+  "panel.servers.empty.description": {
+    "defaultMessage": "Pick a loader and a version, and this machine will run it in a minute."
+  },
+  "panel.servers.empty.heading": {
+    "defaultMessage": "No servers yet"
+  },
+  "panel.servers.error.unreachable": {
+    "defaultMessage": "The panel could not be reached."
+  },
+  "panel.servers.group.own": {
+    "defaultMessage": "Your servers"
+  },
+  "panel.servers.group.shared": {
+    "defaultMessage": "Shared with you"
+  },
+  "panel.servers.load-failed": {
+    "defaultMessage": "The server list could not be loaded"
+  },
+  "panel.servers.new-server": {
+    "defaultMessage": "New server"
+  },
+  "panel.servers.no-match.description": {
+    "defaultMessage": "No server matches “{query}”."
+  },
+  "panel.servers.no-match.heading": {
+    "defaultMessage": "Nothing matches"
+  },
+  "panel.servers.port-only": {
+    "defaultMessage": "Port {port}"
+  },
+  "panel.servers.retry": {
+    "defaultMessage": "Try again"
+  },
+  "panel.servers.search-placeholder": {
+    "defaultMessage": "Search servers..."
+  },
+  "panel.servers.state.backup-creating": {
+    "defaultMessage": "Backing up"
+  },
+  "panel.servers.state.backup-restoring": {
+    "defaultMessage": "Restoring"
+  },
+  "panel.servers.state.broken": {
+    "defaultMessage": "Broken"
+  },
+  "panel.servers.state.deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "panel.servers.state.installing": {
+    "defaultMessage": "Installing"
+  },
+  "panel.servers.state.ready": {
+    "defaultMessage": "Ready"
+  },
+  "panel.servers.state.setup-pending": {
+    "defaultMessage": "Needs setup"
+  },
+  "panel.servers.state.syncing-content": {
+    "defaultMessage": "Syncing content"
+  },
+  "server.settings.tabs.advanced": {
+    "defaultMessage": "Advanced"
+  },
+  "server.settings.tabs.general": {
+    "defaultMessage": "General"
+  },
+  "server.settings.tabs.installation": {
+    "defaultMessage": "Installation"
+  },
+  "server.settings.tabs.network": {
+    "defaultMessage": "Network"
+  },
+  "server.settings.tabs.properties": {
+    "defaultMessage": "Properties"
+  },
+  "servers.admonitions.background-task-running": {
+    "defaultMessage": "Background task running"
+  },
+  "servers.busy.backup-creating": {
+    "defaultMessage": "Backup creation in progress"
+  },
+  "servers.busy.backup-restoring": {
+    "defaultMessage": "Backup restore in progress"
+  },
+  "servers.busy.deleting": {
+    "defaultMessage": "Server is being deleted"
+  },
+  "servers.busy.installing": {
+    "defaultMessage": "Server is installing"
+  },
+  "servers.busy.syncing-content": {
+    "defaultMessage": "Content sync in progress"
+  },
+  "servers.busy.unknown": {
+    "defaultMessage": "Background task running"
+  }
+}

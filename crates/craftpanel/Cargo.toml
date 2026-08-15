@@ -1,0 +1,42 @@
+[package]
+name = "craftpanel"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+argon2 = "0.5.3"
+axum = { version = "0.8.9", features = ["ws", "macros"] }
+axum-extra = { version = "0.12.6", features = ["cookie"] }
+clap = { version = "4.6.6", features = ["derive"] }
+craftpanel-proto = { version = "0.1.0", path = "../craftpanel-proto" }
+flate2 = "1.1.9"
+futures = "0.3.34"
+hex = "0.4.3"
+libc = "0.2.189"
+md-5 = "0.10.6"
+mime_guess = "2.0.5"
+rand = "0.10.2"
+reqwest = { version = "0.13.4", features = ["json", "stream"] }
+rust-embed = { version = "8.12.0", features = ["debug-embed"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+sha1 = "0.10.7"
+sha2 = "0.11.0"
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "migrate", "time"] }
+tar = "0.4.44"
+thiserror.workspace = true
+time = { version = "0.3.45", features = ["formatting", "parsing", "serde"] }
+tokio.workspace = true
+tokio-util = "0.7.19"
+toml = "1.1.4"
+tower = "0.5.3"
+tower-http = { version = "0.7.0", features = ["fs", "trace", "compression-gzip", "limit"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
+ulid = "3.0.0"
+walkdir = "2.5.0"
+zip = "7.2.0"
+zstd = "0.13.3"

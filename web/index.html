@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CraftPanel</title>
+		<!-- The first coat of paint goes on before the module bundle; without these lines the wrong
+		     mode flashes up until startTheme(). Key and fallback as in web/src/composables/theme.ts. -->
+		<script>
+			;(function () {
+				var stored = null
+				try {
+					stored = localStorage.getItem('craftpanel.theme')
+				} catch (blocked) {
+					stored = null
+				}
+				var mode = ['light', 'dark', 'oled', 'retro'].indexOf(stored) < 0 ? null : stored
+				if (!mode) mode = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+				document.documentElement.className = mode + '-mode'
+				document.documentElement.style.colorScheme = mode === 'light' ? 'light' : 'dark'
+			})()
+		</script>
+	</head>
+	<body>
+		<div id="app"></div>
+		<div id="teleports"></div>
+		<script type="module" src="/src/main.ts"></script>
+	</body>
+</html>

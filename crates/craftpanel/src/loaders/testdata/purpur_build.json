@@ -1,0 +1,19 @@
+{
+  "project": "purpur",
+  "version": "1.21.8",
+  "build": "2497",
+  "result": "SUCCESS",
+  "timestamp": 1758246365352,
+  "duration": 501623,
+  "commits": [
+    {
+      "author": "granny",
+      "email": "granny@purpurmc.org",
+      "description": "fix(ridables): \"only use brain if no rider\" code was missing on some mobs\n",
+      "hash": "a49cdb9c75711792fa645c16d867c49a1c337c6f",
+      "timestamp": 1758245054000
+    }
+  ],
+  "metadata": {},
+  "md5": "b8b2802525f5b85f986af49ac4b095aa"
+}

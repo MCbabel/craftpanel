@@ -1,0 +1,1 @@
+{"statusCode":422,"name":"invalid_from_address","message":"Invalid `from` field. The email address needs to follow the `email@example.com` or `Name <email@example.com>` format"}

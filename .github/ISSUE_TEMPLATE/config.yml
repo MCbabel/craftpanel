@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security problem
+    url: https://github.com/MCbabel/craftpanel/security/advisories/new
+    about: Report it privately, not here. The helper runs as root. See SECURITY.md.
+  - name: Building, testing, the eight checks
+    url: https://github.com/MCbabel/craftpanel/blob/main/CONTRIBUTING.md
+    about: How to get a tree that builds, and what a change is expected to keep green.

@@ -1,0 +1,43 @@
+{
+  "name": "@craftpanel/web",
+  "version": "0.0.0",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@modrinth/api-client": "workspace:*",
+    "@modrinth/assets": "workspace:*",
+    "@modrinth/ui": "workspace:*",
+    "@modrinth/utils": "workspace:*",
+    "@tanstack/vue-query": "5.90.7",
+    "@vueuse/core": "^11.1.0",
+    "dayjs": "^1.11.10",
+    "floating-vue": "^5.2.2",
+    "intl-messageformat": "^10.7.7",
+    "overlayscrollbars": "^2.15.1",
+    "vue": "^3.5.13",
+    "vue-i18n": "^10.0.0",
+    "vue-router": "^4.6.0"
+  },
+  "devDependencies": {
+    "@modrinth/tooling-config": "workspace:*",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.39",
+    "sass": "^1.74.1",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.4",
+    "vite": "^8.0.0",
+    "vite-svg-loader": "^5.1.0",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^2.1.6"
+  }
+}

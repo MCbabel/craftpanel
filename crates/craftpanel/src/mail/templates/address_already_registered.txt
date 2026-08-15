@@ -1,0 +1,13 @@
+Someone tried to sign up with your address
+
+Hi {{username}},
+
+Somebody filled in the sign-up form of this panel with your address. You
+already have an account, so nothing new was created and nothing changed.
+
+Sign in: {{action_url}}
+
+Forgotten password: {{forgot_url}}
+
+It was us who sent this, and it was not you who signed up, so there is nothing
+else to do.

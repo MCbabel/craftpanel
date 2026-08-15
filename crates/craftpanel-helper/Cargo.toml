@@ -1,0 +1,15 @@
+[package]
+name = "craftpanel-helper"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+craftpanel-proto = { version = "0.1.0", path = "../craftpanel-proto" }
+libc = "0.2.189"
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

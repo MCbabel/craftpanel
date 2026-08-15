@@ -1,0 +1,34 @@
+{
+  "ports": {
+    "type": "tunnel-type",
+    "details": "minecraft-java"
+  },
+  "origin": {
+    "type": "agent",
+    "data": {
+      "agent_id": "11112222-3333-4444-5555-666677778888",
+      "config": {
+        "fields": [
+          {
+            "name": "local_ip",
+            "value": "127.0.0.1"
+          },
+          {
+            "name": "local_port",
+            "value": "25565"
+          }
+        ]
+      }
+    }
+  },
+  "enabled": true,
+  "alloc": {
+    "type": "region",
+    "details": {
+      "region": "global",
+      "port": null
+    }
+  },
+  "name": "survival",
+  "firewall_id": null
+}

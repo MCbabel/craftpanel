@@ -1,0 +1,8 @@
+A new account is waiting for you
+
+{{applicant}} confirmed the address {{applicant_email}} on {{when}} and is
+waiting to be let in. Nobody gets in until you say so.
+
+{{action_url}}
+
+You are getting this because you are an administrator of this panel.

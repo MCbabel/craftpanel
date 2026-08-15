@@ -1,0 +1,11 @@
+Test mail from your panel
+
+If you can read this, your Resend setup works: the key was accepted and the
+sender {{from}} was allowed to send to this address.
+
+Sent on {{when}}. Nobody else got this -- it went to the one address you typed
+in.
+
+This is also what every other mail from this panel looks like: same colours as
+the interface, no images, and a text-only version underneath for clients that
+want one.

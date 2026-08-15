@@ -1,0 +1,8 @@
+Your account is ready
+
+Hi {{username}},
+
+An administrator let your account in. You can sign in with the username
+{{username}} and the password you chose when you signed up.
+
+{{action_url}}

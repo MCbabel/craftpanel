@@ -1,0 +1,71 @@
+name: Bug report
+description: Something the panel does wrong, or stops doing.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A security problem does not belong here. Use
+        [Report a vulnerability](https://github.com/MCbabel/craftpanel/security/advisories/new).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what the panel did, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: machine
+    attributes:
+      label: The machine
+      description: |
+        Paste the output of these six lines. systemd and cgroup v2 are load-bearing here, and
+        the wrong Java is the most common cause of a server that will not start.
+
+        ```
+        uname -sr
+        . /etc/os-release && echo "$PRETTY_NAME"
+        systemctl --version | head -1
+        stat -fc %T /sys/fs/cgroup
+        java -version 2>&1 | head -1
+        craftpanel --version
+        ```
+      render: shell
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Loader
+      options:
+        - Not about a particular server
+        - Vanilla
+        - Paper
+        - Folia
+        - Purpur
+        - Leaf
+        - Fabric
+        - Velocity
+    validations:
+      required: true
+
+  - type: input
+    id: game_version
+    attributes:
+      label: Game version
+      placeholder: "1.21.8"
+
+  - type: textarea
+    id: log
+    attributes:
+      label: journalctl -u craftpanel -n 200 --no-pager
+      description: |
+        Add `journalctl -u craftpanel-helper -n 200 --no-pager` as well if it is about creating an
+        account, starting a server or setting limits. Read what you paste: the log carries file
+        names, e-mail addresses and public addresses.
+      render: shell
+    validations:
+      required: true

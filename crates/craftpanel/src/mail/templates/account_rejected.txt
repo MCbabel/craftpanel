@@ -1,0 +1,9 @@
+About your sign-up
+
+Hi {{username}},
+
+Your sign-up on this panel was not accepted, and the application has been
+removed. Your address is no longer stored here.
+
+If you think this is a mistake, talk to whoever runs the panel. Answering this
+mail will not reopen it.

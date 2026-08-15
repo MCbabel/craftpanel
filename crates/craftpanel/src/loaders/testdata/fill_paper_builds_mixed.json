@@ -1,0 +1,68 @@
+[
+  {
+    "id": 132,
+    "time": "2026-05-11T11:43:09Z",
+    "channel": "STABLE",
+    "commits": [
+      {
+        "sha": "c5eb0790f199da6c38d0a650e1e5cd5415b28185",
+        "time": "2026-05-11T11:41:08Z",
+        "message": "Fork friendly byte buf correctly\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.11-132.jar",
+        "checksums": {
+          "sha256": "5ffef465eeeb5f2a3c23a24419d97c51afd7dbb4923ff42df9a3f58bba1ccfba"
+        },
+        "size": 54846016,
+        "url": "https://fill-data.papermc.io/v1/objects/5ffef465eeeb5f2a3c23a24419d97c51afd7dbb4923ff42df9a3f58bba1ccfba/paper-1.21.11-132.jar"
+      }
+    }
+  },
+  {
+    "id": 66,
+    "time": "2025-12-30T14:15:39Z",
+    "channel": "BETA",
+    "commits": [
+      {
+        "sha": "5875d88002d9beeb8b0a3dc8af352777d32265c0",
+        "time": "2025-12-30T14:13:53Z",
+        "message": "Fix inventory desyncs with certain cancelled interactions (#12960)\n\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.11-66.jar",
+        "checksums": {
+          "sha256": "22322ae26aa839afb6ab51763fd629ded1044e0ad83510fb50942880fa622c7f"
+        },
+        "size": 54815533,
+        "url": "https://fill-data.papermc.io/v1/objects/22322ae26aa839afb6ab51763fd629ded1044e0ad83510fb50942880fa622c7f/paper-1.21.11-66.jar"
+      }
+    }
+  },
+  {
+    "id": 48,
+    "time": "2025-12-21T11:40:42Z",
+    "channel": "ALPHA",
+    "commits": [
+      {
+        "sha": "997f5054574db24d114d25d7ed88b0c9db3573a0",
+        "time": "2025-12-21T11:38:53Z",
+        "message": "Mark client as loading after API respawn (Fixes #13417) (#13418)\n\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.11-48.jar",
+        "checksums": {
+          "sha256": "8fac758fae652914a9820306fa75335fb26bf9dbccf24215b4abb0e1116d2eae"
+        },
+        "size": 54185874,
+        "url": "https://fill-data.papermc.io/v1/objects/8fac758fae652914a9820306fa75335fb26bf9dbccf24215b4abb0e1116d2eae/paper-1.21.11-48.jar"
+      }
+    }
+  }
+]

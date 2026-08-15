@@ -1,0 +1,10 @@
+Confirm your email address
+
+Hi {{username}},
+
+Somebody signed up for an account on this panel with your address. Confirm it
+and the sign-up goes on. The link is good for {{valid_for}}.
+
+{{action_url}}
+
+If it was not you, ignore this mail. Nothing happens without the link above.

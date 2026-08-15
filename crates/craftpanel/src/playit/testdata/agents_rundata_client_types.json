@@ -1,0 +1,44 @@
+{
+  "status": "success",
+  "data": {
+    "agent_id": "11112222-3333-4444-5555-666677778888",
+    "tunnels": [
+      {
+        "id": "c0ffee11-2233-4455-6677-889900aabbcc",
+        "internal_id": 7,
+        "name": "survival",
+        "display_address": "147.185.221.24:31245",
+        "port_type": "tcp",
+        "port_count": 1,
+        "tunnel_type": "minecraft-java",
+        "tunnel_type_display": "Minecraft Java",
+        "agent_config": {
+          "fields": [
+            {
+              "name": "local_ip",
+              "value": "127.0.0.1"
+            },
+            {
+              "name": "local_port",
+              "value": "25565"
+            }
+          ]
+        },
+        "disabled_reason": null
+      }
+    ],
+    "pending": [],
+    "notices": [
+      {
+        "priority": "Low",
+        "message": "Verify your email to keep your account",
+        "resolve_link": "https://playit.gg/account"
+      }
+    ],
+    "permissions": {
+      "is_self_managed": true,
+      "has_premium": false,
+      "account_status": "guest"
+    }
+  }
+}

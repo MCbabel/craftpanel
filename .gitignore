@@ -1,0 +1,10 @@
+node_modules/
+dist/
+target/
+*.db
+*.db-*
+.env
+
+# Python drops intermediate code next to the scripts
+__pycache__/
+.cargo/

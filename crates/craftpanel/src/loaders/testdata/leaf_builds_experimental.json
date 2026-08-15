@@ -1,0 +1,45 @@
+{
+  "project_id": "leaf",
+  "project_name": "Leaf",
+  "version": "26.2",
+  "builds": [
+    {
+      "build": 63,
+      "time": "2026-08-11T14:26:25.135Z",
+      "channel": "experimental",
+      "promoted": false,
+      "changes": [
+        {
+          "commit": "cc2a6fdfdec6245b9084b8860bdcbbbd7ddf04e6",
+          "summary": "Limit pushable entity queries (#850)",
+          "message": "Limit pushable entity queries (#850)\n\n* Limit pushable entity queries\n\n* [ci/skip] add comments\n\n* Move reset out from try block"
+        }
+      ],
+      "downloads": {
+        "primary": {
+          "name": "leaf-26.2-63.jar",
+          "sha256": "3f2266fd47a8715d14e8e0e7ce1c65c381c059938d9f53e8761a5800aa9212be"
+        }
+      }
+    },
+    {
+      "build": 64,
+      "time": "2026-08-12T14:50:28.039Z",
+      "channel": "experimental",
+      "promoted": false,
+      "changes": [
+        {
+          "commit": "d7d77ab37f89ed800e56177c7d127b62d2c1e555",
+          "summary": "Updated Upstream (Paper) (#864)",
+          "message": "Updated Upstream (Paper) (#864)\n\nUpstream has released updates that appear to apply and compile correctly\n\nPaper Changes:\nPaperMC/Paper@c9e894d3 Do not re-order ClientboundLoginCompressionPacket"
+        }
+      ],
+      "downloads": {
+        "primary": {
+          "name": "leaf-26.2-64.jar",
+          "sha256": "cc5ba9ffaa60570be353c011316da3e5ebcd7036aaa67a76d7bf796120f7d33b"
+        }
+      }
+    }
+  ]
+}

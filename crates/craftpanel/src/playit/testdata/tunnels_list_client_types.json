@@ -1,0 +1,126 @@
+{
+  "status": "success",
+  "data": {
+    "tunnels": [
+      {
+        "id": "c0ffee11-2233-4455-6677-889900aabbcc",
+        "created_at": "2026-08-13T10:00:00Z",
+        "name": "survival",
+        "user_enabled": true,
+        "offline_reasons": null,
+        "tunnel_type": "minecraft-java",
+        "port_type": "tcp",
+        "port_count": 1,
+        "firewall_id": null,
+        "props": {
+          "hostname_verify_level": "None"
+        },
+        "origin": {
+          "type": "agent",
+          "details": {
+            "agent_id": "11112222-3333-4444-5555-666677778888",
+            "name": "craftpanel",
+            "config_schema_id": "308943e8-faef-4835-a2ba-270351f72aa3",
+            "config_data": {
+              "fields": [
+                {
+                  "name": "local_ip",
+                  "value": "127.0.0.1"
+                },
+                {
+                  "name": "local_port",
+                  "value": "25565"
+                }
+              ]
+            },
+            "config_invalid": null
+          }
+        },
+        "port_allocation_requests": [],
+        "public_allocations": [
+          {
+            "type": "PortAllocation",
+            "details": {
+              "alloc_id": "2f5f3b0e-6c1e-4c2a-9a5b-0d4e8b1f77aa",
+              "ip_region": "global",
+              "ip_hostname": "global.ply.gg",
+              "auto_domain": "quiet-forest.gl.at.ply.gg",
+              "ip": "147.185.221.24",
+              "port": 31245,
+              "port_count": 1,
+              "port_type": "tcp",
+              "expire_notice": null
+            }
+          }
+        ],
+        "connect_addresses": [
+          {
+            "type": "auto",
+            "value": {
+              "address": "quiet-forest.gl.at.ply.gg",
+              "source": {
+                "resource": "hostname-routing",
+                "id": "8a1d6b52-3f47-4f0a-8f7c-1c2b3d4e5f60"
+              }
+            }
+          },
+          {
+            "type": "addr4",
+            "value": {
+              "address": "147.185.221.24:31245",
+              "source": {
+                "resource": "port-allocation",
+                "id": "2f5f3b0e-6c1e-4c2a-9a5b-0d4e8b1f77aa"
+              }
+            }
+          },
+          {
+            "type": "ip4",
+            "value": {
+              "address": "147.185.221.24",
+              "default_port": 31245,
+              "source": {
+                "resource": "port-allocation",
+                "id": "2f5f3b0e-6c1e-4c2a-9a5b-0d4e8b1f77aa"
+              }
+            }
+          },
+          {
+            "type": "ip6",
+            "value": {
+              "address": "2602:fbaf:0:1::18",
+              "default_port": 31245,
+              "source": {
+                "resource": "port-allocation",
+                "id": "2f5f3b0e-6c1e-4c2a-9a5b-0d4e8b1f77aa"
+              }
+            }
+          },
+          {
+            "type": "addr6",
+            "value": {
+              "address": "[2602:fbaf:0:1::18]:31245",
+              "source": {
+                "resource": "port-allocation",
+                "id": "2f5f3b0e-6c1e-4c2a-9a5b-0d4e8b1f77aa"
+              }
+            }
+          },
+          {
+            "type": "domain",
+            "value": {
+              "id": "aa11bb22-cc33-dd44-ee55-ff6677889900",
+              "domain": "mc.example.org",
+              "address": "mc.example.org",
+              "mode": "Srv",
+              "source": {
+                "resource": "hostname-routing",
+                "id": "8a1d6b52-3f47-4f0a-8f7c-1c2b3d4e5f60"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

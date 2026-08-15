@@ -1,0 +1,15 @@
+{
+  "name": "@modrinth/blog",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./changelog": {
+      "types": "./changelog.ts",
+      "default": "./changelog.ts"
+    }
+  },
+  "dependencies": {
+    "dayjs": "^1.11.10"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "error": {
+    "errors": [
+      {
+        "domain": "usageLimits",
+        "reason": "uploadLimitExceeded",
+        "message": "The upload limit for this user has been exceeded."
+      }
+    ],
+    "code": 403,
+    "message": "The upload limit for this user has been exceeded."
+  }
+}

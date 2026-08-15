@@ -1,0 +1,14 @@
+{
+  "name": "craftpanel",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @craftpanel/web dev",
+    "build": "pnpm --filter @craftpanel/web build",
+    "typecheck": "pnpm --filter @craftpanel/web typecheck"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

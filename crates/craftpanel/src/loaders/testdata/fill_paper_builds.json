@@ -1,0 +1,68 @@
+[
+  {
+    "id": 60,
+    "time": "2025-09-06T21:50:11.982Z",
+    "channel": "STABLE",
+    "commits": [
+      {
+        "sha": "29c8822d90899c89d2689338e81a98f690bcba12",
+        "time": "2025-09-06T21:38:29Z",
+        "message": "Remove no longer needed MC-210802 fix (#13059)\n\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.8-60.jar",
+        "checksums": {
+          "sha256": "8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e"
+        },
+        "size": 52811717,
+        "url": "https://fill-data.papermc.io/v1/objects/8de7c52c3b02403503d16fac58003f1efef7dd7a0256786843927fa92ee57f1e/paper-1.21.8-60.jar"
+      }
+    }
+  },
+  {
+    "id": 59,
+    "time": "2025-09-06T21:03:20.324Z",
+    "channel": "STABLE",
+    "commits": [
+      {
+        "sha": "19156cdd3be99963884ef56faaf41425813a24be",
+        "time": "2025-09-06T20:49:56Z",
+        "message": "Give the right amount of experience after mending (#13047)\n\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.8-59.jar",
+        "checksums": {
+          "sha256": "f8c67bdb8de57e16d972e57c11d2f1b6c74d9e796d798e8ba92461ecdfe146ca"
+        },
+        "size": 52810792,
+        "url": "https://fill-data.papermc.io/v1/objects/f8c67bdb8de57e16d972e57c11d2f1b6c74d9e796d798e8ba92461ecdfe146ca/paper-1.21.8-59.jar"
+      }
+    }
+  },
+  {
+    "id": 58,
+    "time": "2025-09-03T22:15:27.030Z",
+    "channel": "STABLE",
+    "commits": [
+      {
+        "sha": "9aaaadffaa0caad086cf04709904b47eaac161d7",
+        "time": "2025-09-03T21:59:39Z",
+        "message": "Backport DFU changes from snapshots\n\nWhen converting to components:\n - Remove enchantments with levels <= 0\n - Remove the item name if it is not valid JSON\n - Remove lore entries that are not valid JSON\n"
+      }
+    ],
+    "downloads": {
+      "server:default": {
+        "name": "paper-1.21.8-58.jar",
+        "checksums": {
+          "sha256": "d2f29b6d3c945479de8271ea56e8f7935fceec021edaafcbbaf2a8c09f4a5d67"
+        },
+        "size": 52809230,
+        "url": "https://fill-data.papermc.io/v1/objects/d2f29b6d3c945479de8271ea56e8f7935fceec021edaafcbbaf2a8c09f4a5d67/paper-1.21.8-58.jar"
+      }
+    }
+  }
+]

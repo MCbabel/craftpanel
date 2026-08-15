@@ -1,0 +1,16 @@
+{
+  "user": {
+    "kind": "drive#user",
+    "displayName": "Anna Example",
+    "photoLink": "https://lh3.googleusercontent.com/a/example",
+    "me": true,
+    "permissionId": "01234567890123456789",
+    "emailAddress": "anna@example.com"
+  },
+  "storageQuota": {
+    "limit": "16106127360",
+    "usageInDrive": "1073741824",
+    "usageInDriveTrash": "0",
+    "usage": "2147483648"
+  }
+}

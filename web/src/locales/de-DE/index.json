@@ -1,0 +1,2858 @@
+{
+  "account.at-least-no-limit": {
+    "defaultMessage": "mindestens {used}, ohne Limit"
+  },
+  "account.at-least-of-bytes": {
+    "defaultMessage": "mindestens {used} von {total}"
+  },
+  "account.bytes-no-limit": {
+    "defaultMessage": "{used}, ohne Limit"
+  },
+  "account.cores.cap": {
+    "defaultMessage": "{used, number} von {limit, plural, one {# Kern} other {# Kernen}}, feste Obergrenze"
+  },
+  "account.cores.none": {
+    "defaultMessage": "{used, plural, one {# Kern} other {# Kerne}}, ohne Limit"
+  },
+  "account.cores.share": {
+    "defaultMessage": "{used, number} von {limit, plural, one {# Kern} other {# Kernen}}, solange der Rechner ausgelastet ist, mehr im Leerlauf"
+  },
+  "account.cpu.title": {
+    "defaultMessage": "Prozessor"
+  },
+  "account.disk.detail": {
+    "defaultMessage": "{servers} in Servern, {backups} in Sicherungen"
+  },
+  "account.disk.title": {
+    "defaultMessage": "Speicherplatz"
+  },
+  "account.disk.unread": {
+    "defaultMessage": "Einige Ordner waren beim Zählen für das Panel verschlossen, deshalb ist das nur eine Untergrenze. Was darin liegt, belegt trotzdem Speicherplatz."
+  },
+  "account.drive.broken.body": {
+    "defaultMessage": "Bis du dich neu verbindest, kann keine Sicherung in dein Drive wandern. Sicherungen, die schon dort liegen, bleiben, wo sie sind."
+  },
+  "account.drive.broken.header": {
+    "defaultMessage": "Google nimmt diese Verbindung nicht mehr an"
+  },
+  "account.drive.check": {
+    "defaultMessage": "Jetzt prüfen"
+  },
+  "account.drive.checked-at": {
+    "defaultMessage": "Zuletzt bestätigt {ago}"
+  },
+  "account.drive.checked-never": {
+    "defaultMessage": "Noch nicht bestätigt"
+  },
+  "account.drive.connect": {
+    "defaultMessage": "Google Drive verbinden"
+  },
+  "account.drive.connect-free": {
+    "defaultMessage": "Kostenlos, und du kannst es hier jederzeit rückgängig machen."
+  },
+  "account.drive.connected-intro": {
+    "defaultMessage": "Deine Sicherungen wandern in dein eigenes Drive. Dort kannst du sie selbst öffnen, herunterladen und löschen."
+  },
+  "account.drive.disconnect": {
+    "defaultMessage": "Verbindung trennen"
+  },
+  "account.drive.disconnect.body": {
+    "defaultMessage": "Das Panel gibt seinen Zugriff an Google zurück und vergisst ihn. Neue Sicherungen bleiben dann auf diesem Rechner, sofern der Betreiber das erlaubt."
+  },
+  "account.drive.disconnect.delete": {
+    "defaultMessage": "Löschen und trennen"
+  },
+  "account.drive.disconnect.files": {
+    "defaultMessage": "Sicherungen, die schon in deinem Drive liegen, kannst du dabei löschen oder liegen lassen — sie gehören so oder so dir, und das Panel findet sie wieder, wenn du dieses Konto später erneut verbindest."
+  },
+  "account.drive.disconnect.keep": {
+    "defaultMessage": "Sicherungen behalten"
+  },
+  "account.drive.external-off.body": {
+    "defaultMessage": "Google Drive ist ein Dienst nach außen. Solange ein Administrator diesen Schalter aus lässt, wird nichts hochgeladen und es kommt keine Verbindung zustande."
+  },
+  "account.drive.external-off.header": {
+    "defaultMessage": "Dienste nach außen sind abgeschaltet"
+  },
+  "account.drive.fact.account": {
+    "defaultMessage": "Google-Konto"
+  },
+  "account.drive.fact.account-unknown": {
+    "defaultMessage": "Noch nicht bekannt"
+  },
+  "account.drive.fact.folder": {
+    "defaultMessage": "Ordner"
+  },
+  "account.drive.fact.storage": {
+    "defaultMessage": "Drive-Speicher"
+  },
+  "account.drive.fact.storage-free": {
+    "defaultMessage": "{free} noch frei."
+  },
+  "account.drive.fact.storage-unlimited": {
+    "defaultMessage": "Kein Limit"
+  },
+  "account.drive.fact.storage-value": {
+    "defaultMessage": "{used} von {limit}"
+  },
+  "account.drive.fact.storage-workspace": {
+    "defaultMessage": "Dieses Konto meldet kein Speicherlimit."
+  },
+  "account.drive.intro": {
+    "defaultMessage": "Verbinde dein Google-Konto, dann wandern die Sicherungen deiner Server in dein eigenes Drive statt auf diesen Rechner. Das Panel sieht immer nur den Ordner, den es selbst angelegt hat."
+  },
+  "account.drive.last-failure.header": {
+    "defaultMessage": "Der letzte Verbindungsversuch hat nicht geklappt"
+  },
+  "account.drive.link.accepted": {
+    "defaultMessage": "Bestätigt. Deine Sicherungen können ab jetzt in dein Drive wandern."
+  },
+  "account.drive.link.code": {
+    "defaultMessage": "Dein Code"
+  },
+  "account.drive.link.denied": {
+    "defaultMessage": "Die Anfrage wurde bei Google abgelehnt."
+  },
+  "account.drive.link.expired": {
+    "defaultMessage": "Der Code ist abgelaufen, bevor er bestätigt wurde, deshalb fragt das Panel nicht weiter nach."
+  },
+  "account.drive.link.intro": {
+    "defaultMessage": "Öffne diese Seite auf einem beliebigen Gerät, melde dich bei Google an und tippe den Code unten ein. Diese Seite merkt es von selbst."
+  },
+  "account.drive.link.retry": {
+    "defaultMessage": "Neuer Code"
+  },
+  "account.drive.link.title": {
+    "defaultMessage": "Google Drive verbinden"
+  },
+  "account.drive.link.waiting": {
+    "defaultMessage": "Warte auf die Bestätigung bei Google… noch {remaining}"
+  },
+  "account.drive.load-failed": {
+    "defaultMessage": "Der Drive-Status ließ sich nicht laden"
+  },
+  "account.drive.not-set-up": {
+    "defaultMessage": "Der Betreiber dieses Panels hat Google Drive nicht eingerichtet, deshalb bleiben Sicherungen auf diesem Rechner."
+  },
+  "account.drive.point.once": {
+    "defaultMessage": "Du bestätigst einmal mit einem Code auf einem beliebigen Gerät. In dieses Panel wird kein Passwort eingetippt."
+  },
+  "account.drive.point.unencrypted": {
+    "defaultMessage": "Eine Sicherung enthält dein ganzes Serververzeichnis, und sie ist nicht verschlüsselt — alles, was in deinen Konfigurationsdateien steht, kann jeder lesen, der dein Drive lesen kann."
+  },
+  "account.drive.point.visible": {
+    "defaultMessage": "Sie landen in einem Ordner namens „{folder}“, den du selbst sehen, öffnen und leeren kannst."
+  },
+  "account.drive.point.yours": {
+    "defaultMessage": "Die Archive liegen in deinem Speicher, nicht auf dem Speicherplatz des Betreibers."
+  },
+  "account.drive.state.broken": {
+    "defaultMessage": "Verbindung verloren"
+  },
+  "account.drive.state.connected": {
+    "defaultMessage": "Verbunden"
+  },
+  "account.drive.title": {
+    "defaultMessage": "Sicherungen in deinem eigenen Google Drive"
+  },
+  "account.drive.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgegangen. Versuch es noch einmal."
+  },
+  "account.error.unknown": {
+    "defaultMessage": "Etwas ist schiefgegangen. Versuch es noch einmal."
+  },
+  "account.limits.hint": {
+    "defaultMessage": "Arbeitsspeicher ist ein Budget, das du auf deine Server verteilst; beim Speicherplatz zählt alles, was deine Server und ihre Sicherungen zusammen belegen. Ändern kann das nur ein Administrator."
+  },
+  "account.limits.none": {
+    "defaultMessage": "Dieses Konto hat überhaupt keine Limits: keine Obergrenze beim Arbeitsspeicher, keine Prozessorgrenze, keine Prozesszahl und kein Speicherkontingent. Die Zahlen unten zeigen, was gemessen wurde, nicht was erlaubt ist."
+  },
+  "account.limits.title": {
+    "defaultMessage": "Limits"
+  },
+  "account.memory.detail": {
+    "defaultMessage": "Gerade belegt: {used}"
+  },
+  "account.memory.title": {
+    "defaultMessage": "Arbeitsspeicher"
+  },
+  "account.mib-no-limit": {
+    "defaultMessage": "{value} MiB, ohne Limit"
+  },
+  "account.of-bytes": {
+    "defaultMessage": "{used} von {total}"
+  },
+  "account.of-mib": {
+    "defaultMessage": "{value} von {total} MiB"
+  },
+  "account.over-limit.both": {
+    "defaultMessage": "Das Budget für Arbeitsspeicher und das Limit für Speicherplatz sind beide überschritten. Nichts wurde gestoppt oder gelöscht, aber es kommt auch nichts Neues mehr dazu."
+  },
+  "account.over-limit.disk": {
+    "defaultMessage": "Dieses Konto belegt mehr Speicherplatz, als es darf. Es wurde nichts gelöscht und nichts gestoppt, aber Hochladen, Installieren und Sichern werden abgelehnt, bis du Platz frei machst."
+  },
+  "account.over-limit.header": {
+    "defaultMessage": "Über dem Limit"
+  },
+  "account.over-limit.memory": {
+    "defaultMessage": "An deine Server ist mehr Arbeitsspeicher vergeben, als dieses Konto hat. Nichts wurde gestoppt, aber du kannst keinen neuen Server anlegen oder starten, bis du einen Server löschst oder kleiner machst."
+  },
+  "account.pids.none": {
+    "defaultMessage": "{used}, ohne Limit"
+  },
+  "account.pids.of": {
+    "defaultMessage": "{used} von {limit}"
+  },
+  "account.pids.title": {
+    "defaultMessage": "Prozesse"
+  },
+  "account.playit.disconnect.body": {
+    "defaultMessage": "Der Tunnel-Dienst hält an und dein Schlüssel wird von diesem Rechner gelöscht. Deine Server laufen weiter und bleiben im lokalen Netz erreichbar."
+  },
+  "account.playit.external-off.body": {
+    "defaultMessage": "playit.gg ist ein Dienst nach außen. Solange ein Administrator diesen Schalter aus lässt, wird keine Adresse vergeben und der Tunnel-Dienst bleibt aus."
+  },
+  "account.playit.intro": {
+    "defaultMessage": "playit.gg vergibt eine Adresse, die von außen funktioniert, ohne dass jemand an einen Router muss. Verbinde dein eigenes Konto, dann können deine Server eine anfordern."
+  },
+  "account.playit.not-self-managed.body": {
+    "defaultMessage": "playit.gg meldet den Agenten als nicht selbstverwaltet, deshalb kann das Panel keine Adressen für deine Server anlegen. Trenne die Verbindung und verbinde neu; das Panel fordert immer einen selbstverwalteten Agenten an."
+  },
+  "account.playit.ports-for-others": {
+    "defaultMessage": "{count, plural, one {Eine davon gehört zu einem Server, der jemand anderem gehört} other {# davon gehören zu Servern, die jemand anderem gehören}} — aus dem Konto, das dieses Panel früher für alle geteilt hat. Zurückgeben kannst du sie auf der Seite des jeweiligen Servers."
+  },
+  "account.playit.quiet": {
+    "defaultMessage": "Keiner deiner Server hat eine öffentliche Adresse, deshalb läuft der Tunnel-Dienst nicht."
+  },
+  "account.playit.title": {
+    "defaultMessage": "Öffentliche Adressen für deine Server"
+  },
+  "account.role.admin": {
+    "defaultMessage": "Administrator"
+  },
+  "account.role.user": {
+    "defaultMessage": "Nutzer"
+  },
+  "account.servers.description": {
+    "defaultMessage": "{total, plural, one {# Server} other {# Server}}, {running, plural, =0 {keiner läuft} one {# läuft} other {# laufen}}."
+  },
+  "account.servers.memory": {
+    "defaultMessage": "{mib} MiB"
+  },
+  "account.servers.none": {
+    "defaultMessage": "Noch keine eigenen Server."
+  },
+  "account.servers.title": {
+    "defaultMessage": "Wohin das Budget fließt"
+  },
+  "account.subtitle": {
+    "defaultMessage": "Was dieses Konto darf und wie viel davon in Benutzung ist."
+  },
+  "account.system-account": {
+    "defaultMessage": "Läuft als Systemnutzer {name}"
+  },
+  "account.system-not-ready": {
+    "defaultMessage": "Der Systemnutzer hinter diesem Konto ist noch nicht bereit, deshalb kann kein Server starten. Ein Administrator kann es erneut versuchen."
+  },
+  "account.title": {
+    "defaultMessage": "Dein Konto"
+  },
+  "admin.drive.account.connected": {
+    "defaultMessage": "Verbunden"
+  },
+  "admin.drive.account.connecting": {
+    "defaultMessage": "Nichts verbunden"
+  },
+  "admin.drive.account.error": {
+    "defaultMessage": "Funktioniert nicht"
+  },
+  "admin.drive.account.revoked": {
+    "defaultMessage": "Zugriff entzogen"
+  },
+  "admin.drive.accounts.description": {
+    "defaultMessage": "Eine Zeile je Nutzer, der ein Google-Konto verbunden hat. Du kannst für niemanden eines verbinden — das kann nur die Person vor dem Browser selbst."
+  },
+  "admin.drive.accounts.empty": {
+    "defaultMessage": "Niemand hat ein Google-Konto verbunden"
+  },
+  "admin.drive.accounts.empty-hint": {
+    "defaultMessage": "Wer seine Sicherungen in seinem eigenen Speicher haben will, verbindet sein Google-Konto auf seiner Kontoseite. Hier ist dafür nichts zu tun."
+  },
+  "admin.drive.accounts.title": {
+    "defaultMessage": "Verbundene Konten"
+  },
+  "admin.drive.backups-value": {
+    "defaultMessage": "{count} · {bytes}"
+  },
+  "admin.drive.checked-never": {
+    "defaultMessage": "nie"
+  },
+  "admin.drive.client-id": {
+    "defaultMessage": "Client-ID"
+  },
+  "admin.drive.client-id.placeholder": {
+    "defaultMessage": "1234567890-abcdef.apps.googleusercontent.com"
+  },
+  "admin.drive.client-secret": {
+    "defaultMessage": "Client-Secret"
+  },
+  "admin.drive.client-secret.hint": {
+    "defaultMessage": "Leer lassen, um das gespeicherte Secret zu behalten. Speicherst du mit geleertem Feld, wird es entfernt."
+  },
+  "admin.drive.client-secret.keep": {
+    "defaultMessage": "Ein Secret ist gespeichert — leer lassen, um es zu behalten"
+  },
+  "admin.drive.client-secret.placeholder": {
+    "defaultMessage": "GOCSPX-…"
+  },
+  "admin.drive.column.actions": {
+    "defaultMessage": "Aktionen"
+  },
+  "admin.drive.column.backups": {
+    "defaultMessage": "Sicherungen dort"
+  },
+  "admin.drive.column.checked": {
+    "defaultMessage": "Zuletzt geprüft"
+  },
+  "admin.drive.column.state": {
+    "defaultMessage": "Zustand"
+  },
+  "admin.drive.column.storage": {
+    "defaultMessage": "Drive-Speicher"
+  },
+  "admin.drive.column.user": {
+    "defaultMessage": "Nutzer"
+  },
+  "admin.drive.credentials.description": {
+    "defaultMessage": "Die ID liegt in der Datenbank; das Secret wird in eine Datei geschrieben, die nur das Panel lesen kann, und wird nie wieder angezeigt."
+  },
+  "admin.drive.credentials.title": {
+    "defaultMessage": "Zugangsdaten des Clients"
+  },
+  "admin.drive.cut": {
+    "defaultMessage": "Trennen"
+  },
+  "admin.drive.cut.body": {
+    "defaultMessage": "Das Panel gibt seinen Zugriff auf das Google-Konto von {user} zurück und vergisst ihn. Er kann sich jederzeit selbst wieder verbinden."
+  },
+  "admin.drive.cut.files": {
+    "defaultMessage": "Seine Sicherungen bleiben in seinem Drive. Es gibt hier keinen Knopf, der Dateien in fremdem Speicher löscht, und das ist Absicht — er kann sie sehen und selbst wegwerfen."
+  },
+  "admin.drive.folder-hint": {
+    "defaultMessage": "Der Ordner, den das Panel im Drive jedes Nutzers anlegt. Benennst du ihn hier um, werden bereits vorhandene Ordner nicht umbenannt."
+  },
+  "admin.drive.folder-name": {
+    "defaultMessage": "Ordnername"
+  },
+  "admin.drive.forget": {
+    "defaultMessage": "Zugangsdaten entfernen"
+  },
+  "admin.drive.forget.body": {
+    "defaultMessage": "Client-ID und Secret werden gelöscht, und das Panel ist wieder „nicht eingerichtet“."
+  },
+  "admin.drive.forget.warning": {
+    "defaultMessage": "Die Verbindungen, die deine Nutzer hergestellt haben, bleiben in der Liste, funktionieren aber nicht mehr: Keine Sicherung kann in ein Drive wandern und keine wieder herausgeholt werden, bis wieder Zugangsdaten eingetragen sind."
+  },
+  "admin.drive.load-failed": {
+    "defaultMessage": "Die Drive-Einstellungen konnten nicht geladen werden"
+  },
+  "admin.drive.policy": {
+    "defaultMessage": "Wohin Sicherungen dürfen"
+  },
+  "admin.drive.policy.drive-only": {
+    "defaultMessage": "Nur Google Drive"
+  },
+  "admin.drive.policy.drive-only-hint": {
+    "defaultMessage": "Auf diesem Rechner bleibt nichts liegen — und ein Nutzer, der kein Drive verbunden hat, kann überhaupt nicht sichern. Das ist Absicht: Ein stilles Ausweichen auf den Speicherplatz hier ist genau der Weg, auf dem jemand am Ende glaubt, er sei abgesichert."
+  },
+  "admin.drive.policy.local-only": {
+    "defaultMessage": "Nur dieser Rechner"
+  },
+  "admin.drive.policy.local-only-hint": {
+    "defaultMessage": "Der Ausweg, wenn Google Ärger macht. Sicherungen, die schon in einem Drive liegen, bleiben lesbar und wiederherstellbar; nur neue bleiben hier."
+  },
+  "admin.drive.policy.user-choice": {
+    "defaultMessage": "Jeder Server entscheidet selbst"
+  },
+  "admin.drive.policy.user-choice-hint": {
+    "defaultMessage": "Jeder Server sichert standardmäßig hierher; wer ein Drive verbunden hat, kann seine Server umstellen."
+  },
+  "admin.drive.publish.body": {
+    "defaultMessage": "Solange der Zustimmungsbildschirm auf „Testing“ steht, gibt Google nur Zugriff heraus, der nach sieben Tagen abläuft — jede Verbindung bricht dann nach einer Woche, lautlos, und genau dann, wenn jemand eine Sicherung braucht. Das Panel kann diese Einstellung nicht bei Google abfragen; es kann dich nur darauf hinweisen."
+  },
+  "admin.drive.publish.header": {
+    "defaultMessage": "Die App zu veröffentlichen ist Pflicht"
+  },
+  "admin.drive.saved": {
+    "defaultMessage": "Gespeichert."
+  },
+  "admin.drive.state.blank": {
+    "defaultMessage": "Nicht eingerichtet"
+  },
+  "admin.drive.state.blank-hint": {
+    "defaultMessage": "Sicherungen bleiben auf diesem Rechner, und nichts im Panel ruft Google auf."
+  },
+  "admin.drive.state.ready": {
+    "defaultMessage": "Eingerichtet"
+  },
+  "admin.drive.state.ready-hint": {
+    "defaultMessage": "Nutzer können ihr Google-Konto auf ihrer eigenen Kontoseite verbinden."
+  },
+  "admin.drive.step.api": {
+    "defaultMessage": "Schalte die Drive-API ein — ohne sie wird jeder Aufruf abgewiesen:"
+  },
+  "admin.drive.step.client": {
+    "defaultMessage": "Lege einen Client vom Typ „TVs and Limited Input devices“ an und trage seine ID und sein Secret unten ein."
+  },
+  "admin.drive.step.consent": {
+    "defaultMessage": "Fülle den OAuth-Zustimmungsbildschirm aus: Zielgruppe „External“, ein Name für die App, eine Support-Adresse und der Scope .../auth/drive.file. Dieser Scope gilt nicht als sensibel, eine Prüfung ist also nicht nötig."
+  },
+  "admin.drive.step.project": {
+    "defaultMessage": "Lege ein Projekt an bei"
+  },
+  "admin.drive.step.publish": {
+    "defaultMessage": "Drücke „Publish app“, damit der Veröffentlichungsstatus „In production“ lautet."
+  },
+  "admin.drive.storage-unlimited": {
+    "defaultMessage": "Kein Limit"
+  },
+  "admin.drive.storage-value": {
+    "defaultMessage": "{used} von {limit}"
+  },
+  "admin.drive.subtitle": {
+    "defaultMessage": "Richte hier ein einziges Google-Projekt ein; jeder Nutzer verbindet dann sein eigenes Konto, und die Sicherungen landen in seinem Speicher statt auf diesem Rechner."
+  },
+  "admin.drive.title": {
+    "defaultMessage": "Google Drive"
+  },
+  "admin.drive.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.limits.cpu.cap-hint": {
+    "defaultMessage": "Harte Grenze: Das Konto bekommt nie mehr als {cores} Kerne, so unbeschäftigt der Rechner auch sein mag."
+  },
+  "admin.limits.cpu.cores": {
+    "defaultMessage": "Kerne"
+  },
+  "admin.limits.cpu.mode": {
+    "defaultMessage": "Modus"
+  },
+  "admin.limits.cpu.mode.cap": {
+    "defaultMessage": "Harte Grenze"
+  },
+  "admin.limits.cpu.mode.share": {
+    "defaultMessage": "Anteil"
+  },
+  "admin.limits.cpu.share-hint": {
+    "defaultMessage": "Anteil: so viel wie {cores} Kerne, solange der Rechner ausgelastet ist, mehr, solange er Luft hat. Keine Obergrenze."
+  },
+  "admin.limits.cpu.title": {
+    "defaultMessage": "Prozessor"
+  },
+  "admin.limits.cpu.used": {
+    "defaultMessage": "gerade in Benutzung: {used} von {limit} Kernen"
+  },
+  "admin.limits.cpu.used-only": {
+    "defaultMessage": "gerade in Benutzung: {used} Kerne"
+  },
+  "admin.limits.disk.description": {
+    "defaultMessage": "Alles, was dieses Konto auf der Platte liegen hat: alle seine Server und deren Sicherungen. Der Kernel kennt keine Obergrenze für Speicherplatz, also lehnt das Panel das Hochladen, Installationen und Sicherungen ab, sobald das Limit erreicht ist — nichts wird gelöscht und kein Server gestoppt."
+  },
+  "admin.limits.disk.over": {
+    "defaultMessage": "Das liegt unter dem, was das Konto schon belegt. Speichern ist erlaubt und es wird nichts gelöscht, aber das Konto kann keinen weiteren Platz mehr belegen, bis es welchen freigibt."
+  },
+  "admin.limits.disk.split": {
+    "defaultMessage": "{servers} in Servern, {backups} in Sicherungen"
+  },
+  "admin.limits.disk.title": {
+    "defaultMessage": "Speicherplatz"
+  },
+  "admin.limits.disk.used": {
+    "defaultMessage": "Belegt: {used} von {limit} MiB"
+  },
+  "admin.limits.disk.used-at-least": {
+    "defaultMessage": "Belegt: mindestens {used} von {limit} MiB — einige Ordner waren für das Panel verschlossen"
+  },
+  "admin.limits.memory.allocated": {
+    "defaultMessage": "An Server vergeben: {allocated} von {limit} MiB"
+  },
+  "admin.limits.memory.below-allocated": {
+    "defaultMessage": "Das liegt unter dem, was das Konto schon an seine Server vergeben hat. Speichern ist erlaubt und nichts wird abgeschossen, aber das Konto gilt als über dem Limit, bis ein Server gelöscht oder verkleinert wird, und es kann nichts Neues mehr starten."
+  },
+  "admin.limits.memory.description": {
+    "defaultMessage": "Die Obergrenze für alles, was dieses Konto laufen lässt, in Mebibyte."
+  },
+  "admin.limits.memory.title": {
+    "defaultMessage": "Arbeitsspeicher"
+  },
+  "admin.limits.memory.used": {
+    "defaultMessage": "gerade in Benutzung: {used}"
+  },
+  "admin.limits.pids.description": {
+    "defaultMessage": "Wie viele Prozesse und Threads das Konto gleichzeitig am Leben halten darf."
+  },
+  "admin.limits.pids.title": {
+    "defaultMessage": "Prozesse"
+  },
+  "admin.limits.pids.used": {
+    "defaultMessage": "gerade in Benutzung: {used} von {limit}"
+  },
+  "admin.limits.pids.used-only": {
+    "defaultMessage": "gerade in Benutzung: {used}"
+  },
+  "admin.mail.accepted-not-arrived": {
+    "defaultMessage": "„Angenommen“ heißt, dass Resend die Mail entgegengenommen hat, nicht dass sie im Postfach angekommen ist. Das Panel bekommt es nicht mit, wenn eine Mail zurückkommt."
+  },
+  "admin.mail.address-invalid": {
+    "defaultMessage": "Das ist keine Adresse. Die Form lautet name@domain.tld."
+  },
+  "admin.mail.attempts": {
+    "defaultMessage": "{count, plural, one {# Versuch} other {# Versuche}}"
+  },
+  "admin.mail.column.actions": {
+    "defaultMessage": "Aktionen"
+  },
+  "admin.mail.column.detail": {
+    "defaultMessage": "Detail"
+  },
+  "admin.mail.column.mail": {
+    "defaultMessage": "Mail"
+  },
+  "admin.mail.column.state": {
+    "defaultMessage": "Zustand"
+  },
+  "admin.mail.column.when": {
+    "defaultMessage": "Eingereiht"
+  },
+  "admin.mail.daily-limit": {
+    "defaultMessage": "Höchstzahl an Mails pro Tag"
+  },
+  "admin.mail.daily-limit-hint": {
+    "defaultMessage": "Die eigene Bremse des Panels, gezählt über die letzten 24 Stunden. 100 entspricht dem kostenlosen Tarif von Resend; 0 schaltet sie ab und lässt nur noch das Limit von Resend selbst."
+  },
+  "admin.mail.delivery.failed": {
+    "defaultMessage": "fehlgeschlagen"
+  },
+  "admin.mail.delivery.queued": {
+    "defaultMessage": "wartet"
+  },
+  "admin.mail.delivery.sending": {
+    "defaultMessage": "wird gesendet"
+  },
+  "admin.mail.delivery.sent": {
+    "defaultMessage": "angenommen"
+  },
+  "admin.mail.example-link": {
+    "defaultMessage": "So wird ein Link aussehen:"
+  },
+  "admin.mail.failed-count": {
+    "defaultMessage": "Fehlgeschlagen"
+  },
+  "admin.mail.free-tier": {
+    "defaultMessage": "Der kostenlose Tarif von Resend: 100 Mails am Tag, 3.000 im Monat, eine Domain. Bis eine Domain bestätigt ist, kann der Absender nur onboarding@resend.dev sein, und der einzige Empfänger ist die Adresse, mit der du dein Resend-Konto eröffnet hast — genug für den Testknopf unten, zu wenig für echte Registrierungen."
+  },
+  "admin.mail.from-address": {
+    "defaultMessage": "Absenderadresse"
+  },
+  "admin.mail.from-name": {
+    "defaultMessage": "Absendername"
+  },
+  "admin.mail.how-to-description": {
+    "defaultMessage": "Vier Schritte, und der erste Tag klappt ohne eigene Domain."
+  },
+  "admin.mail.how-to-title": {
+    "defaultMessage": "Woher du einen Schlüssel bekommst"
+  },
+  "admin.mail.key-description": {
+    "defaultMessage": "Wird als Datei mit Modus 0600 neben der Datenbank abgelegt, nie in der Datenbank selbst — eine Kopie von panel.db ist damit kein Weg in dein Resend-Konto."
+  },
+  "admin.mail.key-hint": {
+    "defaultMessage": "Das Feld bleibt nach dem Speichern leer: Das Panel gibt einen Schlüssel nie wieder heraus. Tippe einen neuen ein, um ihn zu ersetzen."
+  },
+  "admin.mail.key-label": {
+    "defaultMessage": "API-Schlüssel"
+  },
+  "admin.mail.key-set-at": {
+    "defaultMessage": "Schlüssel gespeichert {when}"
+  },
+  "admin.mail.key-title": {
+    "defaultMessage": "Der Resend-Schlüssel"
+  },
+  "admin.mail.kind.account-approved": {
+    "defaultMessage": "Konto zugelassen"
+  },
+  "admin.mail.kind.account-awaiting-review": {
+    "defaultMessage": "Registrierung wartet"
+  },
+  "admin.mail.kind.account-rejected": {
+    "defaultMessage": "Registrierung abgewiesen"
+  },
+  "admin.mail.kind.address-already-registered": {
+    "defaultMessage": "Adresse schon vergeben"
+  },
+  "admin.mail.kind.password-changed": {
+    "defaultMessage": "Passwort wurde geändert"
+  },
+  "admin.mail.kind.reset-password": {
+    "defaultMessage": "Passwort zurücksetzen"
+  },
+  "admin.mail.kind.test": {
+    "defaultMessage": "Testmail"
+  },
+  "admin.mail.kind.verify-email": {
+    "defaultMessage": "Adresse bestätigen"
+  },
+  "admin.mail.last-error-header": {
+    "defaultMessage": "Die letzte Mail ging nicht raus"
+  },
+  "admin.mail.last-test": {
+    "defaultMessage": "Letzte Testmail"
+  },
+  "admin.mail.link-base": {
+    "defaultMessage": "Adresse des Panels"
+  },
+  "admin.mail.link-insecure": {
+    "defaultMessage": "Über http reist das Token im Link im Klartext. Im Heimnetz ist das oft die einzige Möglichkeit; im offenen Internet nimm https."
+  },
+  "admin.mail.link-missing": {
+    "defaultMessage": "Ohne diese Adresse geht keine Mail mit Link raus — das sind die Bestätigungsmail, das Zurücksetzen des Passworts und der Hinweis an die Administratoren. Die vier Mails ohne Link funktionieren weiter."
+  },
+  "admin.mail.link-no-scheme": {
+    "defaultMessage": "Der Adresse fehlt das Schema: https://panel.example (oder http:// im Heimnetz)."
+  },
+  "admin.mail.load-failed": {
+    "defaultMessage": "Die Mail-Einstellungen konnten nicht geladen werden"
+  },
+  "admin.mail.look": {
+    "defaultMessage": "Mail ansehen"
+  },
+  "admin.mail.never": {
+    "defaultMessage": "nie"
+  },
+  "admin.mail.no-key-yet": {
+    "defaultMessage": "Noch kein Schlüssel hier, also verlässt keine Mail das Panel."
+  },
+  "admin.mail.of-limit": {
+    "defaultMessage": "{used} von {limit}"
+  },
+  "admin.mail.outbox-description": {
+    "defaultMessage": "Wird 30 Tage aufbewahrt. Der Inhalt einer zugestellten Mail wird geleert — er trug einen Link, der geheim ist, solange die Mail unterwegs ist."
+  },
+  "admin.mail.outbox-empty": {
+    "defaultMessage": "Noch keine Mail"
+  },
+  "admin.mail.outbox-empty-hint": {
+    "defaultMessage": "Schick oben die Testmail los, dann steht sie hier als erste Zeile."
+  },
+  "admin.mail.outbox-title": {
+    "defaultMessage": "Die letzten Mails"
+  },
+  "admin.mail.preview-cli": {
+    "defaultMessage": "Auf dem Rechner selbst: craftpanel mail preview --out /tmp/craftpanel-mail schreibt alle sechzehn Dateien, HTML und Text."
+  },
+  "admin.mail.preview-description": {
+    "defaultMessage": "Jede Mail mit Beispielwerten, in einem neuen Tab. Funktioniert ohne Schlüssel, ohne Netz und ohne dass eine einzige Mail verschickt wird."
+  },
+  "admin.mail.preview-title": {
+    "defaultMessage": "Die Mails ansehen"
+  },
+  "admin.mail.remove-key": {
+    "defaultMessage": "Schlüssel entfernen"
+  },
+  "admin.mail.remove-key-body": {
+    "defaultMessage": "Die Schlüsseldatei wird gelöscht. Danach geht keine Mail mehr raus, und die Registrierung ist zu, bis ein neuer Schlüssel da ist. Mail, die noch wartet, schlägt mit einem Hinweis auf den Grund fehl — trag einen neuen Schlüssel ein, und „Erneut versuchen“ schickt sie los."
+  },
+  "admin.mail.reply-to": {
+    "defaultMessage": "Antwortadresse"
+  },
+  "admin.mail.reply-to-hint": {
+    "defaultMessage": "Wohin eine Antwort geht. Bleibt es leer, geht eine Antwort an die Absenderadresse — und wenn die niemand liest, schreib das lieber in die Mail als hierher."
+  },
+  "admin.mail.reply-to-placeholder": {
+    "defaultMessage": "optional"
+  },
+  "admin.mail.save-key": {
+    "defaultMessage": "Schlüssel speichern"
+  },
+  "admin.mail.send-test": {
+    "defaultMessage": "Testmail senden"
+  },
+  "admin.mail.sender-description": {
+    "defaultMessage": "Was deine Nutzer in ihrem Postfach sehen, und wohin die Links in einer Mail zeigen."
+  },
+  "admin.mail.sender-preview": {
+    "defaultMessage": "Im Postfach:"
+  },
+  "admin.mail.sender-title": {
+    "defaultMessage": "Absender und Adresse des Panels"
+  },
+  "admin.mail.sent-today": {
+    "defaultMessage": "Gesendet in 24 h"
+  },
+  "admin.mail.sink-path": {
+    "defaultMessage": "Jede Mail wird nach {path} geschrieben, und nichts geht ins Netz."
+  },
+  "admin.mail.state.configured": {
+    "defaultMessage": "Schlüssel gespeichert"
+  },
+  "admin.mail.state.file-sink": {
+    "defaultMessage": "schreibt Dateien"
+  },
+  "admin.mail.state.not-configured": {
+    "defaultMessage": "nicht eingerichtet"
+  },
+  "admin.mail.step1": {
+    "defaultMessage": "Eröffne ein Konto bei"
+  },
+  "admin.mail.step2": {
+    "defaultMessage": "Lege einen API-Schlüssel an bei"
+  },
+  "admin.mail.step3": {
+    "defaultMessage": "Gib ihm die Berechtigung „Sending access“ — mehr braucht das Panel nicht. Der Schlüssel beginnt mit re_. Füge ihn unten ein und speichere."
+  },
+  "admin.mail.step4": {
+    "defaultMessage": "Um an jemand anderen als dich selbst zu schreiben, bestätige eine Domain (MX- und TXT-Einträge für SPF und DKIM) bei"
+  },
+  "admin.mail.subtitle": {
+    "defaultMessage": "Das Panel verschickt Mail über Resend — eine Bestätigung der Registrierung, ein Zurücksetzen des Passworts, einen Hinweis, wenn ein Konto zugelassen wird. Hier muss nichts eingerichtet werden; ohne Schlüssel verschickt das Panel einfach nichts."
+  },
+  "admin.mail.test-description": {
+    "defaultMessage": "Wird sofort verschickt, nicht eingereiht — du stehst ja hier, also bekommst du die Antwort. Es ist eine echte Mail im echten Aussehen, und sie zählt gegen das Tageskontingent."
+  },
+  "admin.mail.test-failed-header": {
+    "defaultMessage": "Die Testmail ging nicht raus"
+  },
+  "admin.mail.test-sender-body": {
+    "defaultMessage": "onboarding@resend.dev ist die Adresse von Resend für den ersten Versuch: Zustellen kann sie nur an die Adresse, mit der dein Resend-Konto eröffnet wurde. Für echte Registrierungen bestätige eine Domain unter resend.com/domains und trage hier eine Adresse dieser Domain ein."
+  },
+  "admin.mail.test-sender-header": {
+    "defaultMessage": "Dieser Absender erreicht nur dich"
+  },
+  "admin.mail.test-sent-body": {
+    "defaultMessage": "Die ID von Resend dafür ist {id}. Kommt sie nicht binnen einer Minute an, schau in den Spam-Ordner — das macht eine unbestätigte Domain."
+  },
+  "admin.mail.test-sent-header": {
+    "defaultMessage": "Resend hat die Mail für {to} angenommen"
+  },
+  "admin.mail.test-title": {
+    "defaultMessage": "Eine Testmail senden"
+  },
+  "admin.mail.test-to": {
+    "defaultMessage": "An"
+  },
+  "admin.mail.test-to-placeholder": {
+    "defaultMessage": "die Adresse auf deinem Konto"
+  },
+  "admin.mail.title": {
+    "defaultMessage": "Mail"
+  },
+  "admin.mail.try-again": {
+    "defaultMessage": "Erneut versuchen"
+  },
+  "admin.mail.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.mail.waiting": {
+    "defaultMessage": "Wartend"
+  },
+  "admin.playit.account.email-not-verified": {
+    "defaultMessage": "E-Mail nicht bestätigt"
+  },
+  "admin.playit.account.guest": {
+    "defaultMessage": "Gast"
+  },
+  "admin.playit.account.verified": {
+    "defaultMessage": "bestätigt"
+  },
+  "admin.playit.agent.absent": {
+    "defaultMessage": "läuft nicht"
+  },
+  "admin.playit.agent.failed": {
+    "defaultMessage": "fehlgeschlagen"
+  },
+  "admin.playit.agent.running": {
+    "defaultMessage": "läuft"
+  },
+  "admin.playit.agent.starting": {
+    "defaultMessage": "startet"
+  },
+  "admin.playit.binary.absent": {
+    "defaultMessage": "nicht heruntergeladen"
+  },
+  "admin.playit.binary.failed": {
+    "defaultMessage": "fehlgeschlagen"
+  },
+  "admin.playit.binary.fetching": {
+    "defaultMessage": "wird heruntergeladen"
+  },
+  "admin.playit.binary.ready": {
+    "defaultMessage": "bereit"
+  },
+  "admin.playit.checked-at": {
+    "defaultMessage": "Zuletzt bestätigt {ago}"
+  },
+  "admin.playit.checked-never": {
+    "defaultMessage": "Von playit.gg noch nicht bestätigt"
+  },
+  "admin.playit.claim.accepted": {
+    "defaultMessage": "Bestätigt. Der Tunneldienst startet."
+  },
+  "admin.playit.claim.expired": {
+    "defaultMessage": "Innerhalb von {minutes} Minuten wurde nichts bestätigt, also hat das Panel aufgehört zu fragen."
+  },
+  "admin.playit.claim.intro": {
+    "defaultMessage": "Öffne diese Adresse und bestätige dort. Diese Seite merkt es von selbst."
+  },
+  "admin.playit.claim.rejected": {
+    "defaultMessage": "Die Anfrage wurde bei playit.gg abgelehnt."
+  },
+  "admin.playit.claim.retry": {
+    "defaultMessage": "Neuer Link"
+  },
+  "admin.playit.claim.title": {
+    "defaultMessage": "Mit playit.gg verbinden"
+  },
+  "admin.playit.claim.waiting": {
+    "defaultMessage": "Warte auf die Bestätigung im Browser … noch {remaining}"
+  },
+  "admin.playit.column.account": {
+    "defaultMessage": "playit.gg-Konto"
+  },
+  "admin.playit.column.actions": {
+    "defaultMessage": "Aktionen"
+  },
+  "admin.playit.column.agent": {
+    "defaultMessage": "Tunneldienst"
+  },
+  "admin.playit.column.checked": {
+    "defaultMessage": "Zuletzt bestätigt"
+  },
+  "admin.playit.column.ports": {
+    "defaultMessage": "Öffentliche Adressen"
+  },
+  "admin.playit.column.user": {
+    "defaultMessage": "Nutzer"
+  },
+  "admin.playit.connect.button": {
+    "defaultMessage": "Mit playit.gg verbinden"
+  },
+  "admin.playit.connect.free": {
+    "defaultMessage": "Kostenlos, und hier jederzeit wieder rückgängig zu machen."
+  },
+  "admin.playit.connect.point-once": {
+    "defaultMessage": "Du bestätigst einmal im Browser. In dieses Panel wird kein Passwort getippt."
+  },
+  "admin.playit.connect.point-per-server": {
+    "defaultMessage": "Für Server, die keine anfordern, ändert sich nichts."
+  },
+  "admin.playit.connect.point-ports": {
+    "defaultMessage": "Ein kostenloses Konto trägt {limit} öffentliche Adressen gleichzeitig."
+  },
+  "admin.playit.connected.description": {
+    "defaultMessage": "Der Tunneldienst läuft als Kindprozess des Panels und braucht keine Aufmerksamkeit."
+  },
+  "admin.playit.disconnect": {
+    "defaultMessage": "Trennen"
+  },
+  "admin.playit.disconnect.body-user": {
+    "defaultMessage": "Der Tunneldienst von {user} hält an und der Schlüssel wird von diesem Rechner gelöscht. Seine Server laufen weiter und bleiben im lokalen Netz erreichbar. Er kann jederzeit selbst wieder ein Konto verbinden."
+  },
+  "admin.playit.disconnect.delete": {
+    "defaultMessage": "Adressen löschen und trennen"
+  },
+  "admin.playit.disconnect.keep": {
+    "defaultMessage": "Adressen behalten"
+  },
+  "admin.playit.disconnect.tunnels": {
+    "defaultMessage": "{count} Adresse(n) sind vergeben. Lösche sie bei playit.gg, damit ihre Ports wieder frei sind, oder behalte sie, falls playit.gg gerade nicht erreichbar ist — dann belegen sie weiter Ports auf dem Konto."
+  },
+  "admin.playit.external-off.body": {
+    "defaultMessage": "playit.gg ist ein ausgehender Dienst. Solange der Schalter unter den Panel-Einstellungen aus ist, bleibt der Agent unten und es lässt sich nichts verbinden."
+  },
+  "admin.playit.external-off.header": {
+    "defaultMessage": "Ausgehende Dienste sind abgeschaltet"
+  },
+  "admin.playit.fact.account": {
+    "defaultMessage": "playit.gg-Konto"
+  },
+  "admin.playit.fact.account-unknown": {
+    "defaultMessage": "Noch nicht bekannt — wartet auf die erste Antwort von playit.gg."
+  },
+  "admin.playit.fact.agent": {
+    "defaultMessage": "Tunneldienst"
+  },
+  "admin.playit.fact.agent-hint": {
+    "defaultMessage": "Startet mit dem Panel neu; verbundene Spieler sehen eine kurze Unterbrechung."
+  },
+  "admin.playit.fact.agent-id": {
+    "defaultMessage": "Agent"
+  },
+  "admin.playit.fact.binary": {
+    "defaultMessage": "Programmdatei"
+  },
+  "admin.playit.fact.binary-hint": {
+    "defaultMessage": "{version} für {arch}, geprüft gegen eine im Panel hinterlegte Prüfsumme."
+  },
+  "admin.playit.fact.ports": {
+    "defaultMessage": "Öffentliche Adressen"
+  },
+  "admin.playit.fact.ports-full": {
+    "defaultMessage": "Alle aufgebraucht. Ein Server bekommt erst dann eine Adresse, wenn ein anderer eine zurückgibt."
+  },
+  "admin.playit.fact.ports-left": {
+    "defaultMessage": "Noch {count} frei."
+  },
+  "admin.playit.fact.ports-value": {
+    "defaultMessage": "{used} von {limit}"
+  },
+  "admin.playit.guest-hint": {
+    "defaultMessage": "Ein Gastkonto hängt an keiner E-Mail-Adresse und kann verloren gehen. Melde dich an bei"
+  },
+  "admin.playit.last-error": {
+    "defaultMessage": "Zuletzt gemeldetes Problem"
+  },
+  "admin.playit.load-failed": {
+    "defaultMessage": "Der playit-Status konnte nicht geladen werden"
+  },
+  "admin.playit.nobody": {
+    "defaultMessage": "Niemand hat ein Konto verbunden"
+  },
+  "admin.playit.nobody-hint": {
+    "defaultMessage": "Ein Nutzer, der eine von außen erreichbare Adresse will, verbindet sein eigenes playit.gg-Konto auf seiner Kontoseite. Hier muss nichts eingerichtet werden."
+  },
+  "admin.playit.not-configured": {
+    "defaultMessage": "kein Schlüssel"
+  },
+  "admin.playit.not-self-managed.header": {
+    "defaultMessage": "Dieser Agent darf seine eigenen Tunnel nicht verwalten"
+  },
+  "admin.playit.open-settings": {
+    "defaultMessage": "Panel-Einstellungen"
+  },
+  "admin.playit.own-account-hint": {
+    "defaultMessage": "Dein eigenes Konto liegt auf deiner Kontoseite. Niemand kann eines für jemand anderen verbinden — die Bestätigung geschieht im Browser dieser Person bei playit.gg."
+  },
+  "admin.playit.ports-for-others": {
+    "defaultMessage": "{count, plural, one {# für einen Server, der jemand anderem gehört} other {# für Server, die anderen Leuten gehören}}"
+  },
+  "admin.playit.premium": {
+    "defaultMessage": "Premium"
+  },
+  "admin.playit.quiet": {
+    "defaultMessage": "Keiner seiner Server hat eine Adresse, also läuft nichts."
+  },
+  "admin.playit.restart": {
+    "defaultMessage": "Tunneldienst neu starten"
+  },
+  "admin.playit.subtitle-all": {
+    "defaultMessage": "Jeder Nutzer verbindet sein eigenes playit.gg-Konto, und seine Ports gehören ihm. Hier steht, wer eines hat — du kannst hinsehen, und du kannst jemanden loslösen."
+  },
+  "admin.playit.title-all": {
+    "defaultMessage": "Öffentliche Adressen (alle Nutzer)"
+  },
+  "admin.playit.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.playit.unnamed": {
+    "defaultMessage": "Konto bereits gelöscht"
+  },
+  "admin.registrations.approve": {
+    "defaultMessage": "Zulassen"
+  },
+  "admin.registrations.closed-body": {
+    "defaultMessage": "Im Moment kann sich niemand registrieren, also erscheint hier nichts Neues. Was hier steht, kannst du weiterhin zulassen oder abweisen."
+  },
+  "admin.registrations.closed-header": {
+    "defaultMessage": "Die Registrierung ist abgeschaltet"
+  },
+  "admin.registrations.column.applicant": {
+    "defaultMessage": "Bewerber"
+  },
+  "admin.registrations.column.from": {
+    "defaultMessage": "Von"
+  },
+  "admin.registrations.column.state": {
+    "defaultMessage": "Zustand"
+  },
+  "admin.registrations.column.when": {
+    "defaultMessage": "Registriert"
+  },
+  "admin.registrations.confirmed-at": {
+    "defaultMessage": "bestätigt {when}"
+  },
+  "admin.registrations.error.email-taken": {
+    "defaultMessage": "Diese Adresse liegt schon auf einem Konto."
+  },
+  "admin.registrations.error.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Versuche es bitte erneut."
+  },
+  "admin.registrations.error.invalid-state": {
+    "defaultMessage": "Diese Registrierung hat ihre Adresse noch nicht bestätigt, also kann sie nicht zugelassen werden."
+  },
+  "admin.registrations.error.not-found": {
+    "defaultMessage": "Diese Registrierung ist weg — jemand anderes hat entschieden, oder sie wurde weggeräumt."
+  },
+  "admin.registrations.error.username-taken": {
+    "defaultMessage": "Dieser Name ist inzwischen vergeben. Der Bewerber muss sich erneut registrieren."
+  },
+  "admin.registrations.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Versuche es bitte erneut."
+  },
+  "admin.registrations.load-failed": {
+    "defaultMessage": "Die Registrierungen konnten nicht geladen werden"
+  },
+  "admin.registrations.no-address": {
+    "defaultMessage": "nicht erfasst"
+  },
+  "admin.registrations.nobody": {
+    "defaultMessage": "Niemand wartet"
+  },
+  "admin.registrations.nobody-hint": {
+    "defaultMessage": "Neue Registrierungen erscheinen hier, sobald jemand das Formular ausfüllt."
+  },
+  "admin.registrations.open-settings": {
+    "defaultMessage": "Panel-Einstellungen"
+  },
+  "admin.registrations.reason-hint": {
+    "defaultMessage": "Bleibt im Panel. Die Mail trägt ihn nie mit."
+  },
+  "admin.registrations.reason-label": {
+    "defaultMessage": "Grund (optional, für dich)"
+  },
+  "admin.registrations.reject": {
+    "defaultMessage": "Abweisen"
+  },
+  "admin.registrations.reject-body": {
+    "defaultMessage": "{username} bekommt eine kurze, neutrale Mail ohne Grund, und die Adresse ist dreißig Tage gesperrt."
+  },
+  "admin.registrations.same-address": {
+    "defaultMessage": "{count} von dieser Adresse"
+  },
+  "admin.registrations.state.unverified": {
+    "defaultMessage": "Adresse nicht bestätigt"
+  },
+  "admin.registrations.state.waiting": {
+    "defaultMessage": "Wartet auf dich"
+  },
+  "admin.registrations.subtitle": {
+    "defaultMessage": "Leute, die sich selbst registriert haben. Eine bestätigte Registrierung wartet hier, bis du sie zulässt; vorher gibt es kein Konto."
+  },
+  "admin.registrations.sweep-hint": {
+    "defaultMessage": "Unbestätigte Registrierungen verschwinden nach sieben Tagen, bestätigte nach dreißig — Name und Adresse sind dann wieder frei."
+  },
+  "admin.registrations.title": {
+    "defaultMessage": "Registrierungen"
+  },
+  "admin.registrations.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.registrations.waiting-count": {
+    "defaultMessage": "{count, plural, one {# Registrierung wartet} other {# Registrierungen warten}} auf dich."
+  },
+  "admin.settings.ceilings.description": {
+    "defaultMessage": "Grenzen, die das Panel für alle durchsetzt, Administratoren eingeschlossen."
+  },
+  "admin.settings.ceilings.title": {
+    "defaultMessage": "Obergrenzen"
+  },
+  "admin.settings.defaults.description": {
+    "defaultMessage": "Was ein neues Konto bekommt, wenn beim Anlegen keine Limits angegeben werden. Eine Änderung hier lässt bestehende Konten unangetastet."
+  },
+  "admin.settings.defaults.title": {
+    "defaultMessage": "Vorgaben für neue Konten"
+  },
+  "admin.settings.external.description": {
+    "defaultMessage": "Lässt das Panel Modrinth für Inhalte erreichen, und den Dienst für Absturzprotokolle."
+  },
+  "admin.settings.external.off": {
+    "defaultMessage": "Ist das aus, lassen sich Inhalte weder durchsuchen noch installieren, und Absturzberichte können nicht geteilt werden. Server laufen weiter."
+  },
+  "admin.settings.external.title": {
+    "defaultMessage": "Ausgehende Dienste"
+  },
+  "admin.settings.invalid": {
+    "defaultMessage": "Einige Werte liegen außerhalb des erlaubten Bereichs. Korrigiere die rot markierten Felder."
+  },
+  "admin.settings.load-failed": {
+    "defaultMessage": "Die Panel-Einstellungen konnten nicht geladen werden"
+  },
+  "admin.settings.max-backups": {
+    "defaultMessage": "Sicherungen pro Server"
+  },
+  "admin.settings.max-backups.hint": {
+    "defaultMessage": "Ist die Zahl erreicht, wird eine neue Sicherung abgelehnt, bis eine gelöscht wird."
+  },
+  "admin.settings.max-operations": {
+    "defaultMessage": "Vorgänge gleichzeitig"
+  },
+  "admin.settings.max-operations.hint": {
+    "defaultMessage": "Installationen, Sicherungen und Entpackvorgänge reihen sich hinter dieser Zahl ein."
+  },
+  "admin.settings.max-upload": {
+    "defaultMessage": "Höchstgröße beim Hochladen"
+  },
+  "admin.settings.max-upload.hint": {
+    "defaultMessage": "Gilt für das Schreiben von Dateien wie für das Hochladen von Inhalten. Zurzeit {size}."
+  },
+  "admin.settings.network.description": {
+    "defaultMessage": "Die Adresse, zu der Spieler sich verbinden, und die Ports, die Server bekommen dürfen."
+  },
+  "admin.settings.network.title": {
+    "defaultMessage": "Netzwerk"
+  },
+  "admin.settings.port-count": {
+    "defaultMessage": "{count} Port(s)"
+  },
+  "admin.settings.port-from": {
+    "defaultMessage": "Von"
+  },
+  "admin.settings.port-pool": {
+    "defaultMessage": "Portbereich"
+  },
+  "admin.settings.port-pool.description": {
+    "defaultMessage": "Jeder Serverport wird aus diesem Bereich vergeben."
+  },
+  "admin.settings.port-pool.invalid": {
+    "defaultMessage": "Der Bereich muss aufwärts laufen und zwischen 1024 und 65535 bleiben. Ein Bereich, der einen bereits vergebenen Port auslässt, wird beim Speichern abgelehnt."
+  },
+  "admin.settings.port-to": {
+    "defaultMessage": "Bis"
+  },
+  "admin.settings.public-address": {
+    "defaultMessage": "Öffentliche Adresse"
+  },
+  "admin.settings.public-address.empty": {
+    "defaultMessage": "Es ist keine Adresse gesetzt, also hat die Netzwerkseite neben dem Port nichts zu zeigen."
+  },
+  "admin.settings.public-address.hint": {
+    "defaultMessage": "Wird neben jedem Serverport angezeigt. Ein Name ist erlaubt. Das Panel rät sie nicht: Hinter NAT oder einem Reverse-Proxy wäre jede Vermutung falsch."
+  },
+  "admin.settings.public-address.placeholder": {
+    "defaultMessage": "play.example.com"
+  },
+  "admin.settings.registration.approval-description": {
+    "defaultMessage": "Eine bestätigte Registrierung wartet in einer Liste, bis du Ja sagst. Ohne das funktioniert das Konto in dem Moment, in dem die Adresse bestätigt ist."
+  },
+  "admin.settings.registration.approval-title": {
+    "defaultMessage": "Ich lasse jedes neue Konto selbst zu"
+  },
+  "admin.settings.registration.description": {
+    "defaultMessage": "Lass Leute ihr Konto selbst anlegen, statt jedes einzelne einzutippen."
+  },
+  "admin.settings.registration.mail-missing-body": {
+    "defaultMessage": "Eine Registrierung braucht eine Bestätigungsmail, also bleibt das Formular zu, bis das Versenden funktioniert — dieser Schalter allein bewirkt nichts."
+  },
+  "admin.settings.registration.mail-missing-link": {
+    "defaultMessage": "Mail einrichten"
+  },
+  "admin.settings.registration.mail-missing-title": {
+    "defaultMessage": "Keine Mail, keine Registrierung"
+  },
+  "admin.settings.registration.queue-hint": {
+    "defaultMessage": "Wartende Registrierungen stehen unter"
+  },
+  "admin.settings.registration.queue-link": {
+    "defaultMessage": "Registrierungen"
+  },
+  "admin.settings.registration.title": {
+    "defaultMessage": "Registrierung"
+  },
+  "admin.settings.registration.without-approval": {
+    "defaultMessage": "Jeder mit einer E-Mail-Adresse bekommt dann ein Konto und die Standardlimits, ohne dass du es vorher siehst."
+  },
+  "admin.settings.seconds": {
+    "defaultMessage": "Sekunden"
+  },
+  "admin.settings.stop-grace": {
+    "defaultMessage": "Schonfrist beim Stoppen"
+  },
+  "admin.settings.stop-grace.hint": {
+    "defaultMessage": "Wie lange ein Server zum Herunterfahren brauchen darf, bevor er abgeschossen wird."
+  },
+  "admin.settings.subtitle": {
+    "defaultMessage": "Die Regeln, die für das ganze Panel gelten, nicht für einen einzelnen Server."
+  },
+  "admin.settings.title": {
+    "defaultMessage": "Panel-Einstellungen"
+  },
+  "admin.settings.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.users.admin-has-no-limits": {
+    "defaultMessage": "Ein Administrator hat keine Limits: keine Obergrenze für Arbeitsspeicher, keine Prozessorgrenze, keine Prozesszahl und kein Kontingent an Speicherplatz. Hier gibt es nichts einzustellen."
+  },
+  "admin.users.column.actions": {
+    "defaultMessage": "Aktionen"
+  },
+  "admin.users.column.memory": {
+    "defaultMessage": "Vergebener Arbeitsspeicher"
+  },
+  "admin.users.column.role": {
+    "defaultMessage": "Rolle"
+  },
+  "admin.users.column.servers": {
+    "defaultMessage": "Server"
+  },
+  "admin.users.column.system": {
+    "defaultMessage": "Systemkonto"
+  },
+  "admin.users.column.usage": {
+    "defaultMessage": "In Benutzung"
+  },
+  "admin.users.column.user": {
+    "defaultMessage": "Nutzer"
+  },
+  "admin.users.count": {
+    "defaultMessage": "Konten: {count}"
+  },
+  "admin.users.cpu-and-pids": {
+    "defaultMessage": "{used} von {limit} Kernen ({mode}) · {pids} von {pidsLimit} Prozessen"
+  },
+  "admin.users.cpu-and-pids-no-limit": {
+    "defaultMessage": "{used} Kerne · {pids} Prozesse · keine Limits"
+  },
+  "admin.users.create": {
+    "defaultMessage": "Nutzer anlegen"
+  },
+  "admin.users.created-at": {
+    "defaultMessage": "Angelegt {time}"
+  },
+  "admin.users.default-limits.description": {
+    "defaultMessage": "Schalte das aus, um Arbeitsspeicher, Prozessor und Prozesse für dieses Konto zu setzen."
+  },
+  "admin.users.default-limits.title": {
+    "defaultMessage": "Die Vorgaben des Panels verwenden"
+  },
+  "admin.users.delete": {
+    "defaultMessage": "Nutzer löschen"
+  },
+  "admin.users.delete.choice-delete": {
+    "defaultMessage": "Löschen, mit ihren Dateien und Sicherungen"
+  },
+  "admin.users.delete.choice-description": {
+    "defaultMessage": "Entweder sie ziehen zu einem anderen Konto um, oder sie gehen mit dem Konto."
+  },
+  "admin.users.delete.choice-title": {
+    "defaultMessage": "Was mit diesen Servern geschieht"
+  },
+  "admin.users.delete.choice-transfer": {
+    "defaultMessage": "Auf ein anderes Konto übertragen"
+  },
+  "admin.users.delete.intro": {
+    "defaultMessage": "{username} und das zugehörige Systemkonto werden entfernt. Das lässt sich nicht rückgängig machen."
+  },
+  "admin.users.delete.no-transfer-target": {
+    "defaultMessage": "Es gibt kein anderes Konto, auf das übertragen werden könnte."
+  },
+  "admin.users.delete.owned": {
+    "defaultMessage": "Server dieses Kontos"
+  },
+  "admin.users.delete.running-body": {
+    "defaultMessage": "Stoppe zuerst jeden Server dieses Kontos. Das Panel schießt sie nicht für dich ab."
+  },
+  "admin.users.delete.running-header": {
+    "defaultMessage": "Ein Server dieses Kontos läuft"
+  },
+  "admin.users.delete.transfer-hint": {
+    "defaultMessage": "Gerät der neue Besitzer dadurch über sein Limit, findet die Übertragung trotzdem statt; er gilt dann als über dem Limit."
+  },
+  "admin.users.delete.transfer-placeholder": {
+    "defaultMessage": "Ein Konto auswählen"
+  },
+  "admin.users.delete.transfer-target": {
+    "defaultMessage": "Neuer Besitzer"
+  },
+  "admin.users.delete.type-to-confirm": {
+    "defaultMessage": "Tippe zur Bestätigung {username}"
+  },
+  "admin.users.disk-no-limit": {
+    "defaultMessage": "{used} an Speicherplatz, kein Limit"
+  },
+  "admin.users.disk-of": {
+    "defaultMessage": "{used} von {total} MiB Speicherplatz"
+  },
+  "admin.users.edit": {
+    "defaultMessage": "Konto bearbeiten"
+  },
+  "admin.users.edit-limits": {
+    "defaultMessage": "Limits"
+  },
+  "admin.users.email": {
+    "defaultMessage": "E-Mail-Adresse (optional)"
+  },
+  "admin.users.email-hint": {
+    "defaultMessage": "Der einzige Weg, auf dem dieses Konto ein vergessenes Passwort selbst wiederherstellen kann. Es geht keine Bestätigungsmail raus — eine Adresse, die ein Administrator eintippt, gilt als brauchbar."
+  },
+  "admin.users.email-remove-warning": {
+    "defaultMessage": "Speicherst du jetzt, nimmst du die Adresse vom Konto. Es hat dann keinen Weg zurück über Mail: Ein neues Passwort, einmal angezeigt, ist alles, was ihm bleibt."
+  },
+  "admin.users.empty": {
+    "defaultMessage": "Noch keine Konten"
+  },
+  "admin.users.empty-hint": {
+    "defaultMessage": "Lege das erste Konto an, um einen Teil dieses Rechners zu vergeben."
+  },
+  "admin.users.error.email-taken": {
+    "defaultMessage": "Diese Adresse liegt schon auf einem anderen Konto oder auf einer offenen Registrierung. Eine offene Registrierung ist jemand, der auf eine Entscheidung wartet — lass sie unter Administration → Registrierungen zu oder weise sie ab."
+  },
+  "admin.users.error.invalid-email": {
+    "defaultMessage": "Das sieht nicht nach einer E-Mail-Adresse aus."
+  },
+  "admin.users.host.cpu": {
+    "defaultMessage": "Vergebene Kerne"
+  },
+  "admin.users.host.cpu-all-capped": {
+    "defaultMessage": "Jedes Konto hat eine harte Grenze, diese Summe ist also eine echte Obergrenze."
+  },
+  "admin.users.host.cpu-mixed": {
+    "defaultMessage": "Enthält auch Konten mit Anteil ({count}), die keine Obergrenze haben — die Summe ist nur ein Anhaltspunkt."
+  },
+  "admin.users.host.cpu-used": {
+    "defaultMessage": "{used} Kerne in Benutzung"
+  },
+  "admin.users.host.description": {
+    "defaultMessage": "Was der Rechner hat, und wie viel davon schon vergeben ist."
+  },
+  "admin.users.host.measured": {
+    "defaultMessage": "Gemessen um {time}"
+  },
+  "admin.users.host.memory": {
+    "defaultMessage": "Vergebener Arbeitsspeicher"
+  },
+  "admin.users.host.memory-used": {
+    "defaultMessage": "{used} von {total} in Benutzung"
+  },
+  "admin.users.host.processes": {
+    "defaultMessage": "Laufende Prozesse"
+  },
+  "admin.users.host.processes-hint": {
+    "defaultMessage": "Über alle Konten hinweg."
+  },
+  "admin.users.host.title": {
+    "defaultMessage": "Dieser Rechner"
+  },
+  "admin.users.host.users": {
+    "defaultMessage": "Konten"
+  },
+  "admin.users.in-use": {
+    "defaultMessage": "{used} Arbeitsspeicher"
+  },
+  "admin.users.last-login": {
+    "defaultMessage": "Zuletzt angemeldet {time}"
+  },
+  "admin.users.limits.header": {
+    "defaultMessage": "Limits für {username}"
+  },
+  "admin.users.load-failed": {
+    "defaultMessage": "Konnte nicht geladen werden"
+  },
+  "admin.users.mib-no-limit": {
+    "defaultMessage": "{value} MiB, kein Limit"
+  },
+  "admin.users.must-change.description": {
+    "defaultMessage": "Das Konto kommt nirgendwo anders hin, bis das Passwort geändert ist."
+  },
+  "admin.users.must-change.title": {
+    "defaultMessage": "Passwort bei der nächsten Anmeldung ändern"
+  },
+  "admin.users.never": {
+    "defaultMessage": "nie"
+  },
+  "admin.users.no-matches": {
+    "defaultMessage": "Kein Konto passt"
+  },
+  "admin.users.no-matches-hint": {
+    "defaultMessage": "Versuche einen anderen Nutzernamen."
+  },
+  "admin.users.of-cores": {
+    "defaultMessage": "{value} von {total} Kernen"
+  },
+  "admin.users.of-mib": {
+    "defaultMessage": "{value} von {total} MiB"
+  },
+  "admin.users.over-limit": {
+    "defaultMessage": "Über dem Limit"
+  },
+  "admin.users.over-limit.hint": {
+    "defaultMessage": "An Server ist mehr Arbeitsspeicher vergeben, als das Limit erlaubt. Nichts wird abgeschossen, aber dieses Konto kann keinen Server anlegen oder starten, bis ein Server gelöscht oder verkleinert wird."
+  },
+  "admin.users.overbooked.body": {
+    "defaultMessage": "{allocated} MiB sind Konten zugesagt, vergeben lassen sich aber nur {assignable} MiB. Das ist erlaubt — nichts wird abgelehnt —, aber wenn alle ihren Anteil gleichzeitig nutzen, kommt der Rechner nicht hinterher."
+  },
+  "admin.users.overbooked.header": {
+    "defaultMessage": "Dieser Rechner ist überbucht"
+  },
+  "admin.users.password-generated": {
+    "defaultMessage": "Für das Konto wird ein Passwort erzeugt und direkt nach dem Anlegen einmal angezeigt."
+  },
+  "admin.users.password.done": {
+    "defaultMessage": "Ich habe es kopiert"
+  },
+  "admin.users.password.header": {
+    "defaultMessage": "Das neue Passwort"
+  },
+  "admin.users.password.once": {
+    "defaultMessage": "Das ist das einzige Mal, dass dieses Passwort angezeigt wird. Kopiere es und gib es jetzt weiter — das Panel kann es kein zweites Mal zeigen."
+  },
+  "admin.users.reset-password.action": {
+    "defaultMessage": "Neues Passwort erzeugen"
+  },
+  "admin.users.reset-password.change-own": {
+    "defaultMessage": "Eigenes Passwort ändern"
+  },
+  "admin.users.reset-password.description": {
+    "defaultMessage": "Entweder ein Link per Mail, nach dem niemand außer dem Besitzer das Passwort kennt — oder ein neues Passwort, das hier einmal angezeigt wird und sofort jede Sitzung des Kontos beendet."
+  },
+  "admin.users.reset-password.self": {
+    "defaultMessage": "Ein Passwort zu setzen beendet jede Sitzung des Kontos — bei deinem eigenen Konto auch diese hier, und das neue Passwort wäre weg, bevor du es lesen könntest."
+  },
+  "admin.users.reset-password.title": {
+    "defaultMessage": "Passwort"
+  },
+  "admin.users.role": {
+    "defaultMessage": "Rolle"
+  },
+  "admin.users.role.admin": {
+    "defaultMessage": "Administrator"
+  },
+  "admin.users.role.user": {
+    "defaultMessage": "Nutzer"
+  },
+  "admin.users.row-actions": {
+    "defaultMessage": "Aktionen für {username}"
+  },
+  "admin.users.running": {
+    "defaultMessage": "{count} laufend"
+  },
+  "admin.users.running-now": {
+    "defaultMessage": "läuft"
+  },
+  "admin.users.save-and-remove-email": {
+    "defaultMessage": "Speichern und Adresse entfernen"
+  },
+  "admin.users.search": {
+    "defaultMessage": "Nach Nutzernamen suchen …"
+  },
+  "admin.users.send-link.action": {
+    "defaultMessage": "Link zum Zurücksetzen senden"
+  },
+  "admin.users.send-link.error.mail-not-configured": {
+    "defaultMessage": "In diesem Panel ist Mail nicht eingerichtet. Trag unter Administration → Mail einen Schlüssel ein, oder erzeuge hier ein Passwort."
+  },
+  "admin.users.send-link.error.no-email-address": {
+    "defaultMessage": "Auf diesem Konto liegt keine Adresse, also konnte nichts gesendet werden."
+  },
+  "admin.users.send-link.error.user-not-found": {
+    "defaultMessage": "Dieses Konto ist weg — jemand hat es inzwischen entfernt."
+  },
+  "admin.users.send-link.goes-to": {
+    "defaultMessage": "Ein Link geht an {email}. Er funktioniert einmal und {minutes} Minuten lang, und keine Sitzung endet, bis ein neues Passwort gesetzt ist."
+  },
+  "admin.users.send-link.no-address": {
+    "defaultMessage": "Auf diesem Konto liegt keine Adresse, also kann kein Link irgendwohin gehen — ein erzeugtes Passwort ist der einzige Weg dafür."
+  },
+  "admin.users.send-link.no-link-base": {
+    "defaultMessage": "Mail funktioniert, aber das Panel kennt seine eigene Adresse nicht, also lässt sich kein Link bauen."
+  },
+  "admin.users.send-link.no-mail": {
+    "defaultMessage": "Dieses Panel kann noch keine Mail verschicken, also kann kein Link rausgehen."
+  },
+  "admin.users.send-link.sent": {
+    "defaultMessage": "Ein Link ist unterwegs an {email}. Ältere Links dieses Kontos funktionieren nicht mehr."
+  },
+  "admin.users.send-link.set-up-mail": {
+    "defaultMessage": "Mail einrichten"
+  },
+  "admin.users.send-link.unsaved-address": {
+    "defaultMessage": "Speichere zuerst: Der Link geht an die Adresse auf dem Konto, nicht an das, was oben eingetippt ist."
+  },
+  "admin.users.subtitle": {
+    "defaultMessage": "Jedes Konto auf diesem Rechner, was es nutzen darf und was es nutzt."
+  },
+  "admin.users.system.error": {
+    "defaultMessage": "Fehler"
+  },
+  "admin.users.system.not-ready-hint": {
+    "defaultMessage": "Ohne Systemkonto kann sich dieser Nutzer anmelden, aber keine Server anlegen."
+  },
+  "admin.users.system.provisioning": {
+    "defaultMessage": "Wird angelegt"
+  },
+  "admin.users.system.ready": {
+    "defaultMessage": "Bereit"
+  },
+  "admin.users.system.retry": {
+    "defaultMessage": "Systemkonto erneut anlegen"
+  },
+  "admin.users.title": {
+    "defaultMessage": "Nutzer"
+  },
+  "admin.users.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgelaufen. Versuche es erneut."
+  },
+  "admin.users.username-rule": {
+    "defaultMessage": "3 bis 39 Zeichen, Kleinbuchstaben, Ziffern, Bindestrich und Unterstrich."
+  },
+  "admin.users.you": {
+    "defaultMessage": "Das bist du"
+  },
+  "auth.change-password.current": {
+    "defaultMessage": "Aktuelles Passwort"
+  },
+  "auth.change-password.error.network-unreachable": {
+    "defaultMessage": "Das Panel ist nicht erreichbar."
+  },
+  "auth.change-password.error.weak-password": {
+    "defaultMessage": "Das neue Passwort ist zu kurz."
+  },
+  "auth.change-password.error.wrong-password": {
+    "defaultMessage": "Das aktuelle Passwort stimmt nicht."
+  },
+  "auth.change-password.failed": {
+    "defaultMessage": "Das Passwort konnte nicht geändert werden. Bitte versuche es erneut."
+  },
+  "auth.change-password.length-hint": {
+    "defaultMessage": "Mindestens {length} Zeichen."
+  },
+  "auth.change-password.mismatch": {
+    "defaultMessage": "Die beiden neuen Passwörter stimmen nicht überein."
+  },
+  "auth.change-password.new": {
+    "defaultMessage": "Neues Passwort"
+  },
+  "auth.change-password.required": {
+    "defaultMessage": "Du brauchst ein neues Passwort, bevor du das Panel nutzen kannst."
+  },
+  "auth.change-password.subtitle": {
+    "defaultMessage": "Alle deine anderen Sitzungen werden beendet."
+  },
+  "auth.change-password.title": {
+    "defaultMessage": "Passwort ändern"
+  },
+  "auth.forgot-password.again": {
+    "defaultMessage": "Erneut senden"
+  },
+  "auth.forgot-password.again-in": {
+    "defaultMessage": "In {seconds} s erneut senden"
+  },
+  "auth.forgot-password.back": {
+    "defaultMessage": "Zurück zur Anmeldung"
+  },
+  "auth.forgot-password.email": {
+    "defaultMessage": "E-Mail-Adresse"
+  },
+  "auth.forgot-password.error.network-unreachable": {
+    "defaultMessage": "Das Panel ist nicht erreichbar."
+  },
+  "auth.forgot-password.error.too-many-attempts": {
+    "defaultMessage": "Zu viele Versuche. Warte ein paar Minuten, bevor du es erneut versuchst."
+  },
+  "auth.forgot-password.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Bitte versuche es erneut."
+  },
+  "auth.forgot-password.loading": {
+    "defaultMessage": "Einen Moment…"
+  },
+  "auth.forgot-password.not-set-up": {
+    "defaultMessage": "Auf diesem Panel ist keine Passwort-Wiederherstellung eingerichtet. Wende dich an den Administrator, damit er dich wieder hereinlässt."
+  },
+  "auth.forgot-password.on-its-way": {
+    "defaultMessage": "Wenn es zu dieser Adresse ein Konto gibt, ist eine Mail unterwegs."
+  },
+  "auth.forgot-password.submit": {
+    "defaultMessage": "Link senden"
+  },
+  "auth.forgot-password.subtitle": {
+    "defaultMessage": "Nenne uns die Adresse deines Kontos, dann senden wir dir einen Link."
+  },
+  "auth.forgot-password.title": {
+    "defaultMessage": "Passwort vergessen?"
+  },
+  "auth.forgot-password.valid-for": {
+    "defaultMessage": "Der Link gilt einmal und {minutes} Minuten lang. Manchmal landet er im Spam-Ordner."
+  },
+  "auth.login.create-one": {
+    "defaultMessage": "Jetzt registrieren"
+  },
+  "auth.login.email-unverified": {
+    "defaultMessage": "Sieh in deinem Postfach nach: Deine Adresse ist noch nicht bestätigt, deshalb lässt sich das Konto nicht nutzen."
+  },
+  "auth.login.error.invalid-credentials": {
+    "defaultMessage": "Benutzername oder Passwort stimmt nicht."
+  },
+  "auth.login.error.network-unreachable": {
+    "defaultMessage": "Das Panel ist nicht erreichbar."
+  },
+  "auth.login.error.rate-limited": {
+    "defaultMessage": "Zu viele Anfragen. Warte einen Moment, bevor du es erneut versuchst."
+  },
+  "auth.login.error.too-many-attempts": {
+    "defaultMessage": "Zu viele Versuche. Warte ein paar Minuten, bevor du es erneut versuchst."
+  },
+  "auth.login.failed": {
+    "defaultMessage": "Die Anmeldung ist fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "auth.login.forgot": {
+    "defaultMessage": "Passwort vergessen?"
+  },
+  "auth.login.mail-sent": {
+    "defaultMessage": "Wenn zu dieser Adresse eine Registrierung offen ist, ist ein neuer Link unterwegs. Sieh in deinem Postfach nach."
+  },
+  "auth.login.no-account": {
+    "defaultMessage": "Noch kein Konto?"
+  },
+  "auth.login.password-set": {
+    "defaultMessage": "Dein neues Passwort ist gespeichert. Melde dich damit an."
+  },
+  "auth.login.resend": {
+    "defaultMessage": "Bestätigungsmail erneut senden"
+  },
+  "auth.login.resend-email": {
+    "defaultMessage": "Die Adresse, mit der du dich registriert hast"
+  },
+  "auth.login.subtitle": {
+    "defaultMessage": "Melde dich mit deinem Panel-Konto an."
+  },
+  "auth.login.title": {
+    "defaultMessage": "Anmelden"
+  },
+  "auth.new-password.ask-again": {
+    "defaultMessage": "Neuen Link anfordern"
+  },
+  "auth.new-password.checking": {
+    "defaultMessage": "Der Link wird geprüft…"
+  },
+  "auth.new-password.dead": {
+    "defaultMessage": "Dieser Link gilt nicht mehr — er wurde schon benutzt oder ist abgelaufen. Fordere einen neuen an."
+  },
+  "auth.new-password.error.invalid-token": {
+    "defaultMessage": "Dieser Link gilt nicht mehr. Fordere einen neuen an."
+  },
+  "auth.new-password.error.too-many-attempts": {
+    "defaultMessage": "Zu viele Versuche. Warte ein paar Minuten, bevor du es erneut versuchst."
+  },
+  "auth.new-password.error.weak-password": {
+    "defaultMessage": "Dieses Passwort ist zu kurz."
+  },
+  "auth.new-password.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Bitte versuche es erneut."
+  },
+  "auth.new-password.for-whom": {
+    "defaultMessage": "Für {username}."
+  },
+  "auth.new-password.length-hint": {
+    "defaultMessage": "Mindestens {length} Zeichen."
+  },
+  "auth.new-password.new-password": {
+    "defaultMessage": "Neues Passwort"
+  },
+  "auth.new-password.sign-in-afterwards": {
+    "defaultMessage": "Danach meldest du dich mit dem neuen Passwort an. Alle offenen Sitzungen werden beendet."
+  },
+  "auth.new-password.submit": {
+    "defaultMessage": "Passwort setzen"
+  },
+  "auth.new-password.title": {
+    "defaultMessage": "Neues Passwort setzen"
+  },
+  "auth.new-password.unreachable": {
+    "defaultMessage": "Das Panel ist nicht erreichbar. Versuche den Link gleich erneut."
+  },
+  "auth.register.approval-follows": {
+    "defaultMessage": "Nachdem du deine Adresse bestätigt hast, muss ein Administrator das Konto freigeben. Eine Mail bekommst du so oder so."
+  },
+  "auth.register.check-your-inbox": {
+    "defaultMessage": "Sieh in deinem Postfach nach: Wir haben dir einen Link geschickt, der deine Adresse bestätigt."
+  },
+  "auth.register.closed": {
+    "defaultMessage": "Dieses Panel nimmt gerade keine Registrierungen an. Frage den Administrator nach einem Konto."
+  },
+  "auth.register.email": {
+    "defaultMessage": "E-Mail-Adresse"
+  },
+  "auth.register.email-hint": {
+    "defaultMessage": "Du brauchst sie, um das Konto zu bestätigen und ein vergessenes Passwort zurückzusetzen."
+  },
+  "auth.register.error.disabled": {
+    "defaultMessage": "Dieses Panel nimmt gerade keine Registrierungen an."
+  },
+  "auth.register.error.invalid-email": {
+    "defaultMessage": "Das sieht nicht nach einer E-Mail-Adresse aus."
+  },
+  "auth.register.error.invalid-request": {
+    "defaultMessage": "Prüfe den Namen: 3 bis 39 Zeichen, Kleinbuchstaben, Ziffern, - und _"
+  },
+  "auth.register.error.network-unreachable": {
+    "defaultMessage": "Das Panel ist nicht erreichbar."
+  },
+  "auth.register.error.rate-limited": {
+    "defaultMessage": "Zu viele Versuche von hier. Versuche es später erneut."
+  },
+  "auth.register.error.username-taken": {
+    "defaultMessage": "Dieser Name ist vergeben. Wähle einen anderen."
+  },
+  "auth.register.error.weak-password": {
+    "defaultMessage": "Dieses Passwort ist zu kurz."
+  },
+  "auth.register.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Bitte versuche es erneut."
+  },
+  "auth.register.have-an-account": {
+    "defaultMessage": "Du hast schon eins?"
+  },
+  "auth.register.loading": {
+    "defaultMessage": "Einen Moment…"
+  },
+  "auth.register.name-hint": {
+    "defaultMessage": "3 bis 39 Zeichen: Kleinbuchstaben, Ziffern, - und _"
+  },
+  "auth.register.password-hint": {
+    "defaultMessage": "Mindestens {length} Zeichen."
+  },
+  "auth.register.resend": {
+    "defaultMessage": "Mail erneut senden"
+  },
+  "auth.register.resend-in": {
+    "defaultMessage": "In {seconds} s erneut senden"
+  },
+  "auth.register.spam-hint": {
+    "defaultMessage": "Das kann eine Minute dauern, und manchmal landet sie im Spam-Ordner."
+  },
+  "auth.register.submit": {
+    "defaultMessage": "Konto erstellen"
+  },
+  "auth.register.subtitle": {
+    "defaultMessage": "Wähle einen Namen, bestätige deine Adresse, und das Panel gehört dir."
+  },
+  "auth.register.title": {
+    "defaultMessage": "Konto erstellen"
+  },
+  "auth.registration-pending.body": {
+    "defaultMessage": "Deine Adresse ist bestätigt. Auf diesem Panel sieht sich ein Administrator jedes neue Konto an, bevor es funktioniert."
+  },
+  "auth.registration-pending.mail": {
+    "defaultMessage": "Sobald das passiert ist, bekommst du eine Mail — hier ist nichts weiter zu tun."
+  },
+  "auth.registration-pending.title": {
+    "defaultMessage": "Warten auf die Freigabe"
+  },
+  "auth.verify-email.checking": {
+    "defaultMessage": "Einen Moment…"
+  },
+  "auth.verify-email.closed": {
+    "defaultMessage": "Dieses Panel nimmt gerade keine Registrierungen an."
+  },
+  "auth.verify-email.done": {
+    "defaultMessage": "Dein Konto ist fertig. Melde dich an, und das Panel gehört dir."
+  },
+  "auth.verify-email.email": {
+    "defaultMessage": "Deine E-Mail-Adresse"
+  },
+  "auth.verify-email.expired": {
+    "defaultMessage": "Dieser Link ist abgelaufen. Fordere einen neuen an und sieh noch einmal in deinem Postfach nach."
+  },
+  "auth.verify-email.failed": {
+    "defaultMessage": "Das hat nicht geklappt. Bitte versuche den Link erneut."
+  },
+  "auth.verify-email.missing": {
+    "defaultMessage": "Diese Seite braucht den Link aus der Mail, die wir dir geschickt haben."
+  },
+  "auth.verify-email.new-mail": {
+    "defaultMessage": "Neuen Link senden"
+  },
+  "auth.verify-email.new-mail-sent": {
+    "defaultMessage": "Wenn zu dieser Adresse eine Registrierung offen ist, ist ein neuer Link unterwegs. Sieh in deinem Postfach nach."
+  },
+  "auth.verify-email.title": {
+    "defaultMessage": "Adresse bestätigen"
+  },
+  "auth.verify-email.unknown": {
+    "defaultMessage": "Dieser Link ist ungültig. Wenn du schon bestätigt hast, melde dich einfach an."
+  },
+  "craftpanel.access.action-failed": {
+    "defaultMessage": "Die Änderung wurde abgelehnt"
+  },
+  "craftpanel.access.add-user": {
+    "defaultMessage": "Nutzer hinzufügen"
+  },
+  "craftpanel.access.audit-failed": {
+    "defaultMessage": "Das Aktivitätsprotokoll konnte nicht geladen werden"
+  },
+  "craftpanel.access.audit-help": {
+    "defaultMessage": "Alles, was auf diesem Server passiert ist, das Neueste zuerst."
+  },
+  "craftpanel.access.audit-title": {
+    "defaultMessage": "Aktivitätsprotokoll"
+  },
+  "craftpanel.access.members-failed": {
+    "defaultMessage": "Die Mitglieder konnten nicht geladen werden"
+  },
+  "craftpanel.access.members-help": {
+    "defaultMessage": "Wer diesen Server sehen und ändern darf. Eine Einladung muss erst angenommen werden."
+  },
+  "craftpanel.access.members-title": {
+    "defaultMessage": "Zugriff"
+  },
+  "craftpanel.access.resend-cooldown": {
+    "defaultMessage": "Die Einladung wurde gerade erst verschickt, versuch es in {seconds} Sekunden noch einmal."
+  },
+  "craftpanel.access.role-editor": {
+    "defaultMessage": "Bearbeiter"
+  },
+  "craftpanel.access.role-editor-description": {
+    "defaultMessage": "Inhalte, Dateien, Sicherungen und Einstellungen — alles außer den Server zu löschen."
+  },
+  "craftpanel.access.role-owner": {
+    "defaultMessage": "Besitzer"
+  },
+  "craftpanel.access.role-viewer": {
+    "defaultMessage": "Begrenzt"
+  },
+  "craftpanel.access.role-viewer-description": {
+    "defaultMessage": "Der Konsole zusehen und den Server starten oder stoppen. Keine Änderungen."
+  },
+  "craftpanel.backups.action-failed": {
+    "defaultMessage": "Die Aktion wurde abgelehnt"
+  },
+  "craftpanel.backups.at-hour": {
+    "defaultMessage": "Um (Stunde UTC)"
+  },
+  "craftpanel.backups.busy": {
+    "defaultMessage": "Es läuft bereits eine Sicherung."
+  },
+  "craftpanel.backups.clear-selection": {
+    "defaultMessage": "Auswahl aufheben"
+  },
+  "craftpanel.backups.create": {
+    "defaultMessage": "Sicherung erstellen"
+  },
+  "craftpanel.backups.creating": {
+    "defaultMessage": "Sicherung wird erstellt..."
+  },
+  "craftpanel.backups.deleted": {
+    "defaultMessage": "Sicherung gelöscht"
+  },
+  "craftpanel.backups.drive-broken": {
+    "defaultMessage": "Von diesem Server lassen sich gerade keine Sicherungen erstellen"
+  },
+  "craftpanel.backups.drive-broken.not-configured": {
+    "defaultMessage": "Dieser Server sichert in ein Google Drive, aber der Betreiber hat dem Panel die Google-Zugangsdaten entzogen. Bis sie wieder eingetragen sind, lässt sich nichts hochladen und nichts zurückholen."
+  },
+  "craftpanel.backups.drive-broken.not-connected": {
+    "defaultMessage": "Dieser Server sichert in das Google Drive seines Besitzers, und es ist kein Google-Konto verbunden. Der Besitzer kann auf seiner Kontoseite eines verbinden; bis dahin schlägt jede Sicherung dieses Servers fehl."
+  },
+  "craftpanel.backups.drive-broken.not-connected-owner": {
+    "defaultMessage": "Du musst ein Google-Konto verbinden, bevor dieser Server gesichert werden kann: seine Sicherungen gehen in dein Google Drive, und solange keines verbunden ist, schlägt jede Sicherung dieses Servers fehl."
+  },
+  "craftpanel.backups.drive-connect": {
+    "defaultMessage": "Google Drive verbinden"
+  },
+  "craftpanel.backups.drive-gone-hint": {
+    "defaultMessage": "Leg sie in deinem Drive zurück, um sie von hier wiederherzustellen."
+  },
+  "craftpanel.backups.empty-description": {
+    "defaultMessage": "Eine Sicherung enthält das ganze Serververzeichnis und lässt sich jederzeit wiederherstellen."
+  },
+  "craftpanel.backups.empty-heading": {
+    "defaultMessage": "Noch keine Sicherungen"
+  },
+  "craftpanel.backups.every": {
+    "defaultMessage": "Alle (Stunden)"
+  },
+  "craftpanel.backups.failed": {
+    "defaultMessage": "Der letzte Versuch ist fehlgeschlagen"
+  },
+  "craftpanel.backups.filter-all": {
+    "defaultMessage": "Alle"
+  },
+  "craftpanel.backups.filter-auto": {
+    "defaultMessage": "Automatisch"
+  },
+  "craftpanel.backups.filter-manual": {
+    "defaultMessage": "Manuell"
+  },
+  "craftpanel.backups.keep-last": {
+    "defaultMessage": "Letzte behalten"
+  },
+  "craftpanel.backups.load-failed": {
+    "defaultMessage": "Die Sicherungen konnten nicht geladen werden"
+  },
+  "craftpanel.backups.next-run": {
+    "defaultMessage": "Nächster Lauf {time}"
+  },
+  "craftpanel.backups.open-in-drive": {
+    "defaultMessage": "In Google Drive öffnen"
+  },
+  "craftpanel.backups.quota": {
+    "defaultMessage": "{used} von {total} belegt"
+  },
+  "craftpanel.backups.quota-full": {
+    "defaultMessage": "Keine Sicherungsplätze mehr frei."
+  },
+  "craftpanel.backups.restore-not-done": {
+    "defaultMessage": "Nur eine fertige Sicherung lässt sich wiederherstellen."
+  },
+  "craftpanel.backups.restore-running": {
+    "defaultMessage": "Warte, bis der laufende Sicherungsvorgang fertig ist."
+  },
+  "craftpanel.backups.restoring": {
+    "defaultMessage": "Sicherung wird wiederhergestellt..."
+  },
+  "craftpanel.backups.retry-impossible": {
+    "defaultMessage": "Ein neuer Versuch führt zu nichts, solange es kein Google Drive gibt, in das die Sicherung gehen kann."
+  },
+  "craftpanel.backups.schedule": {
+    "defaultMessage": "Sicherungszeitplan"
+  },
+  "craftpanel.backups.schedule-help": {
+    "defaultMessage": "Automatische Sicherungen laufen im Hintergrund und räumen hinter sich auf."
+  },
+  "craftpanel.backups.schedule-impossible": {
+    "defaultMessage": "Eine automatische Sicherung lässt sich nicht einschalten, solange dieser Server kein Google Drive hat, in das er sichern kann — sie würde jedes Mal fehlschlagen."
+  },
+  "craftpanel.backups.selected": {
+    "defaultMessage": "{count} ausgewählt"
+  },
+  "craftpanel.backups.state.in-drive": {
+    "defaultMessage": "In Google Drive"
+  },
+  "craftpanel.backups.state.missing": {
+    "defaultMessage": "Aus dem Drive verschwunden"
+  },
+  "craftpanel.backups.state.trashed": {
+    "defaultMessage": "Im Papierkorb des Drive"
+  },
+  "craftpanel.backups.state.unreachable": {
+    "defaultMessage": "Drive nicht verbunden"
+  },
+  "craftpanel.backups.target": {
+    "defaultMessage": "Wohin neue Sicherungen gehen"
+  },
+  "craftpanel.backups.target-switched": {
+    "defaultMessage": "Ziel geändert"
+  },
+  "craftpanel.backups.target.drive": {
+    "defaultMessage": "In das Google Drive des Besitzers dieses Servers."
+  },
+  "craftpanel.backups.target.local": {
+    "defaultMessage": "Auf diesen Rechner."
+  },
+  "craftpanel.backups.target.not-configured": {
+    "defaultMessage": "Der Betreiber hat Google Drive nicht eingerichtet."
+  },
+  "craftpanel.backups.target.not-connected": {
+    "defaultMessage": "Der Besitzer dieses Servers hat kein Google-Konto verbunden."
+  },
+  "craftpanel.backups.target.policy": {
+    "defaultMessage": "Das hat der Betreiber für das ganze Panel entschieden."
+  },
+  "craftpanel.backups.title": {
+    "defaultMessage": "Sicherungen"
+  },
+  "craftpanel.browse.back": {
+    "defaultMessage": "Zurück zu den Inhalten"
+  },
+  "craftpanel.browse.catalogue-failed-text": {
+    "defaultMessage": "Modrinth wird vom Panel abgerufen, nicht von deinem Browser — dieser Rechner hat es nicht erreicht."
+  },
+  "craftpanel.browse.catalogue-failed-title": {
+    "defaultMessage": "Der Katalog konnte nicht geöffnet werden"
+  },
+  "craftpanel.browse.install-failed": {
+    "defaultMessage": "Die Installation konnte nicht gestartet werden"
+  },
+  "craftpanel.browse.install-started": {
+    "defaultMessage": "{count, plural, one {# Projekt wird installiert} other {# Projekte werden installiert}}"
+  },
+  "craftpanel.browse.install-started-text": {
+    "defaultMessage": "Der Fortschritt wird über der Inhaltsseite angezeigt."
+  },
+  "craftpanel.browse.locked.game-version": {
+    "defaultMessage": "Die Spielversion kommt von diesem Server"
+  },
+  "craftpanel.browse.locked.loader": {
+    "defaultMessage": "Der Loader kommt von diesem Server"
+  },
+  "craftpanel.browse.locked.provided-by": {
+    "defaultMessage": "Von diesem Server vorgegeben"
+  },
+  "craftpanel.browse.locked.sync": {
+    "defaultMessage": "Wieder an den Server angleichen"
+  },
+  "craftpanel.browse.no-write-permission": {
+    "defaultMessage": "Du hast keine Berechtigung, Inhalte auf diesem Server zu installieren"
+  },
+  "craftpanel.browse.search-failed-title": {
+    "defaultMessage": "Die Suche ist fehlgeschlagen"
+  },
+  "craftpanel.browse.skip.already-installed": {
+    "defaultMessage": "bereits installiert"
+  },
+  "craftpanel.browse.skip.conflicting-dependency": {
+    "defaultMessage": "zwei Versionen auf einmal verlangt"
+  },
+  "craftpanel.browse.skip.duplicate-project": {
+    "defaultMessage": "zweimal ausgewählt"
+  },
+  "craftpanel.browse.skip.missing-version": {
+    "defaultMessage": "die angeforderte Version gibt es nicht mehr"
+  },
+  "craftpanel.browse.skip.no-compatible-version": {
+    "defaultMessage": "keine Version für diese Spielversion und diesen Loader"
+  },
+  "craftpanel.browse.skip.quilt-fabric-api": {
+    "defaultMessage": "Quilt bringt Fabric API selbst mit"
+  },
+  "craftpanel.browse.skipped-entry": {
+    "defaultMessage": "{name}: {reason}"
+  },
+  "craftpanel.browse.skipped-title": {
+    "defaultMessage": "Es konnte nicht alles installiert werden"
+  },
+  "craftpanel.content.change-failed": {
+    "defaultMessage": "Die Inhalte konnten nicht geändert werden"
+  },
+  "craftpanel.content.config-none": {
+    "defaultMessage": "Noch keine Konfiguration"
+  },
+  "craftpanel.content.config-none-tooltip": {
+    "defaultMessage": "Nach {path} wurde noch nichts geschrieben. Ein Plugin oder eine Mod legt die eigenen Dateien beim ersten Lauf des Servers an."
+  },
+  "craftpanel.content.config-own": {
+    "defaultMessage": "Konfiguration öffnen"
+  },
+  "craftpanel.content.config-shared": {
+    "defaultMessage": "Konfigurationsordner öffnen"
+  },
+  "craftpanel.content.config-shared-tooltip": {
+    "defaultMessage": "{name} hat keine eigene — das öffnet {path}"
+  },
+  "craftpanel.content.entry-gone": {
+    "defaultMessage": "Diesen Eintrag gibt es auf dem Server nicht mehr."
+  },
+  "craftpanel.content.load-failed": {
+    "defaultMessage": "Die Inhalte konnten nicht geladen werden"
+  },
+  "craftpanel.content.modpack-failed": {
+    "defaultMessage": "Das Modpack konnte nicht geändert werden"
+  },
+  "craftpanel.content.no-version-list": {
+    "defaultMessage": "Keine Versionen zur Auswahl"
+  },
+  "craftpanel.content.no-write-permission": {
+    "defaultMessage": "Du hast keine Berechtigung, die Inhalte dieses Servers zu ändern"
+  },
+  "craftpanel.content.partially-failed": {
+    "defaultMessage": "{count, number} von {total, number} Dateien konnten nicht geändert werden"
+  },
+  "craftpanel.content.restart-body": {
+    "defaultMessage": "Der Server läuft. Beim Installieren oder Aktualisieren werden die Dateien sofort ersetzt, der laufende Server behält aber die alten, bis du ihn neu startest."
+  },
+  "craftpanel.content.restart-header": {
+    "defaultMessage": "Updates brauchen einen Neustart"
+  },
+  "craftpanel.content.truncated-body": {
+    "defaultMessage": "Dieser Server hat mehr als {limit, number} Dateien. Filter, Zählungen und Sammelaktionen erfassen nur die hier aufgeführten."
+  },
+  "craftpanel.content.truncated-header": {
+    "defaultMessage": "Es werden nicht alle Inhalte angezeigt"
+  },
+  "craftpanel.content.update-failed": {
+    "defaultMessage": "Die Inhalte konnten nicht aktualisiert werden"
+  },
+  "craftpanel.content.update-warning": {
+    "defaultMessage": "Ein Update kann deine Welt beschädigen. Sieh dir das Änderungsprotokoll an und sichere vorher. Der Server läuft, die neue Version greift also erst nach einem Neustart."
+  },
+  "craftpanel.content.upload-failed": {
+    "defaultMessage": "Die Dateien konnten nicht hochgeladen werden"
+  },
+  "craftpanel.content.versions-failed": {
+    "defaultMessage": "Die Versionen konnten nicht von Modrinth geladen werden"
+  },
+  "craftpanel.content.without-project": {
+    "defaultMessage": "Diese Datei ist mit keinem Modrinth-Projekt verknüpft, darum gibt es für sie keine Versionsliste. Lade eine neuere Datei hoch, um sie zu ersetzen."
+  },
+  "craftpanel.files.cancel-failed": {
+    "defaultMessage": "Das Entpacken konnte nicht abgebrochen werden"
+  },
+  "craftpanel.files.open-failed": {
+    "defaultMessage": "{file} konnte nicht geöffnet werden"
+  },
+  "craftpanel.files.open-missing": {
+    "defaultMessage": "Auf diesem Server gibt es {file} noch nicht. Ein Server legt die Datei beim ersten Start an."
+  },
+  "craftpanel.files.upload-conflict": {
+    "defaultMessage": "{file} gibt es in diesem Ordner schon."
+  },
+  "craftpanel.files.upload-too-large": {
+    "defaultMessage": "{file} ist größer, als hochgeladen werden darf."
+  },
+  "craftpanel.installation.load-failed": {
+    "defaultMessage": "Die Installationsoptionen konnten nicht geladen werden"
+  },
+  "craftpanel.installation.loader-version": {
+    "defaultMessage": "{loader}-Version"
+  },
+  "craftpanel.installation.modpack": {
+    "defaultMessage": "Modpack"
+  },
+  "craftpanel.installation.modpack-failed": {
+    "defaultMessage": "Das Modpack konnte nicht geändert werden"
+  },
+  "craftpanel.installation.preview-failed": {
+    "defaultMessage": "Es konnte nicht geprüft werden, welche Inhalte die Änderung überstehen"
+  },
+  "craftpanel.installation.proxy-ignores-properties": {
+    "defaultMessage": "Ein Proxy liest server.properties nicht; diese Einstellungen werden ignoriert."
+  },
+  "craftpanel.installation.repair-failed": {
+    "defaultMessage": "Der Server konnte nicht repariert werden"
+  },
+  "craftpanel.installation.save-failed": {
+    "defaultMessage": "Die Installation konnte nicht geändert werden"
+  },
+  "craftpanel.installation.unknown-loader": {
+    "defaultMessage": "Der Loader-Katalog ist noch nicht geladen"
+  },
+  "craftpanel.installation.versions-failed": {
+    "defaultMessage": "Die Versionen konnten nicht von Modrinth geladen werden"
+  },
+  "craftpanel.playit.checked-at": {
+    "defaultMessage": "Zuletzt bestätigt {ago}"
+  },
+  "craftpanel.playit.failed": {
+    "defaultMessage": "Die Adresse konnte nicht eingerichtet werden"
+  },
+  "craftpanel.playit.give-back": {
+    "defaultMessage": "Adresse zurückgeben"
+  },
+  "craftpanel.playit.give-back-body": {
+    "defaultMessage": "Die Adresse funktioniert für niemanden mehr, der sie hat, und der Port geht an das playit.gg-Konto zurück. Der Server selbst wird nicht angerührt."
+  },
+  "craftpanel.playit.missing": {
+    "defaultMessage": "Die Adresse wurde bei playit.gg entfernt"
+  },
+  "craftpanel.playit.none": {
+    "defaultMessage": "Dieser Server hat keine Adresse, die von außen funktioniert. Freunde erreichen ihn nur aus diesem Netzwerk."
+  },
+  "craftpanel.playit.offline": {
+    "defaultMessage": "Die Adresse trägt nicht"
+  },
+  "craftpanel.playit.online-hint": {
+    "defaultMessage": "Das geben deine Freunde in ihrem Minecraft-Client ein."
+  },
+  "craftpanel.playit.others-hint": {
+    "defaultMessage": "Diese zeigen auf dasselbe Relay, aber Minecraft schickt die Adresse mit, die es bekommen hat, und playit leitet nur den eigenen Namen des Tunnels weiter — aus dem Spiel heraus verbinden sie also nicht."
+  },
+  "craftpanel.playit.others-summary": {
+    "defaultMessage": "{count, plural, one {Eine weitere Adresse} other {# weitere Adressen}} von playit"
+  },
+  "craftpanel.playit.owner-only-account": {
+    "defaultMessage": "Nur der Besitzer dieses Servers kann eine anfordern: sie öffnet den Server ins ganze Internet, und die Adresse wird über sein eigenes playit.gg-Konto vergeben."
+  },
+  "craftpanel.playit.pending": {
+    "defaultMessage": "Die Adresse wird bei playit.gg eingerichtet…"
+  },
+  "craftpanel.playit.recreate": {
+    "defaultMessage": "Neu einrichten"
+  },
+  "craftpanel.playit.request": {
+    "defaultMessage": "Öffentliche Adresse anfordern"
+  },
+  "craftpanel.playit.setup-button": {
+    "defaultMessage": "playit.gg einrichten"
+  },
+  "craftpanel.playit.setup-foreign": {
+    "defaultMessage": "Das Panel kann über playit.gg eine Adresse vergeben, die keine Portfreigabe braucht. Der Besitzer dieses Servers hat kein playit.gg-Konto verbunden."
+  },
+  "craftpanel.playit.setup-owner": {
+    "defaultMessage": "Das Panel kann über playit.gg eine Adresse vergeben, die keine Portfreigabe braucht. Verbinde einmal dein eigenes playit.gg-Konto — es ist kostenlos — und bis zu {limit} deiner Server bekommen je eine Adresse."
+  },
+  "craftpanel.playit.state-unknown": {
+    "defaultMessage": "playit.gg hat keinen Grund genannt."
+  },
+  "craftpanel.playit.title": {
+    "defaultMessage": "Öffentliche Adresse"
+  },
+  "craftpanel.playit.unknown-error": {
+    "defaultMessage": "Etwas ist schiefgegangen. Versuch es noch einmal."
+  },
+  "craftpanel.playit.unknown-host": {
+    "defaultMessage": "Wenn bei einem Freund „Unknown host“ steht, löst sein Internetanbieter den Namen nicht auf. Das behebt er auf seinem eigenen Rechner, indem er einen anderen DNS-Server nutzt — playit erklärt wie:"
+  },
+  "craftpanel.settings.advanced.command": {
+    "defaultMessage": "Startbefehl"
+  },
+  "craftpanel.settings.advanced.command-help": {
+    "defaultMessage": "Der Befehl, der beim Start deines Servers ausgeführt wird."
+  },
+  "craftpanel.settings.advanced.command-is-admins": {
+    "defaultMessage": "Der Startbefehl und seine Flags gehören dem Panel-Administrator. Ein Flag, das Java nicht kennt, und der Server startet nicht mehr, ohne dass die Konsole sagt warum — darum behält das Panel dieses Feld für sich und setzt den Arbeitsspeicher über den Regler oben."
+  },
+  "craftpanel.settings.advanced.default": {
+    "defaultMessage": "Standard"
+  },
+  "craftpanel.settings.advanced.java-automatic": {
+    "defaultMessage": "Automatisch"
+  },
+  "craftpanel.settings.advanced.java-installed": {
+    "defaultMessage": "Java {major}"
+  },
+  "craftpanel.settings.advanced.java-not-installed": {
+    "defaultMessage": "Java {major} (wird heruntergeladen)"
+  },
+  "craftpanel.settings.advanced.java-version": {
+    "defaultMessage": "Java-Version"
+  },
+  "craftpanel.settings.advanced.java-version-help": {
+    "defaultMessage": "Angeboten werden nur Versionen, die dieser Rechner bereitstellen kann."
+  },
+  "craftpanel.settings.advanced.load-failed": {
+    "defaultMessage": "Die Startoptionen konnten nicht geladen werden"
+  },
+  "craftpanel.settings.advanced.managed": {
+    "defaultMessage": "Vom Panel gesetzte Flags"
+  },
+  "craftpanel.settings.advanced.managed-help": {
+    "defaultMessage": "Diese Flags kommen bei jedem Start dazu und lassen sich hier nicht bearbeiten."
+  },
+  "craftpanel.settings.advanced.memory": {
+    "defaultMessage": "Arbeitsspeicher"
+  },
+  "craftpanel.settings.advanced.memory-help": {
+    "defaultMessage": "Der Regler endet bei dem, was dieser Server noch bekommen darf: dem Rest vom Arbeitsspeicher-Budget seines Besitzers, oder dem, was der Rechner hergeben kann, wenn er keines hat."
+  },
+  "craftpanel.settings.advanced.no-memory-left": {
+    "defaultMessage": "Für diesen Server ist kein ganzes Gigabyte mehr übrig — die anderen Server dieses Kontos halten den Rest des Arbeitsspeicher-Budgets."
+  },
+  "craftpanel.settings.advanced.runtime": {
+    "defaultMessage": "Java-Laufzeitumgebung"
+  },
+  "craftpanel.settings.advanced.runtime-help": {
+    "defaultMessage": "Auf welchem Java-Build dein Server läuft."
+  },
+  "craftpanel.settings.advanced.save-failed": {
+    "defaultMessage": "Die Startoptionen konnten nicht aktualisiert werden"
+  },
+  "craftpanel.settings.advanced.saved": {
+    "defaultMessage": "Startoptionen aktualisiert"
+  },
+  "craftpanel.settings.advanced.stripped-body": {
+    "defaultMessage": "Der Arbeitsspeicher kommt vom Regler oben, daneben bleiben nur Java-Flags stehen. Verworfen: {flags}"
+  },
+  "craftpanel.settings.advanced.stripped-header": {
+    "defaultMessage": "Beim Speichern wurde ein Teil deiner Eingabe verworfen"
+  },
+  "craftpanel.settings.general.address": {
+    "defaultMessage": "Adresse"
+  },
+  "craftpanel.settings.general.backups": {
+    "defaultMessage": "Sicherungen"
+  },
+  "craftpanel.settings.general.busy": {
+    "defaultMessage": "Warte, bis der laufende Vorgang fertig ist."
+  },
+  "craftpanel.settings.general.danger": {
+    "defaultMessage": "Gefahrenzone"
+  },
+  "craftpanel.settings.general.danger-description": {
+    "defaultMessage": "Diese Aktionen zerstören Daten. Für alle muss der Server gestoppt sein."
+  },
+  "craftpanel.settings.general.info": {
+    "defaultMessage": "Info"
+  },
+  "craftpanel.settings.general.name": {
+    "defaultMessage": "Servername"
+  },
+  "craftpanel.settings.general.name-empty": {
+    "defaultMessage": "Der Servername darf nicht leer sein."
+  },
+  "craftpanel.settings.general.not-installed": {
+    "defaultMessage": "Dieser Server hat noch keine Installation."
+  },
+  "craftpanel.settings.general.not-owner": {
+    "defaultMessage": "Das kann nur der Besitzer des Servers."
+  },
+  "craftpanel.settings.general.remove": {
+    "defaultMessage": "Server löschen"
+  },
+  "craftpanel.settings.general.remove-confirm": {
+    "defaultMessage": "{name} und alles, was dazugehört, wird gelöscht."
+  },
+  "craftpanel.settings.general.remove-description": {
+    "defaultMessage": "Entfernt den Server, seine Dateien und seine Sicherungen. Das lässt sich nicht rückgängig machen."
+  },
+  "craftpanel.settings.general.remove-failed": {
+    "defaultMessage": "Löschen fehlgeschlagen"
+  },
+  "craftpanel.settings.general.remove-started": {
+    "defaultMessage": "Der Server wird gelöscht"
+  },
+  "craftpanel.settings.general.reset": {
+    "defaultMessage": "Server zurücksetzen"
+  },
+  "craftpanel.settings.general.reset-confirm": {
+    "defaultMessage": "Alles auf {name} außer den Sicherungen wird gelöscht und neu installiert."
+  },
+  "craftpanel.settings.general.reset-description": {
+    "defaultMessage": "Löscht Welt, Inhalte und Konfiguration und installiert dieselbe Version erneut. Die Sicherungen bleiben."
+  },
+  "craftpanel.settings.general.reset-failed": {
+    "defaultMessage": "Zurücksetzen fehlgeschlagen"
+  },
+  "craftpanel.settings.general.reset-started": {
+    "defaultMessage": "Der Server wird zurückgesetzt"
+  },
+  "craftpanel.settings.general.running": {
+    "defaultMessage": "Stoppe zuerst den Server."
+  },
+  "craftpanel.settings.general.save-failed": {
+    "defaultMessage": "Der Server konnte nicht aktualisiert werden"
+  },
+  "craftpanel.settings.general.saved": {
+    "defaultMessage": "Servereinstellungen aktualisiert"
+  },
+  "craftpanel.settings.general.server-id": {
+    "defaultMessage": "Server-ID"
+  },
+  "craftpanel.settings.general.unknown": {
+    "defaultMessage": "Unbekannt"
+  },
+  "craftpanel.settings.general.update-channel": {
+    "defaultMessage": "Update-Kanal"
+  },
+  "craftpanel.settings.general.update-channel.alpha": {
+    "defaultMessage": "Release-, Beta- und Alpha-Versionen werden als verfügbare Updates angezeigt."
+  },
+  "craftpanel.settings.general.update-channel.beta": {
+    "defaultMessage": "Release- und Beta-Versionen werden als verfügbare Updates angezeigt."
+  },
+  "craftpanel.settings.general.update-channel.release": {
+    "defaultMessage": "Nur Release-Versionen werden als verfügbare Updates angezeigt."
+  },
+  "craftpanel.settings.general.version": {
+    "defaultMessage": "Version"
+  },
+  "craftpanel.settings.network.action-failed": {
+    "defaultMessage": "Die Änderung wurde abgelehnt"
+  },
+  "craftpanel.settings.network.address": {
+    "defaultMessage": "Verbindungsadresse"
+  },
+  "craftpanel.settings.network.address-help": {
+    "defaultMessage": "Das geben Spieler in ihrem Minecraft-Client ein."
+  },
+  "craftpanel.settings.network.address-help-tunnelled": {
+    "defaultMessage": "Das geben Spieler in diesem Netzwerk ein. Von außen nutzen sie die öffentliche Adresse unten."
+  },
+  "craftpanel.settings.network.allocations": {
+    "defaultMessage": "Portzuweisungen"
+  },
+  "craftpanel.settings.network.allocations-help": {
+    "defaultMessage": "Zusätzliche Ports für Dinge wie Kartenansichten oder Voice-Chat. Ein gelöschter Port geht zurück in den Pool."
+  },
+  "craftpanel.settings.network.column-actions": {
+    "defaultMessage": "Aktionen"
+  },
+  "craftpanel.settings.network.column-name": {
+    "defaultMessage": "Name"
+  },
+  "craftpanel.settings.network.column-port": {
+    "defaultMessage": "Port"
+  },
+  "craftpanel.settings.network.copied": {
+    "defaultMessage": "In die Zwischenablage kopiert"
+  },
+  "craftpanel.settings.network.create": {
+    "defaultMessage": "Portzuweisung erstellen"
+  },
+  "craftpanel.settings.network.create-hint": {
+    "defaultMessage": "Gib einen Namen ein, um eine Portzuweisung zu erstellen."
+  },
+  "craftpanel.settings.network.created": {
+    "defaultMessage": "Portzuweisung erstellt"
+  },
+  "craftpanel.settings.network.delete-body": {
+    "defaultMessage": "Port {port} geht zurück in den Pool und kann neu vergeben werden."
+  },
+  "craftpanel.settings.network.delete-title": {
+    "defaultMessage": "Portzuweisung löschen"
+  },
+  "craftpanel.settings.network.deleted": {
+    "defaultMessage": "Portzuweisung gelöscht"
+  },
+  "craftpanel.settings.network.load-failed": {
+    "defaultMessage": "Die Portzuweisungen konnten nicht geladen werden"
+  },
+  "craftpanel.settings.network.make-primary": {
+    "defaultMessage": "Zum primären Port machen"
+  },
+  "craftpanel.settings.network.name-label": {
+    "defaultMessage": "Name"
+  },
+  "craftpanel.settings.network.name-placeholder": {
+    "defaultMessage": "z. B. Voice-Chat"
+  },
+  "craftpanel.settings.network.only-that-one-port": {
+    "defaultMessage": "Nur dieser eine Port. Ein Server bekommt einen Tunnel, darum bleibt jede andere Portzuweisung unten allein aus diesem Netzwerk erreichbar."
+  },
+  "craftpanel.settings.network.port-placeholder": {
+    "defaultMessage": "Port"
+  },
+  "craftpanel.settings.network.primary": {
+    "defaultMessage": "Primär"
+  },
+  "craftpanel.settings.network.promoted": {
+    "defaultMessage": "Primärer Port geändert"
+  },
+  "craftpanel.settings.network.public-title": {
+    "defaultMessage": "Veröffentlicht über playit.gg"
+  },
+  "craftpanel.settings.network.published-at": {
+    "defaultMessage": "Port {port}, der primäre, ist als {address} zum Internet offen. Jeder, der diese Adresse hat, erreicht diesen Server."
+  },
+  "craftpanel.settings.network.publishing": {
+    "defaultMessage": "Port {port}, der primäre, wird gerade veröffentlicht. playit.gg hat die Adresse noch nicht genannt."
+  },
+  "craftpanel.settings.network.rename": {
+    "defaultMessage": "Portzuweisung umbenennen"
+  },
+  "craftpanel.settings.network.renamed": {
+    "defaultMessage": "Portzuweisung umbenannt"
+  },
+  "craftpanel.settings.network.restart-body": {
+    "defaultMessage": "Der neue primäre Port greift beim nächsten Start des Servers."
+  },
+  "craftpanel.settings.network.restart-header": {
+    "defaultMessage": "Neustart nötig"
+  },
+  "craftpanel.settings.network.swap-blocked": {
+    "defaultMessage": "Die öffentliche Adresse hält den primären Port"
+  },
+  "craftpanel.settings.network.swap-needs-give-back": {
+    "defaultMessage": "Solange diese Adresse steht, lässt sich der primäre Port nicht verschieben: wohin der Tunnel zeigt, liegt bei playit.gg und ist von hier nicht zu ändern. Der Besitzer oder ein Panel-Administrator gibt die Adresse auf der Übersichtsseite zurück; bis dahin verweigert das Panel den Wechsel."
+  },
+  "panel.copy.failed": {
+    "defaultMessage": "Es wurde nichts kopiert"
+  },
+  "panel.copy.failed-hint": {
+    "defaultMessage": "Dieser Browser wollte den Text nicht in die Zwischenablage legen. Markiere ihn und kopiere ihn von Hand."
+  },
+  "panel.menu.account": {
+    "defaultMessage": "Dein Konto"
+  },
+  "panel.menu.change-password": {
+    "defaultMessage": "Passwort ändern"
+  },
+  "panel.menu.drive": {
+    "defaultMessage": "Google Drive"
+  },
+  "panel.menu.mail": {
+    "defaultMessage": "E-Mail"
+  },
+  "panel.menu.panel-settings": {
+    "defaultMessage": "Panel-Einstellungen"
+  },
+  "panel.menu.playit-all": {
+    "defaultMessage": "Öffentliche Adressen (alle Nutzer)"
+  },
+  "panel.menu.registrations": {
+    "defaultMessage": "Registrierungen"
+  },
+  "panel.menu.users": {
+    "defaultMessage": "Nutzer"
+  },
+  "panel.not-found.back": {
+    "defaultMessage": "Zurück zu den Servern"
+  },
+  "panel.not-found.description": {
+    "defaultMessage": "Diese Adresse führt nirgendwohin."
+  },
+  "panel.not-found.heading": {
+    "defaultMessage": "Seite nicht gefunden"
+  },
+  "panel.operation.backup-create": {
+    "defaultMessage": "Sicherung wird erstellt"
+  },
+  "panel.operation.backup-restore": {
+    "defaultMessage": "Sicherung wird wiederhergestellt"
+  },
+  "panel.operation.change-game-version": {
+    "defaultMessage": "Spielversion wird geändert"
+  },
+  "panel.operation.install-content": {
+    "defaultMessage": "Inhalte werden installiert"
+  },
+  "panel.operation.install-java": {
+    "defaultMessage": "Java wird installiert"
+  },
+  "panel.operation.install-loader": {
+    "defaultMessage": "Loader wird installiert"
+  },
+  "panel.operation.install-modpack": {
+    "defaultMessage": "Modpack wird installiert"
+  },
+  "panel.operation.repair-content": {
+    "defaultMessage": "Wird repariert"
+  },
+  "panel.operation.reset-server": {
+    "defaultMessage": "Wird zurückgesetzt"
+  },
+  "panel.operation.server-create": {
+    "defaultMessage": "Wird eingerichtet"
+  },
+  "panel.operation.server-delete": {
+    "defaultMessage": "Wird gelöscht"
+  },
+  "panel.operation.unarchive": {
+    "defaultMessage": "Wird extrahiert"
+  },
+  "panel.operation.update-content": {
+    "defaultMessage": "Inhalte werden aktualisiert"
+  },
+  "panel.phase.addons": {
+    "defaultMessage": "Inhalte werden geladen"
+  },
+  "panel.phase.analyzing": {
+    "defaultMessage": "Version wird ermittelt"
+  },
+  "panel.phase.installing-loader": {
+    "defaultMessage": "Wird heruntergeladen"
+  },
+  "panel.phase.installing-pack": {
+    "defaultMessage": "Modpack wird entpackt"
+  },
+  "panel.phase.running-installer": {
+    "defaultMessage": "Installer läuft"
+  },
+  "panel.phase.verifying": {
+    "defaultMessage": "Download wird geprüft"
+  },
+  "panel.phase.writing-config": {
+    "defaultMessage": "Konfiguration wird geschrieben"
+  },
+  "panel.server-new.blocked.header": {
+    "defaultMessage": "Du kannst gerade keinen Server erstellen"
+  },
+  "panel.server-new.blocked.over-limit": {
+    "defaultMessage": "Deine Server beanspruchen bereits dein gesamtes Arbeitsspeicher-Budget. Gib etwas davon frei, bevor du einen weiteren erstellst."
+  },
+  "panel.server-new.blocked.system-user": {
+    "defaultMessage": "Dein Systemkonto ist noch nicht bereit. Bis ein Administrator das behoben hat, kann nichts laufen."
+  },
+  "panel.server-new.build.label": {
+    "defaultMessage": "Build"
+  },
+  "panel.server-new.build.latest-stable": {
+    "defaultMessage": "Neuester stabiler Build"
+  },
+  "panel.server-new.build.truncated": {
+    "defaultMessage": "Es werden nur die 500 neuesten Builds angezeigt."
+  },
+  "panel.server-new.cancelled": {
+    "defaultMessage": "Die Einrichtung wurde abgebrochen. Der Server existiert, hat aber noch nichts drauf — richte ihn erneut ein oder lösche ihn."
+  },
+  "panel.server-new.catalog-failed": {
+    "defaultMessage": "Der Loader-Katalog konnte nicht geladen werden"
+  },
+  "panel.server-new.create": {
+    "defaultMessage": "Server erstellen"
+  },
+  "panel.server-new.difficulty.easy": {
+    "defaultMessage": "Einfach"
+  },
+  "panel.server-new.difficulty.hard": {
+    "defaultMessage": "Schwer"
+  },
+  "panel.server-new.difficulty.label": {
+    "defaultMessage": "Schwierigkeit"
+  },
+  "panel.server-new.difficulty.normal": {
+    "defaultMessage": "Normal"
+  },
+  "panel.server-new.difficulty.peaceful": {
+    "defaultMessage": "Friedlich"
+  },
+  "panel.server-new.error.budget-exceeded": {
+    "defaultMessage": "Das ist mehr Arbeitsspeicher, als dein Budget noch übrig hat."
+  },
+  "panel.server-new.error.invalid-request": {
+    "defaultMessage": "Der Name darf nicht leer und nicht länger als 64 Zeichen sein."
+  },
+  "panel.server-new.error.network-unreachable": {
+    "defaultMessage": "Das Panel konnte nicht erreicht werden."
+  },
+  "panel.server-new.error.over-limit": {
+    "defaultMessage": "Deine Server beanspruchen bereits mehr Arbeitsspeicher, als dein Budget erlaubt."
+  },
+  "panel.server-new.error.port-in-use": {
+    "defaultMessage": "Der Port ist belegt. Versuch es erneut."
+  },
+  "panel.server-new.error.port-pool-exhausted": {
+    "defaultMessage": "Im Pool ist kein Port mehr frei. Ein Administrator muss ihn erweitern."
+  },
+  "panel.server-new.error.unknown-loader": {
+    "defaultMessage": "Diesen Loader kennt das Panel nicht."
+  },
+  "panel.server-new.error.unreachable": {
+    "defaultMessage": "Das Panel konnte nicht erreicht werden."
+  },
+  "panel.server-new.error.unsupported-game-version": {
+    "defaultMessage": "Dieser Loader bietet diese Spielversion nicht an."
+  },
+  "panel.server-new.error.upstream-unavailable": {
+    "defaultMessage": "Die Download-Quelle konnte nicht erreicht werden. Versuch es gleich noch einmal."
+  },
+  "panel.server-new.eula.label": {
+    "defaultMessage": "Ich akzeptiere die Endnutzer-Lizenzvereinbarung von Minecraft."
+  },
+  "panel.server-new.eula.link": {
+    "defaultMessage": "Vereinbarung lesen"
+  },
+  "panel.server-new.failed-description": {
+    "defaultMessage": "Der Server existiert, hat aber noch nichts drauf."
+  },
+  "panel.server-new.gamemode.creative": {
+    "defaultMessage": "Kreativ"
+  },
+  "panel.server-new.gamemode.hardcore": {
+    "defaultMessage": "Hardcore"
+  },
+  "panel.server-new.gamemode.label": {
+    "defaultMessage": "Spielmodus"
+  },
+  "panel.server-new.gamemode.survival": {
+    "defaultMessage": "Überleben"
+  },
+  "panel.server-new.install-failed": {
+    "defaultMessage": "Das Einrichten des Servers ist fehlgeschlagen"
+  },
+  "panel.server-new.loader-not-wired": {
+    "defaultMessage": "Dieser Loader braucht einen Installationsschritt und ist noch nicht verfügbar."
+  },
+  "panel.server-new.memory.budget": {
+    "defaultMessage": "{free} in deinem Budget übrig"
+  },
+  "panel.server-new.memory.host-unavailable": {
+    "defaultMessage": "Der Arbeitsspeicher der Maschine konnte nicht gelesen werden, deshalb misst sich der Regler nicht daran. Einen Server zu erstellen geht trotzdem — wähle einen Wert, den die Maschine tragen kann."
+  },
+  "panel.server-new.memory.label": {
+    "defaultMessage": "Arbeitsspeicher"
+  },
+  "panel.server-new.memory.none-left": {
+    "defaultMessage": "Dein Budget hat keinen Platz für einen weiteren Server. Gib zuerst Arbeitsspeicher frei."
+  },
+  "panel.server-new.memory.over-budget": {
+    "defaultMessage": "Das geht über dein eigenes Budget hinaus und in die Maschine hinein. Es ist erlaubt, aber der Arbeitsspeicher ist dann überbucht."
+  },
+  "panel.server-new.name.label": {
+    "defaultMessage": "Name"
+  },
+  "panel.server-new.name.placeholder": {
+    "defaultMessage": "Mein Server"
+  },
+  "panel.server-new.no-builds": {
+    "defaultMessage": "Keine Builds verfügbar"
+  },
+  "panel.server-new.no-versions": {
+    "defaultMessage": "Keine Versionen verfügbar"
+  },
+  "panel.server-new.open-server": {
+    "defaultMessage": "Server öffnen"
+  },
+  "panel.server-new.retry": {
+    "defaultMessage": "Erneut versuchen"
+  },
+  "panel.server-new.seed.label": {
+    "defaultMessage": "Startwert der Welt"
+  },
+  "panel.server-new.seed.placeholder": {
+    "defaultMessage": "Leer lassen für eine zufällige Welt"
+  },
+  "panel.server-new.title": {
+    "defaultMessage": "Neuer Server"
+  },
+  "panel.server-new.warning.memory-overcommitted": {
+    "defaultMessage": "Die Maschine verspricht jetzt mehr Arbeitsspeicher, als sie hat."
+  },
+  "panel.server-new.warning.properties-ignored": {
+    "defaultMessage": "Dieser Loader hat keine server.properties, deshalb wurden die Welt-Einstellungen verworfen."
+  },
+  "panel.server-new.working": {
+    "defaultMessage": "Dein Server wird eingerichtet. Das dauert meist ein bis zwei Minuten."
+  },
+  "panel.server.connection.lost.body": {
+    "defaultMessage": "Konsole, Messwerte und Fortschritt werden nicht mehr aktualisiert."
+  },
+  "panel.server.connection.lost.title": {
+    "defaultMessage": "Keine Live-Verbindung"
+  },
+  "panel.server.connection.reconnect": {
+    "defaultMessage": "Neu verbinden"
+  },
+  "panel.server.connection.reconnecting.body": {
+    "defaultMessage": "Die Live-Verbindung ist abgerissen. Konsole und Messwerte stehen still, bis sie wieder da ist."
+  },
+  "panel.server.connection.reconnecting.title": {
+    "defaultMessage": "Verbindung zum Server wird wiederhergestellt"
+  },
+  "panel.server.console": {
+    "defaultMessage": "Konsole"
+  },
+  "panel.server.error.back": {
+    "defaultMessage": "Zurück zu den Servern"
+  },
+  "panel.server.forbidden.description": {
+    "defaultMessage": "Dein Zugriff auf diesen Server wurde entfernt."
+  },
+  "panel.server.forbidden.title": {
+    "defaultMessage": "Kein Zugriff auf diesen Server"
+  },
+  "panel.server.gone.access-removed": {
+    "defaultMessage": "Dein Zugriff auf diesen Server wurde entfernt."
+  },
+  "panel.server.gone.deleted": {
+    "defaultMessage": "Dieser Server wurde gelöscht."
+  },
+  "panel.server.install.retry-failed": {
+    "defaultMessage": "Die Installation konnte nicht erneut gestartet werden."
+  },
+  "panel.server.missing.description": {
+    "defaultMessage": "Diesen Server gibt es nicht, oder er wurde gelöscht."
+  },
+  "panel.server.missing.title": {
+    "defaultMessage": "Server nicht gefunden"
+  },
+  "panel.server.notice.broken": {
+    "defaultMessage": "Die letzte Installation ist nicht fertig geworden, deshalb kann dieser Server nicht starten. Installiere ihn unter Einstellungen erneut."
+  },
+  "panel.server.notice.delete-failed": {
+    "defaultMessage": "Dieser Server konnte nicht gelöscht werden: {reason} Seine Dateien liegen noch da und zählen weiter auf deinen Speicherplatz. Lösche ihn unter Einstellungen erneut."
+  },
+  "panel.server.notice.deleting": {
+    "defaultMessage": "Dieser Server wird gerade gelöscht."
+  },
+  "panel.server.notice.setup-pending": {
+    "defaultMessage": "Dieser Server hat noch keine Installation. Wähle unter Einstellungen einen Loader und eine Version."
+  },
+  "panel.server.tabs.access": {
+    "defaultMessage": "Zugriff"
+  },
+  "panel.server.tabs.backups": {
+    "defaultMessage": "Sicherungen"
+  },
+  "panel.server.tabs.files": {
+    "defaultMessage": "Dateien"
+  },
+  "panel.server.tabs.overview": {
+    "defaultMessage": "Übersicht"
+  },
+  "panel.server.unreachable.description": {
+    "defaultMessage": "Das Panel hat nicht geantwortet. Versuch es gleich noch einmal."
+  },
+  "panel.server.unreachable.title": {
+    "defaultMessage": "Der Server konnte nicht geladen werden"
+  },
+  "panel.servers.blocked.over-limit": {
+    "defaultMessage": "Deine Server beanspruchen bereits dein gesamtes Arbeitsspeicher-Budget. Gib etwas davon frei, bevor du einen weiteren erstellst."
+  },
+  "panel.servers.blocked.system-user": {
+    "defaultMessage": "Dein Systemkonto ist noch nicht bereit. Bis ein Administrator das behoben hat, kann nichts laufen."
+  },
+  "panel.servers.empty.description": {
+    "defaultMessage": "Wähle einen Loader und eine Version, und diese Maschine lässt ihn in einer Minute laufen."
+  },
+  "panel.servers.empty.heading": {
+    "defaultMessage": "Noch keine Server"
+  },
+  "panel.servers.error.unreachable": {
+    "defaultMessage": "Das Panel konnte nicht erreicht werden."
+  },
+  "panel.servers.group.own": {
+    "defaultMessage": "Deine Server"
+  },
+  "panel.servers.group.shared": {
+    "defaultMessage": "Mit dir geteilt"
+  },
+  "panel.servers.load-failed": {
+    "defaultMessage": "Die Serverliste konnte nicht geladen werden"
+  },
+  "panel.servers.new-server": {
+    "defaultMessage": "Neuer Server"
+  },
+  "panel.servers.no-match.description": {
+    "defaultMessage": "Kein Server passt zu „{query}“."
+  },
+  "panel.servers.no-match.heading": {
+    "defaultMessage": "Nichts passt"
+  },
+  "panel.servers.port-only": {
+    "defaultMessage": "Port {port}"
+  },
+  "panel.servers.retry": {
+    "defaultMessage": "Erneut versuchen"
+  },
+  "panel.servers.search-placeholder": {
+    "defaultMessage": "Server durchsuchen..."
+  },
+  "panel.servers.state.backup-creating": {
+    "defaultMessage": "Sicherung läuft"
+  },
+  "panel.servers.state.backup-restoring": {
+    "defaultMessage": "Wiederherstellung läuft"
+  },
+  "panel.servers.state.broken": {
+    "defaultMessage": "Defekt"
+  },
+  "panel.servers.state.deleting": {
+    "defaultMessage": "Wird gelöscht"
+  },
+  "panel.servers.state.installing": {
+    "defaultMessage": "Wird installiert"
+  },
+  "panel.servers.state.ready": {
+    "defaultMessage": "Bereit"
+  },
+  "panel.servers.state.setup-pending": {
+    "defaultMessage": "Einrichtung nötig"
+  },
+  "panel.servers.state.syncing-content": {
+    "defaultMessage": "Inhalte werden abgeglichen"
+  },
+  "server.settings.tabs.advanced": {
+    "defaultMessage": "Erweitert"
+  },
+  "server.settings.tabs.general": {
+    "defaultMessage": "Allgemein"
+  },
+  "server.settings.tabs.installation": {
+    "defaultMessage": "Installation"
+  },
+  "server.settings.tabs.network": {
+    "defaultMessage": "Netzwerk"
+  },
+  "server.settings.tabs.properties": {
+    "defaultMessage": "Eigenschaften"
+  },
+  "servers.admonitions.background-task-running": {
+    "defaultMessage": "Hintergrundaufgabe wird ausgeführt"
+  },
+  "servers.busy.backup-creating": {
+    "defaultMessage": "Sicherung wird erstellt"
+  },
+  "servers.busy.backup-restoring": {
+    "defaultMessage": "Wiederherstellung aus Sicherung läuft"
+  },
+  "servers.busy.deleting": {
+    "defaultMessage": "Server wird gelöscht"
+  },
+  "servers.busy.installing": {
+    "defaultMessage": "Server wird installiert"
+  },
+  "servers.busy.syncing-content": {
+    "defaultMessage": "Inhalt wird synchronisiert"
+  },
+  "servers.busy.unknown": {
+    "defaultMessage": "Hintergrundaufgabe wird ausgeführt"
+  }
+}

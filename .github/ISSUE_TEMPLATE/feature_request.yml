@@ -1,0 +1,26 @@
+name: Proposal
+description: Something the panel should do and does not.
+labels: [proposal]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        "What it does not do" in the README is a list of decisions, not a backlog: more than one
+        machine, billing and plans, SFTP, Bedrock, Spigot and CraftBukkit are out on purpose. A
+        proposal that reopens one of them needs to argue with the reason given there.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you cannot do today
+      description: The situation you are in, not the feature you have in mind for it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: How you would have it work
+      description: |
+        Where in the panel it sits, what it does to servers that already exist, and what a user
+        without administrator rights may do with it.
