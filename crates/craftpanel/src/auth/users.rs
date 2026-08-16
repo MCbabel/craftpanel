@@ -558,11 +558,15 @@ mod tests {
     #[tokio::test]
     async fn the_system_account_is_named_after_the_id() {
         let pool = test_pool().await;
-        let id = a_user(&pool, "max").await;
+        let username = "julia";
+        let id = a_user(&pool, username).await;
         let row = load(&pool, id).await.unwrap();
 
         assert_eq!(row.system_user().name, format!("craft-{}", id.to_string().to_lowercase()));
-        assert!(!row.system_user().name.contains("max"), "names change, ids do not");
+        assert!(
+            !row.system_user().name.contains(username),
+            "names change, ids do not; Crockford base32 spells no 'i', 'l', 'o' or 'u'"
+        );
     }
 
     #[tokio::test]

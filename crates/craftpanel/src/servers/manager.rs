@@ -1970,7 +1970,7 @@ mod tests {
             shelf: Arc<Shelf>,
             disks: Disks,
         ) -> Self {
-            let helper = FakeHelper::obliging().await;
+            let helper = FakeHelper::obliging().await.rooted_at(dir.path().join("users"));
             let config = Arc::new(Config {
                 data_dir: dir.path().to_path_buf(),
                 helper_socket: helper.socket(),

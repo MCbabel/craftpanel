@@ -710,7 +710,7 @@ mod tests {
         let shut = sandbox.mkdir("plugins/WorldEdit");
         let inside = sandbox.write("plugins/WorldEdit/config.yml", b"a: 1\n");
         let untouched = sandbox.write("world/level.dat", b"x");
-        for path in [&shut, &inside, &untouched] {
+        for path in [&inside, &untouched, &shut] {
             std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600)).unwrap();
         }
 
