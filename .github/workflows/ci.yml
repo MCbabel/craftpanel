@@ -80,4 +80,7 @@ jobs:
             sed -n '/^failures:/,$p' /tmp/panel-tests.log | head -200
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          grep -E "^(thread '|----? |    [a-z_]+::)" /tmp/panel-tests.log \
+            | head -40 \
+            | while IFS= read -r line; do echo "::error::${line}"; done
           exit 1
