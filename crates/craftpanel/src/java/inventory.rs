@@ -11,7 +11,7 @@ use super::{Arch, Installed, Progress, Runtimes};
 use crate::auth::error::{Failure, Result};
 use crate::auth::LiveServers;
 use crate::model::{Id, JreVendor, Timestamp};
-use crate::settings::runtimes::{self, JavaRuntime, Source};
+use crate::settings::runtimes::{self, JavaRuntime, Search, Source};
 
 pub const MAJORS: [u32; 4] = [8, 17, 21, 25];
 
@@ -80,12 +80,18 @@ pub struct Inventory {
     pool: SqlitePool,
     runtimes: Arc<Runtimes>,
     data_dir: PathBuf,
+    search: Search,
     attempts: Mutex<HashMap<u32, Attempt>>,
 }
 
 impl Inventory {
-    pub fn new(pool: SqlitePool, runtimes: Arc<Runtimes>, data_dir: impl Into<PathBuf>) -> Self {
-        Self { pool, runtimes, data_dir: data_dir.into(), attempts: Mutex::default() }
+    pub fn new(
+        pool: SqlitePool,
+        runtimes: Arc<Runtimes>,
+        data_dir: impl Into<PathBuf>,
+        search: Search,
+    ) -> Self {
+        Self { pool, runtimes, data_dir: data_dir.into(), search, attempts: Mutex::default() }
     }
 
     pub async fn start(self: &Arc<Self>, major: u32, live: &LiveServers) -> Result<()> {
@@ -143,7 +149,7 @@ impl Inventory {
         let auto_install = crate::auth::settings::load(&self.pool).await?.java_auto_install;
         let mut used = self.usage(live).await?;
         let attempts = self.attempts.lock().expect("the attempts outlive their panics").clone();
-        let found = runtimes::cached(&self.data_dir);
+        let found = runtimes::cached(&self.data_dir, &self.search);
 
         let mut wanted: Vec<u32> = MAJORS.to_vec();
         let asked_for = found
@@ -331,7 +337,7 @@ mod tests {
     fn an_inventory(pool: &SqlitePool, dir: &Scratch) -> Arc<Inventory> {
         let runtimes =
             Arc::new(Runtimes::with_base(dir.path(), "http://127.0.0.1:1").expect("a client"));
-        Arc::new(Inventory::new(pool.clone(), runtimes, dir.path()))
+        Arc::new(Inventory::new(pool.clone(), runtimes, dir.path(), Search::nowhere()))
     }
 
     async fn a_server_on(pool: &SqlitePool, name: &str, game_version: &str) -> Id {

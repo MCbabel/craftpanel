@@ -32,6 +32,7 @@ struct Fake {
     asked: AtomicUsize,
     served: AtomicUsize,
     hold: Mutex<Option<Duration>>,
+    gate: tokio::sync::watch::Sender<bool>,
     link: Mutex<Option<String>>,
     detour: Mutex<Option<String>>,
 }
@@ -53,6 +54,7 @@ impl FakeAdoptium {
             asked: AtomicUsize::new(0),
             served: AtomicUsize::new(0),
             hold: Mutex::default(),
+            gate: tokio::sync::watch::channel(true).0,
             link: Mutex::default(),
             detour: Mutex::default(),
         });
@@ -111,6 +113,14 @@ impl FakeAdoptium {
 
     pub fn hold(&self, how_long: Duration) {
         *self.state.hold.lock().expect("the hold") = Some(how_long);
+    }
+
+    pub fn shut(&self) {
+        self.state.gate.send_replace(false);
+    }
+
+    pub fn open(&self) {
+        self.state.gate.send_replace(true);
     }
 
     pub fn asked(&self) -> usize {
@@ -179,6 +189,12 @@ async fn latest(
 
 async fn binary(State(state): State<Arc<Fake>>, RoutePath(name): RoutePath<String>) -> Response {
     state.served.fetch_add(1, Ordering::Relaxed);
+    let mut gate = state.gate.subscribe();
+    while !*gate.borrow_and_update() {
+        if gate.changed().await.is_err() {
+            break;
+        }
+    }
     let held = *state.hold.lock().expect("the hold");
     if let Some(how_long) = held {
         tokio::time::sleep(how_long).await;

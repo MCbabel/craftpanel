@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use crate::model::JreVendor;
-use crate::settings::runtimes::{self, Source};
+use crate::settings::runtimes::{self, Search, Source};
 
 use super::harness::{self, a_data_dir, FakeAdoptium, Scratch};
 use super::{JavaError, Runtimes, Stage};
@@ -74,7 +74,7 @@ async fn a_missing_runtime_is_fetched_and_lands_where_the_resolver_looks_first()
     assert_eq!(installed.runtime.vendor, JreVendor::Temurin);
     assert_eq!(installed.runtime.path.as_deref(), binary.to_str());
 
-    let seen = runtimes::discover(dir.path());
+    let seen = runtimes::discover(dir.path(), &Search::nowhere());
     assert!(
         seen.iter().any(|found| found.source == Source::Managed && found.major == 21),
         "settings::runtimes finds it too: {seen:?}"
@@ -346,7 +346,8 @@ async fn an_unpacked_tree_without_a_release_file_is_no_runtime_either() {
     let (refusal, dir) = refused(archive).await;
     assert_eq!(refusal.code(), "java_runtime_incomplete");
     assert!(refusal.to_string().contains("no readable release file"), "{refusal}");
-    assert!(runtimes::discover(dir.path()).iter().all(|found| found.source != Source::Managed));
+    let seen = runtimes::discover(dir.path(), &Search::nowhere());
+    assert!(seen.iter().all(|found| found.source != Source::Managed));
 }
 
 #[tokio::test]
@@ -407,7 +408,7 @@ async fn the_size_and_the_stand_are_readable_while_the_download_runs() {
     let upstream = FakeAdoptium::started().await;
     let archive = harness::a_jre(VERSION);
     upstream.offer(21, VERSION, archive.clone());
-    upstream.hold(Duration::from_millis(300));
+    upstream.shut();
 
     let runtimes = Arc::new(Runtimes::with_base(dir.path(), upstream.base()).expect("a client"));
     let progress = runtimes.watch(21);
@@ -416,7 +417,7 @@ async fn the_size_and_the_stand_are_readable_while_the_download_runs() {
         tokio::spawn(async move { runtimes.install(21).await })
     };
 
-    for _ in 0..200 {
+    for _ in 0..500 {
         if progress.stage() == Stage::Downloading {
             break;
         }
@@ -426,6 +427,7 @@ async fn the_size_and_the_stand_are_readable_while_the_download_runs() {
     assert_eq!(progress.total(), archive.len() as u64, "the size is out before the bytes are");
     assert!(progress.share() < 0.9);
 
+    upstream.open();
     task.await.expect("the task").expect("a runtime");
     assert_eq!(progress.stage(), Stage::Done);
     assert_eq!(progress.share(), 1.0);
@@ -762,7 +764,7 @@ async fn the_staging_shuts_everyone_else_out_while_the_bytes_come_down() {
     let dir = a_data_dir();
     let upstream = FakeAdoptium::started().await;
     upstream.offer(21, VERSION, harness::a_jre(VERSION));
-    upstream.hold(Duration::from_millis(500));
+    upstream.shut();
 
     let runtimes = Arc::new(Runtimes::with_base(dir.path(), upstream.base()).expect("a client"));
     let task = {
@@ -771,7 +773,7 @@ async fn the_staging_shuts_everyone_else_out_while_the_bytes_come_down() {
     };
 
     let staging = dir.path().join("runtimes").join(".java-21.new");
-    for _ in 0..300 {
+    for _ in 0..500 {
         if staging.exists() {
             break;
         }
@@ -779,6 +781,7 @@ async fn the_staging_shuts_everyone_else_out_while_the_bytes_come_down() {
     }
     assert_eq!(mode_of(&staging), 0o700, "nobody else can so much as look into the staging");
 
+    upstream.open();
     let home = task.await.expect("the task").expect("a runtime").home;
     assert!(!staging.exists(), "and it is gone when the runtime stands");
     assert_eq!(mode_of(&dir.path().join("runtimes")), 0o755);

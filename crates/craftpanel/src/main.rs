@@ -146,6 +146,7 @@ async fn serve() -> Result<()> {
         pool.clone(),
         Arc::clone(&runtimes),
         config.data_dir.clone(),
+        config.java_search.clone(),
     ));
 
     let playit = playit::Playit::new(pool.clone(), Arc::clone(&state.config))

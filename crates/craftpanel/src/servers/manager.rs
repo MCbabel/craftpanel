@@ -704,7 +704,8 @@ impl Manager {
 
     async fn java_before_the_first_start(&self, id: Id, major: Option<u32>) {
         let Some(major) = major else { return };
-        let here = crate::settings::runtimes::cached(&self.config.data_dir);
+        let here =
+            crate::settings::runtimes::cached(&self.config.data_dir, &self.config.java_search);
         if here.iter().any(|found| found.major == major) {
             return;
         }
@@ -1054,7 +1055,8 @@ impl Manager {
             return Ok(PathBuf::from(managed));
         }
 
-        let here = crate::settings::runtimes::cached(&self.config.data_dir);
+        let here =
+            crate::settings::runtimes::cached(&self.config.data_dir, &self.config.java_search);
         if let Some(exact) = binary_of(&here, |found| found == major) {
             return Ok(exact);
         }
@@ -2137,6 +2139,17 @@ mod tests {
                 .expect("the switch");
         }
 
+        async fn waits_at(&self, id: Id, phase: OperationPhase) -> Operation {
+            for _ in 0..500 {
+                let step = self.manager.operations.get(id).await.expect("the run");
+                if step.phase == Some(phase) {
+                    return step;
+                }
+                tokio::time::sleep(Duration::from_millis(10)).await;
+            }
+            panic!("the run never came to {phase:?}");
+        }
+
         async fn java_run(&self, server: Id) -> Option<Operation> {
             let id: Option<Id> = sqlx::query_scalar(
                 "SELECT id FROM operations WHERE server_id = ? AND kind = 'install_java'",
@@ -2753,7 +2766,7 @@ mod tests {
     #[tokio::test]
     async fn a_new_server_gets_the_java_it_will_need_before_anybody_presses_start() {
         let upstream = an_upstream_with(8, "1.8.0_502").await;
-        upstream.hold(Duration::from_millis(500));
+        upstream.shut();
         let fixture = a_panel_against(&upstream).await;
         let max = a_user(&fixture.pool, "max").await;
         let caller = fixture.caller(max).await;
@@ -2768,18 +2781,11 @@ mod tests {
         let id = made.operation.id;
         let run = tokio::spawn(async move { manager.run(id).await });
 
-        let mut seen = None;
-        for _ in 0..200 {
-            tokio::time::sleep(Duration::from_millis(25)).await;
-            let step = fixture.manager.operations.get(id).await.expect("the run");
-            if step.phase == Some(OperationPhase::InstallingJava) {
-                seen = Some(step);
-                break;
-            }
-        }
-        let shown = seen.expect("the page is told that Java is being fetched");
+        let shown = fixture.waits_at(id, OperationPhase::InstallingJava).await;
         assert!(shown.progress >= 0.65 && shown.progress <= 0.90, "{}", shown.progress);
+        assert!(!laid_down(&fixture, 8).exists(), "the upstream is still held at the door");
 
+        upstream.open();
         assert!(run.await.unwrap(), "the set-up ran");
         assert!(laid_down(&fixture, 8).is_file(), "Java 8 is there before the first start");
         assert_eq!(upstream.served(), 1);

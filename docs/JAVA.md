@@ -1087,6 +1087,57 @@ The rest of the module's tests are listed where they belong: `java/inventory.rs`
 `api/runtimes.rs` in `docs/JAVA-OPERATOR.md` §8, and the resolver's own
 `a_runtime_stands_in_only_up_to_the_next_long_term_release` in `settings/runtimes.rs:328`.
 
+### The machine the tests run on says nothing
+
+`candidates()` used to read a constant of its own: `/usr/lib/jvm`, `/usr/java`, `/opt/java`,
+`/opt/jdk`, plus `$JAVA_HOME` and whatever `java` on the `PATH` resolves to — on whatever machine it
+happened to run. Two tests in `servers::manager` want *"no Java 8 here"* and never made it so, they
+assumed it. This machine has 21 and 25 and no 8, so both passed; `ubuntu-latest` carries Temurin 8,
+11, 17 and 21 pre-installed, so on the runner the resolver found a real Java 8, nothing was fetched,
+and both fell — `a_new_server_gets_the_java_it_will_need_before_anybody_presses_start` on the
+`InstallingJava` it never saw, and on the refusal that never came in
+`a_start_that_finds_no_java_fetches_it_and_says_so_instead_of_dying`. Reproduced here by
+bind-mounting a Temurin 8 over `/usr/lib/jvm`: **50 passed, 2 failed**, exactly those two.
+
+**The places are handed in now.** `Search` (`settings/runtimes.rs:20`) carries all three of them as
+data — the roots, `$JAVA_HOME`, the `PATH` — and `discover()`, `cached()` and `candidates()` take
+one instead of reading the machine. `Search::system()` (`:27`) is the same four roots in the same
+order with the same two environment variables behind them, so nothing about a running panel moved.
+`Config` carries it (`config.rs:20`, `#[serde(skip)]`: no key in `config.toml`, nothing for an
+operator to set wrong), `Inventory` is handed one, and `Runtimes::present()` asks with
+`Search::nowhere()` — it only ever looks at what the panel laid down itself, and a managed runtime
+is read out of `<data_dir>/runtimes/` and takes its `(major, vendor)` slot before any system one is
+even considered.
+
+**In a test build the default is `Search::nowhere()`** (`Default for Search`, `:66`). Every harness
+that builds a `Config::default()` is blind to the machine without knowing that any of this exists,
+and a test that wants a system Java plants one and hands in `Search::under([…])`. `$JAVA_HOME` and
+the `PATH` are muted the same way, and for the reason no test may set them either:
+`std::env::set_var` is process-wide and would colour every other test in the binary, exactly as
+`umask` does.
+
+`a_test_looks_at_none_of_the_places_the_panel_looks_at_on_a_machine` (`settings/runtimes.rs:283`) is
+the guard. **The list comes from `Search::system()` — from the constant, not from the test** — and
+none of those roots may be in what a `Config` carries in a test, and `$JAVA_HOME` and the `PATH`
+must be `None` there. Then it plants a Temurin 8 in a scratch directory and finds it three times
+over, once through a root, once through `$JAVA_HOME`, once through the `PATH`, so that the emptiness
+means blindness and not a resolver that finds nothing anywhere. With the default put back to
+`Search::system()` it fails with *"/usr/lib/jvm is searched in a test"*.
+
+**A phase is caught and no longer hoped for.** The first of the two tests had a second bet in it: it
+slept 25 ms at a time, 200 times over, and hoped to see `InstallingJava` — which a fake Adoptium on
+loopback can run through in less than one of those sleeps. The fake is shut instead
+(`FakeAdoptium::shut`, `java/harness.rs:118`): the download waits at the door, the run cannot leave
+the phase, the test reads it, and then the gate is opened again. That door also replaced the 300 ms
+and 500 ms sleeps in `the_size_and_the_stand_are_readable_while_the_download_runs` and
+`the_staging_shuts_everyone_else_out_while_the_bytes_come_down`, which were hoping to catch a stage
+and a staging directory the same way. The test that was 0.6 s of sleeping is 0.08 s now.
+
+**Run on 2026-08-23** on this machine (Java 21 and 25), on the same machine with a Temurin 8
+bind-mounted over `/usr/lib/jvm` and `$JAVA_HOME` and the `PATH` pointing at it, and on one with
+`/usr/lib/jvm` emptied and `/usr/bin/java` bound over with `/dev/null`: **1 350 passed** in each of
+the three.
+
 ## 13. What is not protected here
 
 Short, and without softening, because §5 and §6 are long enough to read like a wall:

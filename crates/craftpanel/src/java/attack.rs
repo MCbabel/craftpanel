@@ -6,7 +6,7 @@ use std::path::Path;
 use super::harness::{self, a_data_dir, FakeAdoptium};
 use super::progress::Progress;
 use super::{unpack, Runtimes};
-use crate::settings::runtimes::{discover, read_home, Source};
+use crate::settings::runtimes::{discover, read_home, Search, Source};
 
 const VERSION: &str = "21.0.12+7";
 const A_FILE_NO_JAVA_HOLDS: u64 = 300 * 1024 * 1024;
@@ -108,8 +108,10 @@ fn a_release_file_of_gigabytes_is_no_release_file_and_is_never_read_whole() {
 
     assert_eq!(read_home(&home, Source::Managed), None, "1.5 GiB of release was read");
 
-    let managed: Vec<_> =
-        discover(dir.path()).into_iter().filter(|found| found.source == Source::Managed).collect();
+    let managed: Vec<_> = discover(dir.path(), &Search::nowhere())
+        .into_iter()
+        .filter(|found| found.source == Source::Managed)
+        .collect();
     assert!(managed.is_empty(), "{managed:?}");
 }
 

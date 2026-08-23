@@ -22,7 +22,7 @@ use std::sync::{Arc, Mutex};
 use futures::TryStreamExt;
 
 use crate::loaders::{checksum, Http};
-use crate::settings::runtimes::{self, JavaRuntime, Source};
+use crate::settings::runtimes::{self, JavaRuntime, Search, Source};
 
 #[allow(unused_imports)]
 pub use self::{
@@ -84,7 +84,7 @@ impl Runtimes {
 
     pub fn present(&self, major: u32) -> Option<JavaRuntime> {
         let home = self.home(major);
-        runtimes::discover(&self.data_dir).into_iter().find(|runtime| {
+        runtimes::discover(&self.data_dir, &Search::nowhere()).into_iter().find(|runtime| {
             runtime.source == Source::Managed
                 && runtime.major == major
                 && runtime.path.as_deref().is_some_and(|path| Path::new(path).starts_with(&home))

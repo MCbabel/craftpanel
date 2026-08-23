@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
+use crate::settings::runtimes::Search;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default = "default_bind")]
@@ -14,6 +16,8 @@ pub struct Config {
     pub helper_socket: PathBuf,
     #[serde(default)]
     pub ports: PortPool,
+    #[serde(skip)]
+    pub java_search: Search,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,6 +51,7 @@ impl Default for Config {
             data_dir: default_data_dir(),
             helper_socket: default_helper_socket(),
             ports: PortPool::default(),
+            java_search: Search::default(),
         }
     }
 }

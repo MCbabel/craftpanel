@@ -67,6 +67,7 @@ mod tests {
     use crate::config::Config;
     use crate::java::harness::{a_data_dir, a_jre, FakeAdoptium, Scratch};
     use crate::java::Runtimes;
+    use crate::settings::runtimes::Search;
 
     struct World {
         app: axum::Router,
@@ -79,7 +80,7 @@ mod tests {
         let base = upstream.map_or("http://127.0.0.1:1", FakeAdoptium::base);
         let runtimes = Arc::new(Runtimes::with_base(dir.path(), base).expect("a client"));
         let inventory =
-            Arc::new(Inventory::new(pool.clone(), runtimes, dir.path()));
+            Arc::new(Inventory::new(pool.clone(), runtimes, dir.path(), Search::nowhere()));
 
         let config = Config { data_dir: dir.path().to_path_buf(), ..Config::default() };
         let app = router(inventory, LiveServers::none()).with_state(state_with(&pool, config));
@@ -137,7 +138,8 @@ mod tests {
         let dir = a_data_dir();
         let runtimes =
             Arc::new(Runtimes::with_base(dir.path(), "http://127.0.0.1:1").expect("a client"));
-        let inventory = Arc::new(Inventory::new(pool.clone(), runtimes, dir.path()));
+        let inventory =
+            Arc::new(Inventory::new(pool.clone(), runtimes, dir.path(), Search::nowhere()));
         let config = Config { data_dir: dir.path().to_path_buf(), ..Config::default() };
         let app = router(inventory, LiveServers::none()).with_state(state_with(&pool, config));
         let world = World { app, dir };

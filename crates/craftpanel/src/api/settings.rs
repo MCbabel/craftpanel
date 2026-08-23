@@ -154,7 +154,8 @@ async fn read_startup(
     let running = is_running(&live, server).await;
     let restart = settle_restart_flag(&state, &row, running).await?;
 
-    Ok(Json(startup::view(&row, &runtimes::cached(&state.config.data_dir), ceiling, restart)))
+    let here = runtimes::cached(&state.config.data_dir, &state.config.java_search);
+    Ok(Json(startup::view(&row, &here, ceiling, restart)))
 }
 
 async fn write_startup(
@@ -181,7 +182,7 @@ async fn write_startup(
         None => row.memory_mib,
     };
 
-    let installed = runtimes::cached(&state.config.data_dir);
+    let installed = runtimes::cached(&state.config.data_dir, &state.config.java_search);
     check_runtime(&installed, &patch)?;
     let change = startup::plan(&patch, &row, memory)?;
 
@@ -304,7 +305,7 @@ async fn java_runtimes(
     };
 
     Ok(Json(JavaRuntimeList {
-        runtimes: runtimes::cached(&state.config.data_dir),
+        runtimes: runtimes::cached(&state.config.data_dir, &state.config.java_search),
         default_major_for_game_version: default_major,
     }))
 }

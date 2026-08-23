@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
@@ -14,6 +15,63 @@ const SEARCH: [&str; 4] = ["/usr/lib/jvm", "/usr/java", "/opt/java", "/opt/jdk"]
 const LONG_TERM: [u32; 5] = [8, 11, 17, 21, 25];
 
 const RELEASE_CEILING: u64 = 64 * 1024;
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Search {
+    roots: Vec<PathBuf>,
+    java_home: Option<PathBuf>,
+    path: Option<OsString>,
+}
+
+impl Search {
+    pub fn system() -> Self {
+        Self {
+            roots: SEARCH.iter().map(PathBuf::from).collect(),
+            java_home: std::env::var_os("JAVA_HOME").map(PathBuf::from),
+            path: std::env::var_os("PATH"),
+        }
+    }
+
+    pub fn nowhere() -> Self {
+        Self { roots: Vec::new(), java_home: None, path: None }
+    }
+
+    pub fn under(roots: impl IntoIterator<Item = impl Into<PathBuf>>) -> Self {
+        Self { roots: roots.into_iter().map(Into::into).collect(), ..Self::nowhere() }
+    }
+
+    pub fn and_java_home(mut self, home: impl Into<PathBuf>) -> Self {
+        self.java_home = Some(home.into());
+        self
+    }
+
+    pub fn and_path(mut self, path: impl Into<OsString>) -> Self {
+        self.path = Some(path.into());
+        self
+    }
+
+    pub fn roots(&self) -> &[PathBuf] {
+        &self.roots
+    }
+
+    pub fn java_home(&self) -> Option<&Path> {
+        self.java_home.as_deref()
+    }
+
+    pub fn path(&self) -> Option<&OsStr> {
+        self.path.as_deref()
+    }
+}
+
+impl Default for Search {
+    fn default() -> Self {
+        if cfg!(test) {
+            Self::nowhere()
+        } else {
+            Self::system()
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct JavaRuntime {
@@ -38,10 +96,10 @@ pub struct JavaRuntimeList {
     pub default_major_for_game_version: Option<u32>,
 }
 
-pub fn discover(data_dir: &Path) -> Vec<JavaRuntime> {
+pub fn discover(data_dir: &Path, search: &Search) -> Vec<JavaRuntime> {
     let mut found: BTreeMap<(u32, JreVendor), JavaRuntime> = BTreeMap::new();
 
-    for (home, source) in candidates(data_dir) {
+    for (home, source) in candidates(data_dir, search) {
         let Some(runtime) = read_home(&home, source) else { continue };
         found.entry((runtime.major, runtime.vendor)).or_insert(runtime);
     }
@@ -53,24 +111,28 @@ pub fn discover(data_dir: &Path) -> Vec<JavaRuntime> {
     runtimes
 }
 
-pub fn cached(data_dir: &Path) -> Vec<JavaRuntime> {
+pub fn cached(data_dir: &Path, search: &Search) -> Vec<JavaRuntime> {
+    let key = (data_dir.to_path_buf(), search.clone());
     let mut held = seen().lock().expect("the runtime cache outlives its panics");
-    if let Some((at, runtimes)) = held.get(data_dir) {
+    if let Some((at, runtimes)) = held.get(&key) {
         if at.elapsed() < WINDOW {
             return runtimes.clone();
         }
     }
-    let runtimes = discover(data_dir);
-    held.insert(data_dir.to_path_buf(), (Instant::now(), runtimes.clone()));
+    let runtimes = discover(data_dir, search);
+    held.insert(key, (Instant::now(), runtimes.clone()));
     runtimes
 }
 
 pub fn forget(data_dir: &Path) {
-    seen().lock().expect("the runtime cache outlives its panics").remove(data_dir);
+    let mut held = seen().lock().expect("the runtime cache outlives its panics");
+    held.retain(|(dir, _), _| dir != data_dir);
 }
 
-fn seen() -> &'static Mutex<BTreeMap<PathBuf, (Instant, Vec<JavaRuntime>)>> {
-    static SEEN: OnceLock<Mutex<BTreeMap<PathBuf, (Instant, Vec<JavaRuntime>)>>> = OnceLock::new();
+type Cache = BTreeMap<(PathBuf, Search), (Instant, Vec<JavaRuntime>)>;
+
+fn seen() -> &'static Mutex<Cache> {
+    static SEEN: OnceLock<Mutex<Cache>> = OnceLock::new();
     SEEN.get_or_init(Mutex::default)
 }
 
@@ -116,7 +178,7 @@ fn at_most(wanted: u32) -> u32 {
     LONG_TERM.iter().copied().find(|major| *major > wanted).unwrap_or(u32::MAX)
 }
 
-fn candidates(data_dir: &Path) -> Vec<(PathBuf, Source)> {
+fn candidates(data_dir: &Path, search: &Search) -> Vec<(PathBuf, Source)> {
     let mut homes = Vec::new();
 
     if let Ok(entries) = std::fs::read_dir(data_dir.join("runtimes")) {
@@ -124,25 +186,24 @@ fn candidates(data_dir: &Path) -> Vec<(PathBuf, Source)> {
             homes.push((entry.path(), Source::Managed));
         }
     }
-    if let Some(home) = std::env::var_os("JAVA_HOME") {
-        homes.push((PathBuf::from(home), Source::System));
+    if let Some(home) = search.java_home() {
+        homes.push((home.to_path_buf(), Source::System));
     }
-    for root in SEARCH {
+    for root in search.roots() {
         if let Ok(entries) = std::fs::read_dir(root) {
             for entry in entries.flatten() {
                 homes.push((entry.path(), Source::System));
             }
         }
     }
-    if let Some(home) = on_path() {
+    if let Some(home) = search.path().and_then(on_path) {
         homes.push((home, Source::System));
     }
     homes
 }
 
-fn on_path() -> Option<PathBuf> {
-    let path = std::env::var_os("PATH")?;
-    std::env::split_paths(&path)
+fn on_path(path: &OsStr) -> Option<PathBuf> {
+    std::env::split_paths(path)
         .map(|dir| dir.join("java"))
         .find(|candidate| candidate.is_file())
         .and_then(|binary| std::fs::canonicalize(binary).ok())
@@ -217,6 +278,36 @@ mod tests {
     }
 
     #[test]
+    fn a_test_looks_at_none_of_the_places_the_panel_looks_at_on_a_machine() {
+        let dir = a_dir();
+        let outside = Search::system();
+        let inside = crate::config::Config::default().java_search;
+
+        assert!(!outside.roots().is_empty(), "the panel itself does look somewhere");
+        for root in outside.roots() {
+            assert!(!inside.roots().contains(root), "{} is searched in a test", root.display());
+        }
+        assert_eq!(inside.java_home(), None, "$JAVA_HOME says nothing in a test");
+        assert_eq!(inside.path(), None, "and neither does the PATH");
+
+        let home = a_jdk(
+            dir.path(),
+            "temurin-8",
+            "IMPLEMENTOR=\"Eclipse Adoptium\"\nJAVA_VERSION=\"1.8.0_502\"\n",
+        );
+        let handed_in = [
+            Search::under([dir.path()]),
+            Search::nowhere().and_java_home(&home),
+            Search::nowhere().and_path(home.join("bin")),
+        ];
+        for search in handed_in {
+            let found = discover(dir.path(), &search);
+            assert_eq!(found.first().map(|runtime| runtime.major), Some(8), "{search:?}");
+        }
+        assert!(discover(dir.path(), &inside).is_empty(), "and a test is handed none of it");
+    }
+
+    #[test]
     fn a_release_file_answers_both_questions_without_running_anything() {
         let dir = a_dir();
         let home = a_jdk(
@@ -284,7 +375,7 @@ mod tests {
         a_jdk(&runtimes, "temurin-21", "IMPLEMENTOR=\"Eclipse Adoptium\"\nJAVA_VERSION=\"21.0.4\"\n");
         a_jdk(&runtimes, "corretto-17", "IMPLEMENTOR=\"Amazon.com Inc.\"\nJAVA_VERSION=\"17.0.12\"\n");
 
-        let found = discover(dir.path());
+        let found = discover(dir.path(), &Search::nowhere());
         let ours: Vec<&JavaRuntime> =
             found.iter().filter(|runtime| runtime.source == Source::Managed).collect();
         assert_eq!(ours.len(), 2, "{found:?}");
@@ -299,16 +390,16 @@ mod tests {
             runtimes.into_iter().any(|found| found.source == Source::Managed && found.major == 21)
         };
 
-        assert!(!managed(cached(dir.path())));
+        assert!(!managed(cached(dir.path(), &Search::nowhere())));
         a_jdk(
             &dir.path().join("runtimes"),
             "java-21",
             "IMPLEMENTOR=\"Eclipse Adoptium\"\nJAVA_VERSION=\"21.0.4\"\n",
         );
-        assert!(!managed(cached(dir.path())), "the minute has not run out yet");
+        assert!(!managed(cached(dir.path(), &Search::nowhere())), "the minute has not run out yet");
 
         forget(dir.path());
-        assert!(managed(cached(dir.path())), "and now it is there");
+        assert!(managed(cached(dir.path(), &Search::nowhere())), "and now it is there");
     }
 
     #[test]
