@@ -249,7 +249,7 @@ mod tests {
 
     impl Panel {
         async fn new() -> Self {
-            let dir = DataDir::new();
+            let dir = DataDir::new().holding_java(21, "21.0.4");
             let pool = test_pool().await;
             let helper = FakeHelper::obliging().await;
             let config = Arc::new(Config {
@@ -266,6 +266,10 @@ mod tests {
                 crate::helper::Helper::new(helper.socket()),
                 Shelf::new(),
                 Disks::none(),
+                Arc::new(
+                    crate::java::Runtimes::with_base(dir.path(), "http://127.0.0.1:9")
+                        .expect("a client"),
+                ),
             );
             let app = router(Arc::clone(&manager))
                 .with_state(state_with(&pool, (*config).clone()));

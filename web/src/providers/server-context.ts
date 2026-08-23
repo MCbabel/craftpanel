@@ -74,6 +74,7 @@ const INSTALL_PHASES: Record<OperationPhase, Archon.Websocket.v0.SyncInstallPhas
 	installing_loader: 'InstallingLoader',
 	verifying: 'InstallingLoader',
 	running_installer: 'InstallingLoader',
+	installing_java: 'InstallingLoader',
 	installing_pack: 'InstallingPack',
 	addons: 'Addons',
 	writing_config: 'Addons',

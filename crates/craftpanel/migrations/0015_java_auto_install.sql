@@ -1,0 +1,33 @@
+-- Section 23: the panel lays a missing Java runtime down itself.
+--
+-- One switch, and it is the first one in this table that starts open. That needs
+-- its reason, because 0010 wrote down the opposite rule for registration:
+--
+--   * A panel that cannot start a 1.12 server is not a careful panel, it is a
+--     broken one. default_major (settings/runtimes.rs) answers Java 8 for
+--     everything up to 1.16, no distribution ships a Java 8 any more, and
+--     Manager::java then reaches for the next higher runtime it can find -- a
+--     Java 21 that Minecraft 1.16 does not run on. The server dies with a stack
+--     trace that never says the word Java.
+--   * Fetching a signed archive over https opens nothing. No port is listened
+--     on, no account comes into being, nobody outside can reach in. That is the
+--     whole difference to registration_enabled, which lets strangers through the
+--     front door and therefore starts shut.
+--   * The operator who wants none of it turns it off. Then the panel says which
+--     runtime is missing instead of going and getting it, and the runtimes it
+--     already has stay exactly where they are.
+--
+-- Deliberately not folded into external_services_enabled from 0002. That switch
+-- is described to the operator as Modrinth content and the crash log service,
+-- and the sentence under it promises "Servers keep running". A switch that also
+-- decided whether a server can start would make that sentence untrue, and the
+-- operator who blocks Modrinth is not the same operator who manages his own
+-- JVMs.
+--
+-- No second column for "which vendor" and none for "which majors". The vendor is
+-- Temurin because it is the only one still building Java 8 (docs/JAVA.md), and
+-- the majors are the ones default_major can ask for. A column would let the two
+-- drift apart.
+
+ALTER TABLE panel_settings ADD COLUMN java_auto_install INTEGER NOT NULL DEFAULT 1
+                                      CHECK (java_auto_install IN (0, 1));

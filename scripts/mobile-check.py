@@ -44,6 +44,7 @@ PAGES = [
     ("applications", "/admin/registrations", "document.body.innerText.length > 100"),
     ("mail", "/admin/mail", "document.body.innerText.length > 100"),
     ("drives", "/admin/drive", "document.body.innerText.length > 100"),
+    ("runtimes", "/admin/runtimes", "document.body.innerText.length > 100"),
     # There is no line here for the Drive card of one's own account: it is a card in
     # `/account` (`pages/account/sections.ts`) and not a route, so "account" measures it too.
 

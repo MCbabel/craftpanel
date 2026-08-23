@@ -595,6 +595,7 @@ const phaseMessages: Record<OperationPhase, MessageDescriptor> = defineMessages(
 	installing_loader: { id: 'panel.phase.installing-loader', defaultMessage: 'Downloading' },
 	verifying: { id: 'panel.phase.verifying', defaultMessage: 'Checking the download' },
 	running_installer: { id: 'panel.phase.running-installer', defaultMessage: 'Running the installer' },
+	installing_java: { id: 'panel.phase.installing-java', defaultMessage: 'Fetching Java' },
 	installing_pack: { id: 'panel.phase.installing-pack', defaultMessage: 'Unpacking the modpack' },
 	addons: { id: 'panel.phase.addons', defaultMessage: 'Fetching content' },
 	writing_config: { id: 'panel.phase.writing-config', defaultMessage: 'Writing the configuration' },

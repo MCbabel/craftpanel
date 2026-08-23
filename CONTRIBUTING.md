@@ -33,9 +33,9 @@ once, which on a small machine that is also serving a live panel is how the OOM 
 involved.
 
 Eight tests carry `#[ignore]` because they talk to the network: Modrinth, PaperMC, playit.gg,
-Resend. They are not part of CI. Run them with `cargo test -- --ignored` when you touch what they
-cover. Tests that need root, or a group of their own, print `skipped: …` and pass; on a machine
-where they can run, they run.
+Resend, Adoptium. They are not part of CI. Run them with `cargo test -- --ignored` when you touch
+what they cover. Tests that need root, or a group of their own, print `skipped: …` and pass; on a
+machine where they can run, they run.
 
 `scripts/check-types.sh` runs `vue-tsc` and counts only errors in our own files. Modrinth's
 vendored sources do not typecheck under our configuration and are not ours to fix — see below.

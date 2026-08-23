@@ -520,6 +520,36 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn the_java_the_panel_lays_down_is_charged_to_nobody() {
+        let pool = test_pool().await;
+        let scratch = Scratch::new();
+        let max = a_user(&pool, "max").await;
+        sqlx::query("UPDATE users SET disk_mib = 1024 WHERE id = ?")
+            .bind(max)
+            .execute(&pool)
+            .await
+            .unwrap();
+
+        let one = a_server(&pool, max, "one", 1024).await;
+        let mine = scratch.0.join("users").join(max.to_string()).join("servers");
+        a_file(&mine.join(one.to_string()), "world.dat", 100);
+        a_backup(&pool, one, 1022 * MIB).await;
+
+        let home = crate::java::Runtimes::new(scratch.0.clone()).expect("a client").home(8);
+        a_file(&home.join("bin"), "java", 2 * MIB as usize);
+        assert!(!home.starts_with(scratch.0.join("users")), "{}", home.display());
+
+        let disks = a_meter(&pool, &scratch, Duration::ZERO);
+        let space = disks.of(max).await;
+        assert_eq!(space.servers_bytes, 100, "the runtime is the machine's, not his");
+        assert_eq!(space.used_bytes(), 1022 * MIB + 100);
+        assert!(
+            guard(&pool, &disks, max, MIB).await.is_ok(),
+            "two of his 1024 MiB are left, and the two under runtimes/ are not his"
+        );
+    }
+
+    #[tokio::test]
     async fn an_administrator_passes_the_door_with_anything() {
         let pool = test_pool().await;
         let boss = an_admin(&pool, "boss").await;

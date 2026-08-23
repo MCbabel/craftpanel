@@ -205,13 +205,10 @@ const messages = defineMessages({
 	javaVersion: { id: 'craftpanel.settings.advanced.java-version', defaultMessage: 'Java version' },
 	javaVersionHelp: {
 		id: 'craftpanel.settings.advanced.java-version-help',
-		defaultMessage: 'Only versions this machine can provide are offered.',
+		defaultMessage:
+			'Only versions this machine already has are offered. On Automatic the panel takes the one your Minecraft version needs.',
 	},
 	javaAutomatic: { id: 'craftpanel.settings.advanced.java-automatic', defaultMessage: 'Automatic' },
-	javaNotInstalled: {
-		id: 'craftpanel.settings.advanced.java-not-installed',
-		defaultMessage: 'Java {major} (will be downloaded)',
-	},
 	javaInstalled: { id: 'craftpanel.settings.advanced.java-installed', defaultMessage: 'Java {major}' },
 	runtime: { id: 'craftpanel.settings.advanced.runtime', defaultMessage: 'Java runtime' },
 	runtimeHelp: {
@@ -263,10 +260,9 @@ const vendorItems = computed<(JreVendor | null)[]>(() => [
 ])
 
 function javaVersionLabel(major: number | null): string {
-	if (major === null) return formatMessage(messages.javaAutomatic)
-	return runtimes.value.some((runtime) => runtime.major === major && runtime.installed)
-		? formatMessage(messages.javaInstalled, { major })
-		: formatMessage(messages.javaNotInstalled, { major })
+	return major === null
+		? formatMessage(messages.javaAutomatic)
+		: formatMessage(messages.javaInstalled, { major })
 }
 
 function vendorLabel(value: JreVendor | null): string {

@@ -18,8 +18,13 @@ Run it again and it offers three things: update, uninstall, or nothing. An updat
 Minecraft servers running; see [The supervisor](#the-supervisor). An uninstall asks separately
 whether the worlds and the database should go too.
 
-**Requirements:** Linux with systemd and cgroup v2, and a Java runtime (21 for current game
-versions). The installer checks both and says what is missing.
+**Requirements:** Linux with systemd and cgroup v2. The installer checks both and says what is
+missing. A Java runtime is no longer one of them: the panel fetches the one a game version needs —
+Eclipse Temurin from [Adoptium](https://adoptium.net), a JRE, checksum verified — into
+`/var/lib/craftpanel/runtimes/`. That covers Java 8 for 1.16 and older as much as Java 21 for the
+current versions. A JRE that is already on the machine is used as it stands, and an administrator
+can switch the fetching off in the panel settings; then the panel names the runtime a server is
+missing instead of going and getting it. Details in `docs/JAVA.md`.
 
 Before the first release is published there is nothing for the installer to download. Build a
 bundle yourself and hand it to the same script:
@@ -149,7 +154,8 @@ scripts/check-no-comments.sh
 ```
 
 Eight tests are `#[ignore]`d because they talk to the network (Modrinth, PaperMC, playit.gg,
-Resend); run them with `cargo test -- --ignored` when you have changed something they cover.
+Resend, Adoptium); run them with `cargo test -- --ignored` when you have changed something they
+cover.
 
 More in [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -157,8 +163,9 @@ More in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 `docs/` holds the design documents — what was decided, and why. They are the running record of
 the project: `PLAN.md` (the whole shape), `api/CONTRACT.md` (the API contract), `DRIVE.md`,
-`MAIL.md`, `PLAYIT.md`, `SIGN-UP.md`, `PASSWORD-RESET.md`, `INTERFACE.md` and `WIRING.md`
-(interface and wiring), and `AUDIT.md` (an audit measured against a running build on 2026-08-13).
+`MAIL.md`, `PLAYIT.md`, `SIGN-UP.md`, `PASSWORD-RESET.md`, `JAVA.md` (the Java runtimes the panel
+fetches), `INTERFACE.md` and `WIRING.md` (interface and wiring), and `AUDIT.md` (an audit measured
+against a running build on 2026-08-13).
 
 ## Licence
 

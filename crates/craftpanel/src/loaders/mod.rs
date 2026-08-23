@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
-mod checksum;
+pub(crate) mod checksum;
 mod error;
 mod fabric;
 mod fill;
-mod http;
+pub(crate) mod http;
 mod leaf;
 mod purpur;
 mod vanilla;

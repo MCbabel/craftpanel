@@ -20,5 +20,6 @@ export function blankSettings(): PanelSettings {
 		stop_grace_seconds: 60,
 		registration_enabled: false,
 		registration_requires_approval: true,
+		java_auto_install: true,
 	}
 }

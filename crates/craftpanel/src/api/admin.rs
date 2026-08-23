@@ -2146,10 +2146,10 @@ mod tests {
             (
                 "/admin/settings".to_owned(),
                 vec![
-                    "default_limits", "external_services_enabled", "max_backups_per_server",
-                    "max_concurrent_operations", "max_upload_bytes", "port_pool",
-                    "public_address", "registration_enabled", "registration_requires_approval",
-                    "stop_grace_seconds",
+                    "default_limits", "external_services_enabled", "java_auto_install",
+                    "max_backups_per_server", "max_concurrent_operations", "max_upload_bytes",
+                    "port_pool", "public_address", "registration_enabled",
+                    "registration_requires_approval", "stop_grace_seconds",
                 ],
             ),
             (

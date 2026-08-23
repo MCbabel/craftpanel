@@ -9,6 +9,7 @@ mod db;
 mod drive;
 mod files;
 mod helper;
+mod java;
 mod loaders;
 mod mail;
 mod model;
@@ -137,6 +138,16 @@ async fn serve() -> Result<()> {
 
     let sources = Arc::new(loaders::Sources::new().context("setting up the loader sources")?);
 
+    let runtimes = Arc::new(
+        java::Runtimes::new(config.data_dir.clone())
+            .context("setting up the Java runtime downloads")?,
+    );
+    let inventory = Arc::new(java::Inventory::new(
+        pool.clone(),
+        Arc::clone(&runtimes),
+        config.data_dir.clone(),
+    ));
+
     let playit = playit::Playit::new(pool.clone(), Arc::clone(&state.config))
         .context("setting up the playit.gg service")?;
     playit.start();
@@ -161,6 +172,7 @@ async fn serve() -> Result<()> {
         helper.clone(),
         sources,
         disks.clone(),
+        Arc::clone(&runtimes),
     );
     let content = content::Content::new(
         pool.clone(),
@@ -218,6 +230,7 @@ async fn serve() -> Result<()> {
         .merge(api::content::router(Arc::clone(&content), live.clone()))
         .merge(api::registration::with_live(Arc::clone(&sign_ups), live.clone(), disks.clone()))
         .merge(api::recovery::router(Arc::clone(&recovery)))
+        .merge(api::runtimes::router(Arc::clone(&inventory), live.clone()))
         .merge(api::settings::router(Arc::clone(&operations), live))
         .merge(api::backups::router(Arc::clone(&backups)))
         .merge(api::access::router())

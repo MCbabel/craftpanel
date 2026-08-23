@@ -243,6 +243,8 @@ The complete code catalog:
 | 409 | `server_running` | action demands a stopped server |
 | 409 | `server_not_running` | action demands a running server (sending a command) |
 | 409 | `server_broken` | `status == "broken"`, start refused |
+| 409 | `java_runtime_fetching` | `start`: the Java this server needs is missing and is being fetched; an `install_java` run carries the progress (5.9, 23, docs/JAVA-OPERATOR.md) |
+| 409 | `java_runtime_missing` | `start`: the Java is missing, fetching it is switched off (12.10), and nothing installed may stand in for it (23) |
 | 409 | `invalid_power_transition` | transition not allowed; `message` names the actual state and the wish |
 | 409 | `budget_exceeded` | this action would exceed the owner's budget |
 | 409 | `over_limit` | the owner is already over (an admin lowered the limit) |
@@ -851,7 +853,26 @@ Java processes on the same port would come about. Deleting (4.5) takes the same 
 Errors: `409 invalid_power_transition`, `409 server_busy` (a locking operation is running, 5.6),
 `409 server_broken` (on `start`), `409 budget_exceeded`/`409 over_limit` (the admin lowered the
 limit below what is allocated: what runs keeps running, what is stopped no longer starts,
-`docs/PLAN.md:364-366`).
+`docs/PLAN.md:364-366`), `409 java_runtime_fetching` and `409 java_runtime_missing` (23, docs/JAVA.md).
+
+**A stand-in may be one long-term release newer, and no more.** Where the exact runtime is
+missing and fetching is off, the panel used to take the newest Java it could find. That is how a
+1.12 server ends up on a Java 21 it cannot start on, with a stack trace that names netty and never
+Java. The rule now is `settings::runtimes::stands_in_for`: never older, because an older JVM
+turns the game's class files away unread, and never past the first long-term release above the one
+asked for,
+counting 8, 11, 17, 21, 25. So Java 8 accepts 11, Java 17 accepts 21, Java 21 accepts 25, and Java
+8 refuses 17: everything the JDK took out between 9 and 16 is gone by 17, and that is exactly what
+Minecraft up to 1.16 and its plugins reach for. Among the ones allowed the **closest** is taken,
+not the newest. Above 25 nothing is refused, because what the release after it removes is not
+known yet.
+
+**A `start` never waits for a download.** The runtime is looked up before anything is written, so a
+server that has to wait for its Java stays `stopped` rather than standing in `starting` with
+nothing behind it. What the panel does instead is open an `install_java` run, which the page shows
+like any other, and say so in the refusal; the next press starts the server. Which runtime a start
+asks for is `servers.java_major`, and where that is empty, what the game version needs
+(`settings::runtimes::default_major`).
 
 ### 4.7 `GET /api/v1/servers/:id/ws`
 
@@ -1033,7 +1054,7 @@ trigger would be dead code. The emergency exit is deleting the server.
 
 ### 5.9 Phases and how they map
 
-`OperationPhase` has seven values; the interface knows four. The provider does the mapping, and
+`OperationPhase` has eight values; the interface knows four. The provider does the mapping, and
 the four target values are Modrinth's spelling — `InstallingBanner.vue:187-196` compares them
 literally, `ServerPanelAdmonitions.vue:179` checks for `'Analyzing'`.
 
@@ -1043,9 +1064,18 @@ literally, `ServerPanelAdmonitions.vue:179` checks for `'Analyzing'`.
 | `installing_loader` | `InstallingLoader` | load the jar (0.05 → 0.60) |
 | `verifying` | `InstallingLoader` | compare the checksum |
 | `running_installer` | `InstallingLoader` | `--installServer` on NeoForge, Quilt, Forge |
+| `installing_java` | `InstallingLoader` | fetch the JRE this server needs (23, docs/JAVA.md), 40 to 60 MB |
 | `installing_pack` | `InstallingPack` | read the `.mrpack`, unpack overrides, load files |
 | `addons` | `Addons` | download content and lay it out |
 | `writing_config` | `Addons` | `eula.txt`, `server.properties`, `-Xmx`, startup command (0.95 → 1) |
+
+**`installing_java` sits in two places.** Inside a `server_create` it fills the stretch between
+`verifying` and `writing_config` that nothing else used (0.65 → 0.90), because the version a server
+will need is known while it is being set up and nobody should meet the download at the start
+button. It also stands alone as the single phase of an `install_java` run (0 → 1), which is what a
+start makes when the runtime is missing all the same. `bytes_processed` counts the archive; the
+unpacking counts it again, which is why the last tenth of the line moves a second time
+(`java::Progress`, docs/JAVA.md:6).
 
 **The banner is invisible during `analyzing`** (`ServerPanelAdmonitions.vue:179`) — this phase must
 therefore stay short and must contain no network traffic with progress.
@@ -1094,6 +1124,18 @@ two sources for the same lock.
 | `invalid_modpack` | `modpack` | own text |
 | `checksum_mismatch` | `download` | own text |
 | `upstream_unavailable` | `download` | own text |
+| `java_download_unavailable` | `download` | own text — Adoptium has no such runtime for this machine |
+| `java_download_unsupported` | `download` | own text — neither x64 nor aarch64, so nothing can be fetched |
+| `java_download_damaged` | `download` | own text — the archive did not match the checksum Adoptium named |
+| `java_download_untrusted` | `download` | own text — the link, or a redirect on the way, led off the hosts Adoptium's downloads come from |
+| `java_download_oversized` | `download` | own text — the download ran past the size that was announced for it |
+| `java_download_announced_oversized` | `download` | own text — the size Adoptium announced is past the roof, so nothing was fetched |
+| `java_download_failed` | `download` | own text — Adoptium was not reachable |
+| `java_archive_rejected` | `download` | own text — the archive tried to write outside its directory |
+| `java_runtime_incomplete` | `download` | own text — what came down is no runnable Java |
+| `java_runtime_unreachable` | `filesystem` | own text — a directory on the way to `bin/java` shuts the game accounts out and is not the panel's to open |
+| `java_runtime_exposed` | `filesystem` | own text — `runtimes/` may be written by every account on the machine |
+| `java_runtime_unwritable` | `filesystem` | own text — `<data_dir>/runtimes/` could not be written |
 | `no_space` | `filesystem` | own text |
 | `permission_denied` | `filesystem` | own text — `EACCES`/`EPERM`, the panel was not allowed |
 | `delete_failed` | `filesystem` | own text — a tree could not be removed (4.5) |
@@ -3393,6 +3435,14 @@ Real enforcement would need file system project quotas; we do not promise that h
 `disk_mib` counts all servers of the account **and** their backups together; a backup that is
 currently running carries `size_bytes = 0` until it ends and is therefore not yet counted.
 
+**A Java runtime the panel fetched is charged to nobody.** It lies in `<data_dir>/runtimes/`, and
+the meter walks `<data_dir>/users/<id>/servers` and adds the backup rows of that account
+(`auth/disk.rs:Meter::of`) — the two trees are siblings, so a 50 MB Temurin is outside the figure by
+construction and not by a rule that could be forgotten. That is the right answer as well as the
+convenient one: one runtime serves every server on the machine that needs that major, and the
+account that happened to create the first 1.12 server did not buy it for the others. The test that
+holds this down is `auth::disk::tests::the_java_the_panel_lays_down_is_charged_to_nobody`.
+
 **The important case: a limit below what is already assigned.** The call **succeeds**. It throws
 nobody off and refuses nothing (`docs/PLAN.md:364-367`): what runs keeps running, `memory.high` only
 throttles. The response shows `over_limit: true`, `POST /servers` and "start server" answer
@@ -3809,6 +3859,7 @@ export type OperationPhase =
 	| 'installing_loader'
 	| 'verifying'
 	| 'running_installer'
+	| 'installing_java'
 	| 'installing_pack'
 	| 'addons'
 	| 'writing_config'

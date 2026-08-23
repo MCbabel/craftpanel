@@ -101,6 +101,21 @@ where
     B: AsRef<[u8]>,
     E: fmt::Display,
 {
+    write_capped(stream, dest, expected, origin, u64::MAX).await
+}
+
+pub async fn write_capped<S, B, E>(
+    stream: S,
+    dest: &Path,
+    expected: Option<&Checksum>,
+    origin: &str,
+    ceiling: u64,
+) -> Result<u64>
+where
+    S: Stream<Item = std::result::Result<B, E>>,
+    B: AsRef<[u8]>,
+    E: fmt::Display,
+{
     if let Some(parent) = dest.parent() {
         tokio::fs::create_dir_all(parent)
             .await
@@ -111,7 +126,7 @@ where
     partial.push(".part");
     let partial = PathBuf::from(partial);
 
-    match collect(stream, &partial, expected, origin).await {
+    match collect(stream, &partial, expected, origin, ceiling).await {
         Ok(written) => {
             tokio::fs::rename(&partial, dest)
                 .await
@@ -130,6 +145,7 @@ async fn collect<S, B, E>(
     partial: &Path,
     expected: Option<&Checksum>,
     origin: &str,
+    ceiling: u64,
 ) -> Result<u64>
 where
     S: Stream<Item = std::result::Result<B, E>>,
@@ -149,6 +165,9 @@ where
             reason: err.to_string(),
         })?;
         let chunk = chunk.as_ref();
+        if written.saturating_add(chunk.len() as u64) > ceiling {
+            return Err(LoaderError::TooLarge { origin: origin.to_owned(), ceiling });
+        }
 
         if let Some(digester) = digester.as_mut() {
             digester.update(chunk);
@@ -180,6 +199,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::sync::Arc;
+
     use super::*;
 
     const MOJANG_FIXTURE: &[u8] = include_bytes!("testdata/vanilla_version_client_only.json");
@@ -268,6 +290,58 @@ mod tests {
         write_verified(chunked(MOJANG_FIXTURE), &dest, None, "fabric").await.unwrap();
 
         assert_eq!(std::fs::read(&dest).unwrap().len(), MOJANG_FIXTURE.len());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[tokio::test]
+    async fn a_stream_that_grows_past_its_ceiling_stops_at_the_chunk_that_bursts_it() {
+        const CHUNK: &[u8] = &[0u8; 1024];
+        let dir = temp_dir("capped");
+        let dest = dir.join("archive.tar.gz");
+        let pulled = Arc::new(AtomicUsize::new(0));
+        let counted = {
+            let pulled = Arc::clone(&pulled);
+            futures::stream::iter((0..1024).map(|_| Ok::<&[u8], std::io::Error>(CHUNK)))
+                .inspect(move |_| {
+                    pulled.fetch_add(1, Ordering::Relaxed);
+                })
+        };
+
+        let err = write_capped(counted, &dest, None, "https://example.invalid/archive", 4096)
+            .await
+            .expect_err("the ceiling must hold");
+
+        match err {
+            LoaderError::TooLarge { ceiling, .. } => assert_eq!(ceiling, 4096),
+            other => panic!("expected a burst ceiling, got {other:?}"),
+        }
+        assert_eq!(
+            pulled.load(Ordering::Relaxed),
+            5,
+            "it read one chunk past the ceiling and not the whole megabyte"
+        );
+        assert!(!dest.exists());
+        assert!(!dest.with_extension("gz.part").exists());
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 0);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[tokio::test]
+    async fn a_download_that_stays_under_its_ceiling_lands_in_place() {
+        let dir = temp_dir("under");
+        let dest = dir.join("server.jar");
+
+        let written = write_capped(
+            chunked(MOJANG_FIXTURE),
+            &dest,
+            Some(&Checksum::sha1(MOJANG_SHA1)),
+            "the test fixture",
+            MOJANG_FIXTURE.len() as u64,
+        )
+        .await
+        .expect("exactly the announced size is still inside the ceiling");
+
+        assert_eq!(written, MOJANG_FIXTURE.len() as u64);
         let _ = std::fs::remove_dir_all(&dir);
     }
 

@@ -75,6 +75,12 @@ say "checking that the panel runs unprivileged and the helper does not"
 ps -o user= -C craftpanel 2>/dev/null | grep -q craftpanel && ok "panel runs as craftpanel" || fail "panel is not running as craftpanel"
 ps -eo user,cmd | grep -q "^root.*craftpanel-helper" && ok "helper runs as root" || fail "helper is not root"
 
+# The panel fetches its own Java into here (docs/JAVA.md), so it has to own the
+# directory, and a game server under its own account has to be able to walk in.
+[ "$(stat -c '%U %a' /var/lib/craftpanel/runtimes 2>/dev/null)" = "craftpanel 755" ] &&
+	ok "runtimes/ belongs to the panel, 0755" ||
+	fail "runtimes/ is not there as craftpanel 0755: $(stat -c '%U %a' /var/lib/craftpanel/runtimes 2>/dev/null)"
+
 say "driving the interface in a browser"
 CHROME=$(ls -d /root/.cache/ms-playwright/chromium-*/chrome-linux*/chrome 2>/dev/null | head -1)
 [ -x "$CHROME" ] || { echo "no chromium; skipping the browser part"; exit $FAILURES; }

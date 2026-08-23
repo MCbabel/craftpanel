@@ -53,6 +53,7 @@ export type OperationPhase =
 	| 'installing_loader'
 	| 'verifying'
 	| 'running_installer'
+	| 'installing_java'
 	| 'installing_pack'
 	| 'addons'
 	| 'writing_config'
@@ -681,6 +682,49 @@ export interface JavaRuntimeList {
 	default_major_for_game_version: number | null
 }
 
+export interface JavaInstallJob {
+	stage: 'waiting' | 'asking' | 'downloading' | 'unpacking' | 'done'
+	running: boolean
+	done_bytes: number
+	total_bytes: number
+	share: number
+	failure: string | null
+	failure_code: string | null
+}
+
+export interface LaidJavaRuntime {
+	vendor: JreVendor
+	version: string
+	path: string
+	directory: string
+	size_bytes: number
+	laid_at: Rfc3339 | null
+}
+
+export interface SystemJavaRuntime {
+	vendor: JreVendor
+	version: string
+	path: string
+}
+
+export interface JavaMajorEntry {
+	major: number
+	fetchable: boolean
+	runtime: LaidJavaRuntime | null
+	system: SystemJavaRuntime | null
+	job: JavaInstallJob | null
+	servers: number
+	running: string[]
+}
+
+export interface JavaRuntimeOverview {
+	auto_install: boolean
+	architecture: string | null
+	directory: string
+	total_bytes: number
+	majors: JavaMajorEntry[]
+}
+
 export interface Allocation {
 	port: number
 	name: string
@@ -1170,6 +1214,7 @@ export interface PanelSettings {
 	stop_grace_seconds: number
 	registration_enabled: boolean
 	registration_requires_approval: boolean
+	java_auto_install: boolean
 }
 
 export interface WsServerMessage {

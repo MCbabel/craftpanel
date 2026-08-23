@@ -28,8 +28,14 @@ pub enum LoaderError {
     #[error("{service} answered in a shape we do not understand: {reason}")]
     Unreadable { service: &'static str, reason: String },
 
+    #[error("{service} sent us to {origin}, which is not one of the hosts its downloads come from")]
+    Untrusted { service: &'static str, origin: String },
+
     #[error("the download from {origin} broke off: {reason}")]
     Interrupted { origin: String, reason: String },
+
+    #[error("the download from {origin} is longer than the {ceiling} bytes it may be")]
+    TooLarge { origin: String, ceiling: u64 },
 
     #[error(
         "the file from {origin} is damaged: its {algorithm} is {actual}, \

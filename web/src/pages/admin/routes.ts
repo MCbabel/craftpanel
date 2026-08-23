@@ -1,5 +1,6 @@
 import {
 	CloudIcon,
+	CoffeeIcon,
 	GlobeIcon,
 	MailIcon,
 	SettingsIcon,
@@ -24,6 +25,7 @@ const messages = defineMessages({
 	mail: { id: 'panel.menu.mail', defaultMessage: 'Mail' },
 	registrations: { id: 'panel.menu.registrations', defaultMessage: 'Sign-ups' },
 	drive: { id: 'panel.menu.drive', defaultMessage: 'Google Drive' },
+	runtimes: { id: 'panel.menu.runtimes', defaultMessage: 'Java runtimes' },
 	settings: { id: 'panel.menu.panel-settings', defaultMessage: 'Panel settings' },
 })
 
@@ -62,6 +64,13 @@ export const adminPages: AdminPage[] = [
 		component: () => import('@/pages/admin/Drive.vue'),
 		label: messages.drive,
 		icon: CloudIcon,
+	},
+	{
+		name: 'admin-runtimes',
+		path: 'admin/runtimes',
+		component: () => import('@/pages/admin/Runtimes.vue'),
+		label: messages.runtimes,
+		icon: CoffeeIcon,
 	},
 	{
 		name: 'admin-settings',

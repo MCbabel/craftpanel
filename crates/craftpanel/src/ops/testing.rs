@@ -131,6 +131,19 @@ impl DataDir {
     pub fn path(&self) -> &std::path::Path {
         &self.0
     }
+
+    pub fn holding_java(self, major: u32, version: &str) -> Self {
+        let home = self.0.join("runtimes").join(format!("java-{major}"));
+        std::fs::create_dir_all(home.join("bin")).expect("a runtime directory");
+        std::fs::write(home.join("bin").join("java"), "#!/bin/sh\n").expect("a launcher");
+        std::fs::write(
+            home.join("release"),
+            format!("IMPLEMENTOR=\"Eclipse Adoptium\"\nJAVA_VERSION=\"{version}\"\n"),
+        )
+        .expect("a release file");
+        crate::settings::runtimes::forget(&self.0);
+        self
+    }
 }
 
 impl Drop for DataDir {

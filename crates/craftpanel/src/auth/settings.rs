@@ -24,6 +24,7 @@ struct Row {
     stop_grace_seconds: u32,
     registration_enabled: bool,
     registration_requires_approval: bool,
+    java_auto_install: bool,
 }
 
 pub async fn load(pool: &SqlitePool) -> sqlx::Result<PanelSettings> {
@@ -32,7 +33,7 @@ pub async fn load(pool: &SqlitePool) -> sqlx::Result<PanelSettings> {
          default_cpu_mode, default_cpu_cores, default_pids_max, default_disk_mib, \
          max_upload_bytes, max_backups_per_server, external_services_enabled, \
          max_concurrent_operations, stop_grace_seconds, registration_enabled, \
-         registration_requires_approval FROM panel_settings WHERE id = 1",
+         registration_requires_approval, java_auto_install FROM panel_settings WHERE id = 1",
     )
     .fetch_one(pool)
     .await?;
@@ -54,6 +55,7 @@ pub async fn load(pool: &SqlitePool) -> sqlx::Result<PanelSettings> {
         stop_grace_seconds: row.stop_grace_seconds,
         registration_enabled: row.registration_enabled,
         registration_requires_approval: row.registration_requires_approval,
+        java_auto_install: row.java_auto_install,
     })
 }
 
@@ -67,7 +69,7 @@ pub async fn save(pool: &SqlitePool, settings: &PanelSettings) -> Result<()> {
          max_backups_per_server = ?, \
          external_services_enabled = ?, max_concurrent_operations = ?, stop_grace_seconds = ?, \
          registration_enabled = ?, registration_requires_approval = ?, \
-         updated_at = ? WHERE id = 1",
+         java_auto_install = ?, updated_at = ? WHERE id = 1",
     )
     .bind(settings.public_address.as_deref())
     .bind(settings.port_pool.from)
@@ -84,6 +86,7 @@ pub async fn save(pool: &SqlitePool, settings: &PanelSettings) -> Result<()> {
     .bind(settings.stop_grace_seconds)
     .bind(settings.registration_enabled)
     .bind(settings.registration_requires_approval)
+    .bind(settings.java_auto_install)
     .bind(Timestamp::now())
     .execute(pool)
     .await?;
@@ -145,6 +148,7 @@ mod tests {
             external_services_enabled: false,
             max_concurrent_operations: 4,
             stop_grace_seconds: 30,
+            java_auto_install: false,
             ..base.clone()
         }
     }
@@ -160,6 +164,7 @@ mod tests {
         assert_eq!(settings.max_backups_per_server, 10);
         assert_eq!(settings.max_upload_bytes, 4 * 1024 * 1024 * 1024);
         assert_eq!(settings.default_limits.disk_mib, 51200, "0007: fifty gibibytes");
+        assert!(settings.java_auto_install, "0015: the only switch that starts open");
     }
 
     #[tokio::test]

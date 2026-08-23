@@ -67,11 +67,34 @@ preflight() {
 	[ "$(uname -s)" = "Linux" ] || die "CraftPanel runs on Linux only"
 	command -v systemctl >/dev/null || die "systemd is required"
 	command -v curl >/dev/null || die "curl is required"
-	command -v java >/dev/null || warn "java was not found — install a JRE 21 before creating a server"
+
+	# Java is not a requirement any more: the panel fetches the runtime a game
+	# version asks for into $DATA_DIR/runtimes itself (docs/JAVA.md). What is
+	# still worth a word is the machine that has neither — no Java here and no
+	# way to reach Adoptium — because there the first server would not start.
+	if ! java_here && ! adoptium_reachable; then
+		warn "no Java on this machine and api.adoptium.net is out of reach — the panel fetches its own runtimes and cannot here. Try: apt install openjdk-21-jre-headless"
+	fi
 
 	if [ ! -e /sys/fs/cgroup/cgroup.controllers ]; then
 		warn "cgroup v2 is not mounted — per-user CPU and memory limits will not work"
 	fi
+}
+
+java_here() {
+	command -v java >/dev/null && return 0
+
+	local candidate
+	for candidate in "$DATA_DIR"/runtimes/java-*/bin/java; do
+		if [ -x "$candidate" ]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+adoptium_reachable() {
+	curl -fsS --max-time 5 -o /dev/null https://api.adoptium.net/v3/info/available_releases 2>/dev/null
 }
 
 installed_version() {
@@ -152,6 +175,15 @@ ensure_accounts() {
 	install -d -o root -g "$SERVICE_GROUP" -m 1771 "$DATA_DIR"
 	install -d -o root -g "$SERVICE_GROUP" -m 0751 "$DATA_DIR/users"
 	install -d -o "$SERVICE_USER" -g "$SERVICE_GROUP" -m 0750 "$DATA_DIR/cache"
+	# The Java runtimes the panel fetches for itself, one directory per major
+	# version (docs/JAVA.md). The panel owns it, because the panel is the only
+	# thing that writes in there — and 0755 rather than 0750 like the cache above,
+	# because a game server runs as its own managed account, shares no group with
+	# the panel, and still has to execute runtimes/java-<major>/bin/java. Whether
+	# anything is ever fetched into it is not decided here but in the panel
+	# settings (java_auto_install, migration 0015); an installation with that
+	# switch off keeps the directory and can be filled by hand.
+	install -d -o "$SERVICE_USER" -g "$SERVICE_GROUP" -m 0755 "$DATA_DIR/runtimes"
 	install -d -m 0755 "$CONFIG_DIR"
 }
 

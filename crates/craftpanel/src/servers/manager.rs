@@ -16,6 +16,7 @@ use crate::auth::extract::Caller;
 use crate::auth::users::{self};
 use crate::config::Config;
 use crate::helper::Helper;
+use crate::java;
 use crate::loaders::{Build, Channel, Checksum, Loader, LoaderError, Sources, Wanted};
 use crate::model::{
     AuditAction, Id, LoaderId, Minecraft, Operation, OperationError, OperationErrorStep,
@@ -25,6 +26,7 @@ use crate::model::{
     SystemUserState, Timestamp, UpdateChannel, UserRef, KNOWN_PROPERTY_KEYS,
 };
 use crate::ops::{NewOperation, Operations, StateReport, StatsSample, Step};
+use crate::settings::runtimes::JavaRuntime;
 
 use super::{Hub, RunState};
 
@@ -137,6 +139,8 @@ struct Input {
     build: Option<Chosen>,
     #[serde(default = "yes")]
     keep_backups: bool,
+    #[serde(default)]
+    java_major: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -197,6 +201,7 @@ pub struct Manager {
     helper: Helper,
     builds: Arc<dyn Builds>,
     disks: Disks,
+    runtimes: Arc<java::Runtimes>,
     gates: Mutex<HashMap<Id, Arc<tokio::sync::Mutex<()>>>>,
     wishes: Mutex<HashMap<Id, Wish>>,
     meters: Mutex<HashMap<Id, Meter>>,
@@ -212,6 +217,7 @@ impl Manager {
         helper: Helper,
         builds: Arc<dyn Builds>,
         disks: Disks,
+        runtimes: Arc<java::Runtimes>,
     ) -> Arc<Self> {
         Arc::new(Self {
             pool,
@@ -221,6 +227,7 @@ impl Manager {
             helper,
             builds,
             disks,
+            runtimes,
             gates: Mutex::default(),
             wishes: Mutex::default(),
             meters: Mutex::default(),
@@ -467,6 +474,7 @@ impl Manager {
             properties: wish.properties,
             build: build.map(Chosen::from),
             keep_backups: true,
+            java_major: None,
         };
         let mut new = NewOperation::new(server, OperationKind::ServerCreate, Some(caller.id()));
         new.input = serde_json::to_value(&input).ok();
@@ -550,8 +558,11 @@ impl Manager {
     async fn dispatch(self: &Arc<Self>) -> Result<()> {
         for id in self.operations.runnable().await.map_err(fault)? {
             let Ok(operation) = self.operations.get(id).await else { continue };
-            if !matches!(operation.kind, OperationKind::ServerCreate | OperationKind::ServerDelete)
-            {
+            if !matches!(
+                operation.kind,
+                OperationKind::ServerCreate | OperationKind::ServerDelete
+                    | OperationKind::InstallJava
+            ) {
                 continue;
             }
             let manager = Arc::clone(self);
@@ -567,6 +578,7 @@ impl Manager {
         let outcome = match operation.kind {
             OperationKind::ServerCreate => self.install(&operation).await,
             OperationKind::ServerDelete => self.remove(&operation).await,
+            OperationKind::InstallJava => self.lay_out_java(&operation).await,
             _ => return false,
         };
 
@@ -639,6 +651,14 @@ impl Manager {
             return self.give_up(id, &work).await;
         }
 
+        let wanted = chosen
+            .java_major
+            .or_else(|| crate::settings::runtimes::default_major(&game_version));
+        self.java_before_the_first_start(id, wanted).await;
+        if self.called_off(id).await {
+            return self.give_up(id, &work).await;
+        }
+
         self.step(id, OperationPhase::WritingConfig, 0.95, None, Some(false)).await;
         tokio::fs::create_dir_all(&dir).await.map_err(disk)?;
         tokio::fs::write(dir.join("eula.txt"), eula_text()).await.map_err(disk)?;
@@ -680,6 +700,23 @@ impl Manager {
             self.announce(&object);
         }
         Ok(())
+    }
+
+    async fn java_before_the_first_start(&self, id: Id, major: Option<u32>) {
+        let Some(major) = major else { return };
+        let here = crate::settings::runtimes::cached(&self.config.data_dir);
+        if here.iter().any(|found| found.major == major) {
+            return;
+        }
+        if !self.fetches_java().await {
+            return;
+        }
+
+        let laid =
+            java::report::lay_out(&self.runtimes, &self.operations, id, major, (0.65, 0.90)).await;
+        if let Err(err) = laid {
+            tracing::warn!(major, "this server has no Java {major} to start on: {err}");
+        }
     }
 
     async fn remove(&self, operation: &Operation) -> std::result::Result<(), OperationError> {
@@ -842,7 +879,8 @@ impl Manager {
 
     async fn power_row(&self, server: Id) -> Result<PowerRow> {
         sqlx::query_as::<_, PowerRow>(
-            "SELECT id, owner_id, status, memory_mib, loader, java_major, extra_flags
+            "SELECT id, owner_id, status, memory_mib, loader, java_major, game_version,
+                    extra_flags
                FROM servers WHERE id = ?",
         )
         .bind(server)
@@ -876,6 +914,8 @@ impl Manager {
             ));
         }
 
+        let program = self.java(actor, row).await?;
+
         let token = hex::encode(rand::random::<[u8; 32]>());
         sqlx::query(
             "UPDATE servers SET supervisor_token = ?, power_state = 'starting',
@@ -893,7 +933,7 @@ impl Manager {
             user_id: row.owner_id.to_string(),
             server_id: row.id.to_string(),
             working_dir: crate::helper::in_servers(row.id),
-            program: self.java(row.java_major)?,
+            program,
             args: argv(row.loader, row.memory_mib, &row.flags()),
             env: Vec::new(),
             supervisor_socket: self.hub.socket().to_path_buf(),
@@ -1005,37 +1045,76 @@ impl Manager {
         Ok(grace.unwrap_or(60))
     }
 
-    fn java(&self, major: Option<u32>) -> Result<PathBuf> {
-        let Some(major) = major else {
+    async fn java(self: &Arc<Self>, actor: Option<Id>, row: &PowerRow) -> Result<PathBuf> {
+        let Some(major) = row.wants_java() else {
             return Ok(system_java());
         };
 
-        let managed = self
-            .config
-            .data_dir
-            .join("runtimes")
-            .join(format!("java-{major}"))
-            .join("bin")
-            .join("java");
-        if managed.exists() {
-            return Ok(managed);
+        if let Some(managed) = self.runtimes.present(major).and_then(|found| found.path) {
+            return Ok(PathBuf::from(managed));
         }
 
-        if let Some(found) = installed_java(major) {
-            return Ok(found);
+        let here = crate::settings::runtimes::cached(&self.config.data_dir);
+        if let Some(exact) = binary_of(&here, |found| found == major) {
+            return Ok(exact);
         }
 
-        if let Some(newer) = newest_java_at_least(major) {
-            return Ok(newer);
+        if self.fetches_java().await {
+            self.ask_for_java(actor, row.id, major).await?;
+            return Err(Failure::conflict(
+                "java_runtime_fetching",
+                format!(
+                    "this server needs Java {major}, which is not on this machine. \
+                     The panel is fetching it now; start again once that run is done."
+                ),
+            ));
         }
 
-        Err(Failure::conflict(
-            "java_runtime_missing",
-            format!(
-                "this version needs Java {major} and no such runtime is installed \
-                 (try: apt install openjdk-{major}-jre-headless)"
-            ),
-        ))
+        let stands_in = |found| crate::settings::runtimes::stands_in_for(found, major);
+        if let Some(near) = binary_of(&here, stands_in) {
+            tracing::info!(server = %row.id, "a newer Java stands in for the Java {major} asked for");
+            return Ok(near);
+        }
+
+        Err(Failure::conflict("java_runtime_missing", no_java_here(&here, major)))
+    }
+
+    async fn fetches_java(&self) -> bool {
+        match crate::auth::settings::load(&self.pool).await {
+            Ok(settings) => settings.java_auto_install,
+            Err(err) => {
+                tracing::warn!("the panel settings could not be read: {err}");
+                false
+            }
+        }
+    }
+
+    async fn ask_for_java(&self, actor: Option<Id>, server: Id, major: u32) -> Result<()> {
+        let mut new = NewOperation::new(server, OperationKind::InstallJava, actor);
+        new.message = Some(format!("Java {major}"));
+        new.input = Some(serde_json::json!({ "java_major": major }));
+        self.operations.create(new).await.map_err(fault)?;
+        Ok(())
+    }
+
+    async fn lay_out_java(
+        &self,
+        operation: &Operation,
+    ) -> std::result::Result<(), OperationError> {
+        let id = operation.id;
+        let input: Input = self.input(id).await?;
+        let Some(major) = input.java_major else {
+            return Err(internal_error("a Java run that names no version"));
+        };
+
+        let installed =
+            java::report::lay_out(&self.runtimes, &self.operations, id, major, (0.0, 1.0))
+                .await
+                .map_err(|err| java::report::blame(&err))?;
+
+        tracing::info!(major, home = %installed.home.display(), "a Java runtime is here");
+        self.operations.finish(id).await.map_err(internal_error)?;
+        Ok(())
     }
 
     fn gate(&self, server: Id) -> Arc<tokio::sync::Mutex<()>> {
@@ -1510,12 +1589,18 @@ struct PowerRow {
     memory_mib: u32,
     loader: Option<LoaderId>,
     java_major: Option<u32>,
+    game_version: Option<String>,
     extra_flags: String,
 }
 
 impl PowerRow {
     fn flags(&self) -> Vec<String> {
         serde_json::from_str(&self.extra_flags).unwrap_or_default()
+    }
+
+    fn wants_java(&self) -> Option<u32> {
+        self.java_major
+            .or_else(|| crate::settings::runtimes::default_major(self.game_version.as_deref()?))
     }
 }
 
@@ -1932,9 +2017,12 @@ mod tests {
     use super::*;
     use crate::auth::harness::{a_user, an_admin, insert_user, sign_in, FakeHelper, PASSWORD};
     use crate::auth::session;
+    use crate::java::harness::{self as java_harness, FakeAdoptium};
     use crate::model::{KnownProperties, OperationState, PanelRole};
     use crate::ops::testing::DataDir;
     use axum::http::StatusCode;
+
+    const NOWHERE: &str = "http://127.0.0.1:9";
 
     struct Fixture {
         manager: Arc<Manager>,
@@ -1947,19 +2035,19 @@ mod tests {
 
     impl Fixture {
         async fn new() -> Self {
-            let dir = DataDir::new();
+            let dir = DataDir::new().holding_java(21, "21.0.4");
             let pool = crate::auth::harness::test_pool().await;
             Self::with(pool, dir, Shelf::new(), Disks::none()).await
         }
 
         async fn with_disks(disks: Disks) -> Self {
-            let dir = DataDir::new();
+            let dir = DataDir::new().holding_java(21, "21.0.4");
             let pool = crate::auth::harness::test_pool().await;
             Self::with(pool, dir, Shelf::new(), disks).await
         }
 
         async fn failing(error: LoaderError) -> Self {
-            let dir = DataDir::new();
+            let dir = DataDir::new().holding_java(21, "21.0.4");
             let pool = crate::auth::harness::test_pool().await;
             Self::with(pool, dir, Shelf::refusing(error), Disks::none()).await
         }
@@ -1969,6 +2057,16 @@ mod tests {
             dir: DataDir,
             shelf: Arc<Shelf>,
             disks: Disks,
+        ) -> Self {
+            Self::against(pool, dir, shelf, disks, NOWHERE.to_owned()).await
+        }
+
+        async fn against(
+            pool: SqlitePool,
+            dir: DataDir,
+            shelf: Arc<Shelf>,
+            disks: Disks,
+            adoptium: String,
         ) -> Self {
             let helper = FakeHelper::obliging().await.rooted_at(dir.path().join("users"));
             let config = Arc::new(Config {
@@ -1986,6 +2084,9 @@ mod tests {
                 Helper::new(helper.socket()),
                 Arc::clone(&shelf) as Arc<dyn Builds>,
                 disks,
+                Arc::new(
+                    java::Runtimes::with_base(dir.path(), adoptium).expect("a client"),
+                ),
             );
             Self { manager, pool, helper, shelf, hub, dir }
         }
@@ -2004,6 +2105,16 @@ mod tests {
         }
 
         fn loader_wish(&self, name: &str, owner: Id, memory_mib: u32) -> NewServer {
+            self.wish_for(name, owner, memory_mib, "1.21.8")
+        }
+
+        fn wish_for(
+            &self,
+            name: &str,
+            owner: Id,
+            memory_mib: u32,
+            game_version: &str,
+        ) -> NewServer {
             NewServer {
                 name: name.to_owned(),
                 owner_id: owner,
@@ -2011,11 +2122,44 @@ mod tests {
                 port: None,
                 content: CreateContent::Loader {
                     loader: LoaderId::Paper,
-                    game_version: "1.21.8".to_owned(),
+                    game_version: game_version.to_owned(),
                     loader_version: None,
                 },
                 properties: PropertiesFields::default(),
             }
+        }
+
+        async fn set_auto_install(&self, on: bool) {
+            sqlx::query("UPDATE panel_settings SET java_auto_install = ? WHERE id = 1")
+                .bind(on)
+                .execute(&self.pool)
+                .await
+                .expect("the switch");
+        }
+
+        async fn java_run(&self, server: Id) -> Option<Operation> {
+            let id: Option<Id> = sqlx::query_scalar(
+                "SELECT id FROM operations WHERE server_id = ? AND kind = 'install_java'",
+            )
+            .bind(server)
+            .fetch_optional(&self.pool)
+            .await
+            .expect("the operations");
+            match id {
+                Some(id) => Some(self.manager.operations.get(id).await.expect("the run")),
+                None => None,
+            }
+        }
+
+        fn spawned(&self) -> Vec<SpawnRequest> {
+            self.helper
+                .calls()
+                .into_iter()
+                .filter_map(|call| match call {
+                    craftpanel_proto::HelperRequest::Spawn(request) => Some(request),
+                    _ => None,
+                })
+                .collect()
         }
     }
 
@@ -2588,6 +2732,173 @@ mod tests {
         assert_eq!(other.code, "loader_install_failed");
         assert_eq!(other.step, OperationErrorStep::Modloader);
         assert_eq!(other.message, "internal error");
+    }
+
+    async fn an_upstream_with(major: u32, version: &str) -> FakeAdoptium {
+        let upstream = FakeAdoptium::started().await;
+        upstream.offer(major, version, java_harness::a_jre(version));
+        upstream
+    }
+
+    async fn a_panel_against(upstream: &FakeAdoptium) -> Fixture {
+        let dir = DataDir::new().holding_java(21, "21.0.4");
+        let pool = crate::auth::harness::test_pool().await;
+        Fixture::against(pool, dir, Shelf::new(), Disks::none(), upstream.base().to_owned()).await
+    }
+
+    fn laid_down(fixture: &Fixture, major: u32) -> PathBuf {
+        fixture.dir.path().join("runtimes").join(format!("java-{major}")).join("bin").join("java")
+    }
+
+    #[tokio::test]
+    async fn a_new_server_gets_the_java_it_will_need_before_anybody_presses_start() {
+        let upstream = an_upstream_with(8, "1.8.0_502").await;
+        upstream.hold(Duration::from_millis(500));
+        let fixture = a_panel_against(&upstream).await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+
+        let made = fixture
+            .manager
+            .create(&caller, fixture.wish_for("old", max, 2048, "1.12.2"))
+            .await
+            .unwrap();
+
+        let manager = Arc::clone(&fixture.manager);
+        let id = made.operation.id;
+        let run = tokio::spawn(async move { manager.run(id).await });
+
+        let mut seen = None;
+        for _ in 0..200 {
+            tokio::time::sleep(Duration::from_millis(25)).await;
+            let step = fixture.manager.operations.get(id).await.expect("the run");
+            if step.phase == Some(OperationPhase::InstallingJava) {
+                seen = Some(step);
+                break;
+            }
+        }
+        let shown = seen.expect("the page is told that Java is being fetched");
+        assert!(shown.progress >= 0.65 && shown.progress <= 0.90, "{}", shown.progress);
+
+        assert!(run.await.unwrap(), "the set-up ran");
+        assert!(laid_down(&fixture, 8).is_file(), "Java 8 is there before the first start");
+        assert_eq!(upstream.served(), 1);
+
+        let done = fixture.manager.operations.get(id).await.unwrap();
+        assert_eq!(done.state, OperationState::Done);
+        assert_eq!(done.phase, Some(OperationPhase::WritingConfig), "and the run went on");
+    }
+
+    #[tokio::test]
+    async fn a_java_that_cannot_be_had_does_not_break_the_server_being_made() {
+        let upstream = an_upstream_with(21, "21.0.4").await;
+        let fixture = a_panel_against(&upstream).await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+
+        let made = fixture
+            .manager
+            .create(&caller, fixture.wish_for("old", max, 2048, "1.12.2"))
+            .await
+            .unwrap();
+        assert!(fixture.manager.run(made.operation.id).await);
+
+        assert!(!laid_down(&fixture, 8).exists(), "Adoptium offered no Java 8");
+        let done = fixture.manager.operations.get(made.operation.id).await.unwrap();
+        assert_eq!(done.state, OperationState::Done, "the server is set up all the same");
+        let status: ServerStatus =
+            sqlx::query_scalar("SELECT status FROM servers WHERE id = ?")
+                .bind(made.server.id)
+                .fetch_one(&fixture.pool)
+                .await
+                .unwrap();
+        assert_eq!(status, ServerStatus::Available);
+    }
+
+    #[tokio::test]
+    async fn a_start_that_finds_no_java_fetches_it_and_says_so_instead_of_dying() {
+        let upstream = an_upstream_with(8, "1.8.0_502").await;
+        let fixture = a_panel_against(&upstream).await;
+        fixture.set_auto_install(false).await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+
+        let made = fixture
+            .manager
+            .create(&caller, fixture.wish_for("old", max, 2048, "1.12.2"))
+            .await
+            .unwrap();
+        assert!(fixture.manager.run(made.operation.id).await);
+        assert!(!laid_down(&fixture, 8).exists(), "the switch was off while it was made");
+
+        fixture.set_auto_install(true).await;
+        let server = made.server.id;
+        let refusal =
+            fixture.manager.power(&caller, server, PowerAction::Start).await.unwrap_err();
+        assert_eq!(refusal.code(), "java_runtime_fetching");
+        assert!(refusal.to_string().contains("Java 8"), "{refusal}");
+
+        let power: PowerState = sqlx::query_scalar("SELECT power_state FROM servers WHERE id = ?")
+            .bind(server)
+            .fetch_one(&fixture.pool)
+            .await
+            .unwrap();
+        assert_eq!(power, PowerState::Stopped, "and it did not stay half started");
+        assert!(fixture.spawned().is_empty(), "nothing was asked to run yet");
+
+        let asked = fixture.java_run(server).await.expect("a run the page can show");
+        assert_eq!(asked.state, OperationState::Queued);
+        assert_eq!(asked.message.as_deref(), Some("Java 8"));
+
+        assert!(fixture.manager.run(asked.id).await, "the dispatcher takes it up");
+        assert_eq!(
+            fixture.java_run(server).await.map(|run| run.state),
+            Some(OperationState::Done)
+        );
+        assert!(laid_down(&fixture, 8).is_file());
+
+        fixture.manager.power(&caller, server, PowerAction::Start).await.expect("now it starts");
+        let spawned = fixture.spawned();
+        assert_eq!(spawned.len(), 1);
+        assert_eq!(spawned[0].program, laid_down(&fixture, 8), "on the Java it fetched");
+    }
+
+    #[tokio::test]
+    async fn without_the_switch_a_start_climbs_one_release_and_no_further() {
+        let upstream = an_upstream_with(8, "1.8.0_502").await;
+        let fixture = a_panel_against(&upstream).await;
+        fixture.set_auto_install(false).await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+
+        let mut made = Vec::new();
+        for name in ["near", "far"] {
+            let one =
+                fixture.manager.create(&caller, fixture.loader_wish(name, max, 1024)).await;
+            let one = one.unwrap();
+            assert!(fixture.manager.run(one.operation.id).await);
+            made.push(one.server.id);
+        }
+        let (near, far) = (made[0], made[1]);
+        sqlx::query("UPDATE servers SET java_major = 20 WHERE id = ?")
+            .bind(near)
+            .execute(&fixture.pool)
+            .await
+            .unwrap();
+        sqlx::query("UPDATE servers SET java_major = 99 WHERE id = ?")
+            .bind(far)
+            .execute(&fixture.pool)
+            .await
+            .unwrap();
+
+        fixture.manager.power(&caller, near, PowerAction::Start).await.expect("21 will do for 20");
+        assert_eq!(fixture.spawned()[0].program, laid_down(&fixture, 21));
+
+        let refusal = fixture.manager.power(&caller, far, PowerAction::Start).await.unwrap_err();
+        assert_eq!(refusal.code(), "java_runtime_missing");
+        assert!(refusal.to_string().contains("openjdk-99-jre-headless"), "{refusal}");
+        assert!(fixture.java_run(far).await.is_none(), "the switch is off, so nothing is fetched");
+        assert_eq!(fixture.spawned().len(), 1, "and the far one was never handed to the helper");
     }
 
     #[tokio::test]
@@ -3246,37 +3557,26 @@ fn system_java() -> PathBuf {
     }
 }
 
-fn installed_javas() -> Vec<(u32, PathBuf)> {
-    let Ok(entries) = std::fs::read_dir("/usr/lib/jvm") else {
-        return Vec::new();
+fn binary_of(here: &[JavaRuntime], wanted: impl Fn(u32) -> bool) -> Option<PathBuf> {
+    let mut fitting: Vec<&JavaRuntime> =
+        here.iter().filter(|runtime| wanted(runtime.major)).collect();
+    fitting.sort_by_key(|runtime| runtime.major);
+    fitting.into_iter().find_map(|runtime| Some(PathBuf::from(runtime.path.clone()?)))
+}
+
+fn no_java_here(here: &[JavaRuntime], major: u32) -> String {
+    let mut majors: Vec<String> = here.iter().map(|found| found.major.to_string()).collect();
+    majors.dedup();
+    let machine = match majors.as_slice() {
+        [] => "this machine has no Java at all".to_owned(),
+        found => format!(
+            "this machine has Java {}, and a server that asks for Java {major} \
+             does not run on that",
+            found.join(", ")
+        ),
     };
-
-    let mut found: Vec<(u32, PathBuf)> = entries
-        .flatten()
-        .filter_map(|entry| {
-            let name = entry.file_name().to_string_lossy().into_owned();
-            let binary = entry.path().join("bin").join("java");
-            if !binary.exists() {
-                return None;
-            }
-            let major = name
-                .split(|c: char| !c.is_ascii_digit())
-                .filter(|part| !part.is_empty())
-                .filter_map(|part| part.parse::<u32>().ok())
-                .find(|major| (8..=99).contains(major))?;
-            Some((major, binary))
-        })
-        .collect();
-
-    found.sort_by_key(|(major, _)| *major);
-    found.dedup_by_key(|(major, _)| *major);
-    found
-}
-
-fn installed_java(major: u32) -> Option<PathBuf> {
-    installed_javas().into_iter().find(|(found, _)| *found == major).map(|(_, path)| path)
-}
-
-fn newest_java_at_least(major: u32) -> Option<PathBuf> {
-    installed_javas().into_iter().filter(|(found, _)| *found >= major).next_back().map(|(_, p)| p)
+    format!(
+        "{machine}. Turn \"Fetch Java by itself\" back on in the panel settings, or put one \
+         there yourself (apt install openjdk-{major}-jre-headless)"
+    )
 }

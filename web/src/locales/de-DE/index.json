@@ -1049,6 +1049,144 @@
   "admin.registrations.waiting-count": {
     "defaultMessage": "{count, plural, one {# Registrierung wartet} other {# Registrierungen warten}} auf dich."
   },
+  "admin.runtimes.absent-fetchable": {
+    "defaultMessage": "Nicht auf diesem Rechner. Ein Server, der sie braucht, startet nicht, solange sie fehlt."
+  },
+  "admin.runtimes.absent-foreign": {
+    "defaultMessage": "Nicht auf diesem Rechner, und diese Version holt das Panel nicht."
+  },
+  "admin.runtimes.attempt-failed": {
+    "defaultMessage": "Der letzte Versuch ist fehlgeschlagen"
+  },
+  "admin.runtimes.auto-off": {
+    "defaultMessage": "Holen ist aus"
+  },
+  "admin.runtimes.auto-off-hint": {
+    "defaultMessage": "Ein Server, dem sein Java fehlt, startet nicht. Die Knöpfe hier wirken trotzdem: du hast ja danach gefragt."
+  },
+  "admin.runtimes.auto-on": {
+    "defaultMessage": "Holt selbst"
+  },
+  "admin.runtimes.auto-on-hint": {
+    "defaultMessage": "Ein Server, dem sein Java fehlt, bekommt es beim Starten."
+  },
+  "admin.runtimes.auto-switch": {
+    "defaultMessage": "In den Panel-Einstellungen ändern"
+  },
+  "admin.runtimes.covers-17": {
+    "defaultMessage": "Für Minecraft 1.17 bis 1.19"
+  },
+  "admin.runtimes.covers-21": {
+    "defaultMessage": "Für Minecraft 1.20 bis 1.25"
+  },
+  "admin.runtimes.covers-25": {
+    "defaultMessage": "Für Minecraft 1.26 und neuer"
+  },
+  "admin.runtimes.covers-8": {
+    "defaultMessage": "Für Minecraft 1.16 und älter"
+  },
+  "admin.runtimes.covers-other": {
+    "defaultMessage": "Für keine Version fragt das Panel danach; die hat jemand hierhergelegt"
+  },
+  "admin.runtimes.directory": {
+    "defaultMessage": "Liegt in"
+  },
+  "admin.runtimes.fetch-again": {
+    "defaultMessage": "Neu holen"
+  },
+  "admin.runtimes.install": {
+    "defaultMessage": "Holen"
+  },
+  "admin.runtimes.java-major": {
+    "defaultMessage": "Java {major}"
+  },
+  "admin.runtimes.laid-at": {
+    "defaultMessage": "Geholt"
+  },
+  "admin.runtimes.laid-unknown": {
+    "defaultMessage": "irgendwann"
+  },
+  "admin.runtimes.load-failed": {
+    "defaultMessage": "Die Laufzeiten konnten nicht gelesen werden"
+  },
+  "admin.runtimes.locked-body": {
+    "defaultMessage": "Solange ein Server auf dieser Laufzeit läuft, wird sie weder ersetzt noch entfernt: dem laufenden Java würden die Dateien unter den Füßen weggezogen. Halte den Server vorher an."
+  },
+  "admin.runtimes.machine": {
+    "defaultMessage": "Dieser Rechner"
+  },
+  "admin.runtimes.machine-unknown": {
+    "defaultMessage": "keiner, für den Adoptium baut"
+  },
+  "admin.runtimes.remove": {
+    "defaultMessage": "Entfernen"
+  },
+  "admin.runtimes.remove-body": {
+    "defaultMessage": "Das Verzeichnis mit dem geholten Java {major} wird von diesem Rechner gelöscht."
+  },
+  "admin.runtimes.remove-warning": {
+    "defaultMessage": "Ein Server, der diese Version braucht, holt sie beim nächsten Start wieder, solange das Holen eingeschaltet ist. Ist es aus, startet er nicht."
+  },
+  "admin.runtimes.running-now": {
+    "defaultMessage": "Läuft gerade damit: {names}"
+  },
+  "admin.runtimes.servers": {
+    "defaultMessage": "{count, plural, =0 {Kein Server fragt danach} one {# Server fragt danach} other {# Server fragen danach}}."
+  },
+  "admin.runtimes.size": {
+    "defaultMessage": "Größe"
+  },
+  "admin.runtimes.space-used": {
+    "defaultMessage": "Belegter Platz"
+  },
+  "admin.runtimes.stage-asking": {
+    "defaultMessage": "Fragt Adoptium"
+  },
+  "admin.runtimes.stage-done": {
+    "defaultMessage": "Schließt ab"
+  },
+  "admin.runtimes.stage-downloading": {
+    "defaultMessage": "Lädt {done} von {total}"
+  },
+  "admin.runtimes.stage-unpacking": {
+    "defaultMessage": "Packt aus"
+  },
+  "admin.runtimes.stage-waiting": {
+    "defaultMessage": "Wartet"
+  },
+  "admin.runtimes.standing-absent": {
+    "defaultMessage": "Nicht da"
+  },
+  "admin.runtimes.standing-laid": {
+    "defaultMessage": "Vom Panel geholt"
+  },
+  "admin.runtimes.standing-system": {
+    "defaultMessage": "Vom System"
+  },
+  "admin.runtimes.subtitle": {
+    "defaultMessage": "Jede Minecraft-Version braucht ein bestimmtes Java. Das sind die, die dieses Panel für deine Server vorhält, und die, die es von Adoptium holen kann."
+  },
+  "admin.runtimes.system-found": {
+    "defaultMessage": "Das Panel hat keine geholt. Dieser Rechner trägt schon {version} ({vendor}) unter {path}, und die nehmen die Server."
+  },
+  "admin.runtimes.title": {
+    "defaultMessage": "Java-Laufzeiten"
+  },
+  "admin.runtimes.unknown-error": {
+    "defaultMessage": "Da ist etwas schiefgegangen. Versuch es noch einmal."
+  },
+  "admin.runtimes.unsupported-body": {
+    "defaultMessage": "Adoptium baut seine Linux-Laufzeiten für x64 und aarch64, und das hier ist keins von beiden. Installiere Java mit dem Paketmanager; das Panel findet es und führt es unten auf."
+  },
+  "admin.runtimes.unsupported-header": {
+    "defaultMessage": "Auf diesem Rechner lässt sich nichts holen"
+  },
+  "admin.runtimes.version": {
+    "defaultMessage": "Version"
+  },
+  "admin.runtimes.where": {
+    "defaultMessage": "Verzeichnis"
+  },
   "admin.settings.ceilings.description": {
     "defaultMessage": "Grenzen, die das Panel für alle durchsetzt, Administratoren eingeschlossen."
   },
@@ -1072,6 +1210,24 @@
   },
   "admin.settings.invalid": {
     "defaultMessage": "Einige Werte liegen außerhalb des erlaubten Bereichs. Korrigiere die rot markierten Felder."
+  },
+  "admin.settings.java.description": {
+    "defaultMessage": "Braucht ein Server eine Java-Version, die dieser Rechner nicht hat, lädt das Panel diese Laufzeit von Adoptium und legt sie in sein eigenes Datenverzeichnis."
+  },
+  "admin.settings.java.list-hint": {
+    "defaultMessage": "Was auf diesem Rechner liegt, und die Knöpfe zum Hinzufügen und Entfernen, findest du unter"
+  },
+  "admin.settings.java.list-link": {
+    "defaultMessage": "Java-Laufzeiten"
+  },
+  "admin.settings.java.off-body": {
+    "defaultMessage": "Ein Server, dessen Java-Version fehlt, startet dann nicht und sagt, welche er wollte, statt dass das Panel sie holt. Alles bereits Geholte bleibt liegen und läuft weiter. Schalte das aus auf einem Rechner ohne Weg nach draußen oder wenn du deine JVMs mit dem Paketmanager installierst."
+  },
+  "admin.settings.java.off-header": {
+    "defaultMessage": "Die Laufzeiten stellst du jetzt selbst bereit"
+  },
+  "admin.settings.java.title": {
+    "defaultMessage": "Java selbst holen"
   },
   "admin.settings.load-failed": {
     "defaultMessage": "Die Panel-Einstellungen konnten nicht geladen werden"
@@ -2198,14 +2354,11 @@
   "craftpanel.settings.advanced.java-installed": {
     "defaultMessage": "Java {major}"
   },
-  "craftpanel.settings.advanced.java-not-installed": {
-    "defaultMessage": "Java {major} (wird heruntergeladen)"
-  },
   "craftpanel.settings.advanced.java-version": {
     "defaultMessage": "Java-Version"
   },
   "craftpanel.settings.advanced.java-version-help": {
-    "defaultMessage": "Angeboten werden nur Versionen, die dieser Rechner bereitstellen kann."
+    "defaultMessage": "Angeboten werden nur Versionen, die dieser Rechner schon hat. Auf Automatisch nimmt das Panel die, die deine Minecraft-Version braucht."
   },
   "craftpanel.settings.advanced.load-failed": {
     "defaultMessage": "Die Startoptionen konnten nicht geladen werden"
@@ -2459,6 +2612,9 @@
   "panel.menu.registrations": {
     "defaultMessage": "Registrierungen"
   },
+  "panel.menu.runtimes": {
+    "defaultMessage": "Java-Laufzeiten"
+  },
   "panel.menu.users": {
     "defaultMessage": "Nutzer"
   },
@@ -2515,6 +2671,9 @@
   },
   "panel.phase.analyzing": {
     "defaultMessage": "Version wird ermittelt"
+  },
+  "panel.phase.installing-java": {
+    "defaultMessage": "Java wird geholt"
   },
   "panel.phase.installing-loader": {
     "defaultMessage": "Wird heruntergeladen"

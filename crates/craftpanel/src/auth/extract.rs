@@ -263,7 +263,9 @@ mod tests {
             .await
             .unwrap();
 
+        let before = Timestamp::now();
         let later = app.oneshot(as_user(fetch("/me"), &secret)).await.unwrap();
+        let after = Timestamp::now();
         let cookie = set_cookie(&later).expect("the thirty days moved, so the cookie must too");
         assert!(cookie.contains(&secret), "the same secret, a later date: {cookie}");
 
@@ -273,8 +275,16 @@ mod tests {
                 .fetch_one(&pool)
                 .await
                 .unwrap();
-        assert_eq!(expires, opened.expires_at, "thirty days from now again");
         assert!(seen > two_hours_ago);
+        assert!(
+            (before..=after).contains(&seen),
+            "the request itself is the moment: {before} <= {seen} <= {after}"
+        );
+        assert_eq!(
+            expires,
+            Timestamp::at(seen.as_datetime() + session::LIFETIME),
+            "thirty days from that moment again"
+        );
     }
 
     #[tokio::test]

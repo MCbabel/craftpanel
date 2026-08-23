@@ -45,6 +45,7 @@ import type {
 	InstallRequest,
 	InvitationList,
 	JavaRuntimeList,
+	JavaRuntimeOverview,
 	ListDirectoryQuery,
 	ListDirectoryResponse,
 	LoaderBuildList,
@@ -1062,6 +1063,24 @@ const admin = {
 		requestJson<PanelSettings>('/admin/settings', {
 			method: 'PUT',
 			json: body,
+			signal: options.signal,
+		}),
+
+	javaRuntimes: (options: Cancellable = {}) =>
+		requestJson<JavaRuntimeOverview>('/admin/java-runtimes', {
+			method: 'GET',
+			signal: options.signal,
+		}),
+
+	fetchJavaRuntime: (major: number, options: Cancellable = {}) =>
+		requestJson<JavaRuntimeOverview>(`/admin/java-runtimes/${segment(String(major))}`, {
+			method: 'POST',
+			signal: options.signal,
+		}),
+
+	removeJavaRuntime: (major: number, options: Cancellable = {}) =>
+		requestJson<JavaRuntimeOverview>(`/admin/java-runtimes/${segment(String(major))}`, {
+			method: 'DELETE',
 			signal: options.signal,
 		}),
 }

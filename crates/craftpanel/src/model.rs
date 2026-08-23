@@ -598,6 +598,7 @@ wire_enum! {
         InstallingLoader = "installing_loader",
         Verifying = "verifying",
         RunningInstaller = "running_installer",
+        InstallingJava = "installing_java",
         InstallingPack = "installing_pack",
         Addons = "addons",
         WritingConfig = "writing_config",
@@ -1388,6 +1389,7 @@ pub struct PanelSettings {
     pub stop_grace_seconds: u32,
     pub registration_enabled: bool,
     pub registration_requires_approval: bool,
+    pub java_auto_install: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -2163,6 +2165,7 @@ mod tests {
             stop_grace_seconds: 60,
             registration_enabled: false,
             registration_requires_approval: true,
+            java_auto_install: true,
         });
         assert_round_trip(&ContentModpack {
             source_kind: ModpackSourceKind::ModrinthModpack,

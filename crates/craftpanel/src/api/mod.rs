@@ -11,6 +11,7 @@ pub mod mail;
 pub mod playit;
 pub mod recovery;
 pub mod registration;
+pub mod runtimes;
 pub mod servers;
 pub mod session;
 pub mod settings;
