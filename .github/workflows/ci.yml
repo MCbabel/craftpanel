@@ -66,4 +66,18 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test -p craftpanel-proto
       - run: cargo test -p craftpanel-helper
-      - run: cargo test -p craftpanel
+      - name: cargo test -p craftpanel
+        run: |
+          set -o pipefail
+          cargo test -p craftpanel 2>&1 | tee /tmp/panel-tests.log
+        continue-on-error: true
+        id: panel_tests
+      - name: what failed
+        if: steps.panel_tests.outcome == 'failure'
+        run: |
+          {
+            echo '```'
+            sed -n '/^failures:/,$p' /tmp/panel-tests.log | head -200
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
