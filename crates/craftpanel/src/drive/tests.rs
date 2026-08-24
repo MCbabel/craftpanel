@@ -4,7 +4,7 @@ use crate::model::{
     BackupLocation, BackupTargetPolicy, BackupTargetReason, DriveAccountState, DriveFileState,
     DriveLinkState, Id, PanelRole,
 };
-use crate::ops::testing::{a_server, a_user, schema};
+use crate::ops::testing::{a_server, a_user, cut_off, schema};
 
 use super::harness::{self, DataDir, FakeGoogle};
 use super::{Files, SecretChange};
@@ -828,8 +828,7 @@ async fn stopped_after(chunks: usize, held: Option<usize>) -> Interrupted {
     }
     let sending = start_sending(&drive, server, backup, &archive, whole.len() as u64);
     wait_for_chunks(&google, chunks).await;
-    sending.abort();
-    tokio::time::sleep(Duration::from_millis(250)).await;
+    cut_off(sending, &pool).await;
 
     Interrupted { pool, dir, google, anna, server, backup, archive, whole }
 }

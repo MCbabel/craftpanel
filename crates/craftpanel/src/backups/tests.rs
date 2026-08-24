@@ -1650,8 +1650,7 @@ async fn a_retry_after_a_restart_carries_the_upload_on_instead_of_packing_again(
         tokio::time::sleep(Duration::from_millis(5)).await;
     }
     assert_eq!(game.google().chunks_seen(), 1, "the upload never got going");
-    running.abort();
-    tokio::time::sleep(Duration::from_millis(200)).await;
+    crate::ops::testing::cut_off(running, game.pool()).await;
 
     let archive = game.backups.archive_of(game.server, queued.backup);
     assert!(archive.exists(), "a restart does not run the cleanup, so the archive is still here");

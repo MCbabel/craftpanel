@@ -5,7 +5,7 @@ use crate::backups::archive::Progress;
 use crate::model::{
     BackupLocation, DriveAccountState, DriveFileState, Id, PanelRole, Timestamp,
 };
-use crate::ops::testing::{a_server, a_user, schema};
+use crate::ops::testing::{a_server, a_user, cut_off, schema};
 
 use super::harness::{self, DataDir, FakeGoogle};
 use super::http::DriveError;
@@ -114,8 +114,7 @@ impl Siege {
             tokio::time::sleep(Duration::from_millis(5)).await;
         }
         assert!(self.google.chunks_seen() >= chunks, "Google never saw {chunks} chunks");
-        sending.abort();
-        tokio::time::sleep(Duration::from_millis(250)).await;
+        cut_off(sending, &self.pool).await;
     }
 
     fn address(&self) -> std::path::PathBuf {

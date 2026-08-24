@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 
 use sqlx::SqlitePool;
 
@@ -157,4 +158,16 @@ pub async fn operations() -> (Arc<Operations>, DataDir, SqlitePool) {
     let dir = DataDir::new();
     let operations = Operations::new(pool.clone(), dir.path());
     (operations, dir, pool)
+}
+
+pub async fn cut_off<T>(task: tokio::task::JoinHandle<T>, pool: &SqlitePool) {
+    task.abort();
+    let _ = task.await;
+    for _ in 0..2_000 {
+        if pool.num_idle() > 0 || pool.size() < pool.options().get_max_connections() {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(1)).await;
+    }
+    panic!("a run that was cut off never handed its database connection back");
 }

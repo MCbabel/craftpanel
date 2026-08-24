@@ -450,13 +450,16 @@ mod tests {
         let mut doomed =
             Doomed::new("trap '' TERM; echo ready; while :; do sleep 1; done", grace).await;
 
+        let pressed = std::time::Instant::now();
         handle_panel_message(PanelMessage::Kill, &doomed.controls).await.unwrap();
-
-        tokio::time::sleep(grace / 2).await;
-        assert!(doomed.alive(), "the grace was cut short");
 
         let (signal, _) = doomed.ended().await;
         assert_eq!(signal, Some(9), "the grace passed, so SIGKILL had to finish it");
+        assert!(
+            pressed.elapsed() >= grace,
+            "the grace was cut short: the child was gone after {:?}",
+            pressed.elapsed()
+        );
     }
 
     #[tokio::test]
