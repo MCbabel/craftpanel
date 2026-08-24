@@ -8,7 +8,7 @@ containers: one program, one file, one `curl` command.
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MCbabel/craftpanel/HEAD/install.sh | sudo bash
+curl -fsSL https://github.com/MCbabel/craftpanel/releases/latest/download/install.sh | sudo bash
 ```
 
 The installer asks for the web port, the port range for game servers and an administrator name. It
@@ -40,7 +40,11 @@ beside it. Both binaries in it are linked statically against musl, so one file r
 Debian as on a current Ubuntu: the panel asks the machine it lands on for no glibc of its own age.
 
 A bundle you built yourself is taken just as readily, which is the way in on a machine that cannot
-reach GitHub, on an architecture no release covers, and when trying a change before it is tagged:
+reach GitHub, on an architecture no release covers, and when trying a change before it is tagged.
+It is also the answer if the one-liner above prints
+`curl: (22) The requested URL returned error: 404` and does nothing else: that address is a release
+asset, and a `404` from it means this repository has published no release yet, so there is neither
+an installer to fetch nor a bundle for it to fetch.
 
 ```bash
 scripts/release.sh
@@ -53,10 +57,12 @@ The one-liner pipes a script into a root shell, so here is everything needed to 
 that on trust.
 
 **Read it first.** Nothing is lost by taking the two steps apart, and the file is worth keeping:
-the same script updates and uninstalls later.
+the same script updates and uninstalls later. Its sha256 is printed in the release notes, so the
+script can be held against them the way the bundle is.
 
 ```bash
-curl -fsSL -o install.sh https://raw.githubusercontent.com/MCbabel/craftpanel/HEAD/install.sh
+curl -fsSL -o install.sh https://github.com/MCbabel/craftpanel/releases/latest/download/install.sh
+sha256sum install.sh
 less install.sh
 sudo bash install.sh
 ```
@@ -66,14 +72,32 @@ everything above it only defines functions and sets variables. A connection that
 therefore leaves `bash` with definitions and no call, and it exits having touched nothing — which
 is the one failure a pipe into a shell is otherwise genuinely bad at.
 
-**`HEAD` is the tip of the default branch, not a fixed version**, and that is deliberate:
-`install.sh` is also the update and the uninstall path, so a fix to the installer has to reach
-people who already have one, and a version number in the address above would have to be corrected
-by hand at every release — a line nobody remembered to bump is worse than no line. What lands on
-the disk is pinned regardless: the release tag is in the download URL and the bundle is checked
-against its published `sha256`. If you want the script itself nailed down too, put a full commit id
-where `HEAD` is; that address always serves the same bytes, where a branch — and a tag — can be
-moved.
+**The script is a release asset, not a branch.** `/releases/latest/download/install.sh` redirects
+to the installer attached to the newest release, which is a file that went through the tests, was
+built from a tagged commit and was signed in the same run as the bundles. The address itself never
+goes stale — it names no version, so no release has to remember to correct this line — but what it
+hands out is fixed per release. The old address ended in `HEAD`, the tip of the default branch at
+the moment you fetched it: a push to that branch reached every installation started in the next
+minute, as root, having passed nothing. That is the one gap this closes, and the price is that an
+installer fix now needs a release of its own rather than a commit.
+
+**To pin the script, name the release:**
+`https://github.com/MCbabel/craftpanel/releases/download/v1.2.3/install.sh`. That is the address to
+reach for when the newest release turns out to be bad and you want the one before it — and note
+that it takes both halves, because the script asks GitHub for the newest release regardless of
+where the script came from:
+
+```bash
+curl -fsSL -o install.sh https://github.com/MCbabel/craftpanel/releases/download/v1.2.3/install.sh
+sudo CRAFTPANEL_VERSION=1.2.3 bash install.sh
+```
+
+A release asset is fixed the way a tag is fixed: nobody moves it by accident, and whoever holds
+this repository could still replace it. The one address that no one can change the contents of is
+a commit id — `https://raw.githubusercontent.com/MCbabel/craftpanel/<40 hex characters>/install.sh`
+serves those exact bytes or nothing, because the name *is* the content. It is the strictest of the
+three and it is still there; what is gone is the branch name that used to sit in that slot by
+default.
 
 **The bundle is checked, and the sum is printed.** The installer says
 `checksum verified: sha256 <the number>`, so it can be held against what the release page shows. A
@@ -83,9 +107,10 @@ absent — your own bundle, copied without its `.sha256` — `CRAFTPANEL_NO_CHEC
 loud, and there is no quiet way past it. What the sum is worth and what it is not is in
 [SECURITY.md](SECURITY.md).
 
-**Where a bundle came from can be checked too, and that is the part the sum cannot do.** Every
-release is signed as it is published, and the [GitHub CLI](https://cli.github.com) says whether a
-file came out of a run of this repository's release workflow:
+**Where a file came from can be checked too, and that is the part the sum cannot do.** Every
+bundle *and the installer* is signed as the release is published, and the
+[GitHub CLI](https://cli.github.com) says whether a file came out of a run of this repository's
+release workflow:
 
 ```bash
 gh attestation verify craftpanel-linux-x86_64.tar.gz \
@@ -93,9 +118,12 @@ gh attestation verify craftpanel-linux-x86_64.tar.gz \
   --signer-workflow MCbabel/craftpanel/.github/workflows/release.yml
 ```
 
-The installer does not do this — a fresh machine has neither `gh` nor an account signed in — so it
-is a step for whoever wants it, taken before the install or long afterwards; the attestation is
-found by the digest of the file, not by its name or its age.
+The same command with `install.sh` in place of the bundle answers the same question about the
+script. The installer does not do this for itself, and could not honestly try — a fresh machine has
+neither `gh` nor an account signed in, and a script that vouched for itself would be vouching with
+whatever authority the script already had. So it is a step for whoever wants it, taken before the
+install or long afterwards; the attestation is found by the digest of the file, not by its name or
+its age.
 
 Four variables are worth knowing. The installer reads a good many more (`CRAFTPANEL_PREFIX`,
 `CRAFTPANEL_PORT`, `CRAFTPANEL_NONINTERACTIVE` and the rest of the unattended answers), but these
@@ -103,7 +131,7 @@ four decide *what* gets installed:
 
 | | |
 |---|---|
-| `CRAFTPANEL_VERSION=1.2.3` | install exactly that release, instead of whatever is newest today |
+| `CRAFTPANEL_VERSION=1.2.3` | install exactly that release, instead of whatever is newest today. It pins the bundle, not the script — see [Doing it deliberately](#doing-it-deliberately) for pinning both |
 | `CRAFTPANEL_REPO=owner/name` | fetch from another repository — a fork, or a mirror. Unset, it is `MCbabel/craftpanel` |
 | `CRAFTPANEL_BUNDLE=<file>` | install a `.tar.gz` that is already on the machine; nothing is downloaded |
 | `CRAFTPANEL_NO_CHECKSUM=yes` | install a bundle that has **no** published sum. Not a way past a sum that does not match — that always stops |

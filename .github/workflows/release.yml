@@ -1,6 +1,8 @@
 name: release
 
-# Publishes what the curl one-liner in the README downloads. Nobody here has an API
+# Publishes what the curl one-liner in the README downloads: the two bundles, and
+# install.sh itself, which is fetched from a release now rather than off the tip of
+# the default branch. Nobody here has an API
 # token — the deploy key can only push over SSH — so the release has to be made by
 # the workflow itself, with the GITHUB_TOKEN Actions hands it. That is what
 # `permissions: contents: write` on the publish job is for; without it nobody can
@@ -234,6 +236,25 @@ jobs:
           merge-multiple: true
           path: dist
 
+      # The installer is an asset like the bundles, and for the same reason: it is
+      # what people pipe into a root shell. Served off the default branch, it was
+      # the one thing in this whole chain that reached a machine with no tag, no
+      # tests and no signature behind it — push to that branch and every install
+      # begun in the next minute ran what you pushed, while the release machinery
+      # stood beside it guarding the tarballs. This copy comes out of the checkout
+      # above, which is the tagged commit and nothing else.
+      #
+      # Its sum is written here and never checked again, unlike the tarball sums
+      # below. Theirs were written on another machine and travelled here as an
+      # artifact, so comparing them catches a transfer that went wrong. This one
+      # is read off the file it describes, one line earlier, and could only ever
+      # agree with itself. It is published for a person to hold the script against
+      # the release notes, and for nothing automatic.
+      - name: the installer goes with them
+        run: |
+          cp install.sh dist/install.sh
+          sha256sum dist/install.sh | awk '{print $1}' > dist/install.sh.sha256
+
       # The sums were written on the machine that built the tarballs; this is the
       # first time anything checks them after they have travelled. install.sh does
       # the same thing on the user's machine, and it should not be the first to
@@ -270,20 +291,23 @@ jobs:
           subject-path: |
             dist/craftpanel-linux-x86_64.tar.gz
             dist/craftpanel-linux-aarch64.tar.gz
+            dist/install.sh
           create-storage-record: false
 
       - name: what the release page says
         env:
           REPO: ${{ github.repository }}
+          TAG: ${{ needs.check.outputs.tag }}
           VERSION: ${{ needs.check.outputs.version }}
         run: |
           x86_64_sum="$(cat dist/craftpanel-linux-x86_64.tar.gz.sha256)"
           aarch64_sum="$(cat dist/craftpanel-linux-aarch64.tar.gz.sha256)"
+          installer_sum="$(cat dist/install.sh.sha256)"
           cat > notes.md <<NOTES
           On the machine that is to run the servers:
 
           \`\`\`bash
-          curl -fsSL https://raw.githubusercontent.com/$REPO/HEAD/install.sh | sudo bash
+          curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sudo bash
           \`\`\`
 
           The installer picks the bundle for the machine's architecture out of this release,
@@ -298,12 +322,33 @@ jobs:
 
           Each bundle holds \`craftpanel\`, \`craftpanel-helper\`, \`LICENSE\` and \`COPYING.md\`.
 
+          \`install.sh\` is attached here too, and the address above is what serves it. That
+          address always names the newest release, so it never needs correcting, and what it
+          hands out went through the same tests and carries the same signature as the bundles.
+          Reading the script before running it costs one more step:
+
+          \`\`\`bash
+          curl -fsSL -o install.sh https://github.com/$REPO/releases/latest/download/install.sh
+          less install.sh
+          sudo bash install.sh
+          \`\`\`
+
+          **Installing $VERSION once it is no longer the newest**
+
+          The installer asks GitHub for the newest release and installs that, so pinning takes
+          both halves — this release's installer, and the version for it to fetch:
+
+          \`\`\`bash
+          curl -fsSL -o install.sh https://github.com/$REPO/releases/download/$TAG/install.sh
+          sudo CRAFTPANEL_VERSION=$VERSION bash install.sh
+          \`\`\`
+
           **Where these files came from**
 
-          Both bundles are signed during the run that publishes this release, with a
-          short-lived Sigstore certificate that GitHub's OIDC provider names after this
+          Both bundles and the installer are signed during the run that publishes this release,
+          with a short-lived Sigstore certificate that GitHub's OIDC provider names after this
           repository, this workflow file, this commit and this run. The signed statement is
-          stored by the bundle's digest and not beside the file, so replacing what this page
+          stored by the file's digest and not beside the file, so replacing what this page
           serves does not replace it. With the [GitHub CLI](https://cli.github.com) signed in:
 
           \`\`\`bash
@@ -322,6 +367,7 @@ jobs:
           \`\`\`
           $x86_64_sum  craftpanel-linux-x86_64.tar.gz
           $aarch64_sum  craftpanel-linux-aarch64.tar.gz
+          $installer_sum  install.sh
           \`\`\`
 
           These sums, and the \`.sha256\` files the installer compares against, were written in
@@ -337,6 +383,11 @@ jobs:
       # one. --latest settles it instead of leaving it to the dates. No --draft and
       # no --prerelease: the endpoint skips both, and the installer would go on
       # handing out the release before this one as though nothing had happened.
+      #
+      # Twice load-bearing now. /releases/latest/download/install.sh, the address in
+      # the README, resolves against the same notion of newest, so a release that
+      # does not become the latest one publishes an installer nobody will ever be
+      # handed either.
       - name: create the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -368,5 +419,7 @@ jobs:
             dist/craftpanel-linux-x86_64.tar.gz \
             dist/craftpanel-linux-x86_64.tar.gz.sha256 \
             dist/craftpanel-linux-aarch64.tar.gz \
-            dist/craftpanel-linux-aarch64.tar.gz.sha256
+            dist/craftpanel-linux-aarch64.tar.gz.sha256 \
+            dist/install.sh \
+            dist/install.sh.sha256
           echo "https://github.com/$REPO/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"

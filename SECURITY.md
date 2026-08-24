@@ -59,7 +59,9 @@ Roughly in order. A report against any of these gets looked at first.
 
 5. **The installer** — `install.sh`. It is run as root out of a pipe from `curl`. It writes systemd
    units, and its update path moves old units aside and chowns whole trees. Anything that gets it to
-   write, move or chown somewhere it was not meant to is in scope.
+   write, move or chown somewhere it was not meant to is in scope. It is published as an asset of
+   each release, next to the bundles and signed with them, so what reaches a machine is a tagged,
+   tested and attested file rather than the current tip of the default branch.
 
 ## Installing it on purpose
 
@@ -70,14 +72,26 @@ on the strength of one address. What that is worth, and what a careful person ca
   The last line of the file is `main "$@"` and everything above it only defines functions and sets
   variables, so a download that breaks off halfway installs nothing at all rather than half of
   something.
-- **The address in the README ends in `HEAD`**, which is the tip of the default branch at the
-  moment you fetch it — not a version. That is a deliberate trade: the installer is also the update
-  and the uninstall path, so a fix has to reach people who already installed, and a pinned line in
-  a README is a line that goes stale. To fetch a fixed script, put a full 40-character commit id
-  where `HEAD` is. That address always serves the same bytes; a branch does not, and neither does a
-  tag, which can be moved.
+- **The address in the README is a release asset**,
+  `https://github.com/MCbabel/craftpanel/releases/latest/download/install.sh`, which redirects to
+  the installer attached to the newest release. It went through `ci.yml` on the tagged commit, it
+  was uploaded by the run that published the release, and it carries the same attestation the
+  bundles carry. It used to end in `HEAD` — the tip of the default branch at the moment you fetched
+  it — and that was the one thing in this project a push could put on a stranger's machine as root
+  with no tag, no test and no signature in between, while everything else went through the release.
+  The cost of the change is named rather than hidden: a fix to the installer now needs a release,
+  because there is no longer a channel that reaches people faster than one.
+- **To pin the script, name the release** —
+  `…/releases/download/v1.2.3/install.sh`. A stricter address still exists and always will: a
+  40-character commit id under `raw.githubusercontent.com` serves those exact bytes or nothing,
+  because the name is a hash of the content. A release asset is not that; whoever holds this
+  repository can delete one and upload another under the same URL, which is equally true of the
+  bundles and is what the attestation, not the address, is there for.
 - **`CRAFTPANEL_VERSION=1.2.3`** installs exactly that release rather than whatever
   `releases/latest` names today, which is how you install a version you have already looked at.
+  Note that it pins the bundle and not the script: the installer asks GitHub for the newest release
+  whichever release the installer itself came out of, so going back to a version before a bad one
+  takes both halves — the older script's address *and* the variable.
   **`CRAFTPANEL_REPO=owner/name`** decides which repository is downloaded from; unset it is
   `MCbabel/craftpanel`, and it is worth knowing the variable exists if only to see that it is not
   set behind your back.
@@ -94,8 +108,13 @@ travels over the same URL. Whoever could change one could change the other. It c
 that broke off and a download that went wrong — not a bundle that was swapped for another. It is
 said here plainly rather than left to be inferred from the word "verified".
 
-**What proves where a bundle came from.** Every bundle in a release carries a build provenance
-attestation, made in the run that published it. The signature is
+`install.sh.sha256` is published the same way and is worth exactly the same, with one difference
+that cuts the other way: nothing checks it for you. The installer checks the bundle; the installer
+*is* the script, so it is in no position to check itself. That sum is there for a person holding
+the file against the release notes before running it, and for nobody else.
+
+**What proves where a file came from.** Every bundle in a release, and `install.sh` beside them,
+carries a build provenance attestation, made in the run that published it. The signature is
 [Sigstore](https://www.sigstore.dev)'s, with a certificate that lives for minutes and whose subject
 GitHub's OIDC provider fills in rather than the workflow: this repository,
 `.github/workflows/release.yml`, the commit, the run. The signed statement is stored under the
@@ -113,7 +132,10 @@ Without `--signer-workflow` the check asks only that some workflow in this repos
 file; with it, that this one did. `--deny-self-hosted-runners` may be added — releases are built on
 GitHub's own runners and nowhere else. The lookup is by digest, so it works on a file downloaded
 months ago just as well as on one fetched a minute ago, and `gh attestation download` fetches the
-bundle for a later `--bundle` check on a machine with no network.
+bundle for a later `--bundle` check on a machine with no network. Put `install.sh` where the
+tarball's name is and the same command answers the same question about the script — though not
+before you run it, unless you were going to fetch it, check it and run it as three separate acts,
+which is the point of the whole section above.
 
 **What the attestation still does not prove.** That the source it was built from is any good: a
 signature says who built a thing, never that the thing is sound. That the run was not led astray
@@ -125,6 +147,22 @@ because the certificate names the commit and the run it was made from and the tr
 keeps the record. And it proves nothing at all to somebody who never checks: `install.sh` does not,
 because a fresh machine has no GitHub CLI on it and no account signed in. This is a check for the
 careful, made by hand.
+
+**What none of it does for the first fetch.** Moving `install.sh` into the release closed a real
+hole — a push to the default branch no longer reaches a stranger's machine as root — but it did not
+close the chain, and it would be dishonest to let the word "attested" suggest otherwise. The very
+first `curl` rests on two things no signature reaches. TLS: some certificate authority somewhere
+can issue for `github.com`, and a machine that trusts a bad root trusts everything served over it,
+including the release page, including the sums on it. And GitHub itself: the assets, the API that
+says which release is newest, the attestation store and the transparency log are all one company's
+infrastructure, reached from a machine that has nothing of ours on it yet to compare against. There
+is no key shipped ahead of time here, no fingerprint published anywhere but here, and so no way for
+the first fetch to be anything but a trust in GitHub and in the certificate chain of the day. Every
+check described above is a check made *afterwards*, by somebody who already has the file — it
+narrows who could have tampered and it leaves a public record of it, which is worth having, and it
+is not the same thing as not having to trust anyone. Whoever wants less than that trusts a bundle
+built from source they have read (`scripts/release.sh`, `CRAFTPANEL_BUNDLE=`), which moves the
+question to the git history and the toolchain rather than removing it.
 
 ## What is not a finding
 

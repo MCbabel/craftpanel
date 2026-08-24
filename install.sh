@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CraftPanel installer. Run it once to install, run it again to update or remove.
-#   curl -fsSL https://<host>/install.sh | bash
+#   curl -fsSL https://github.com/MCbabel/craftpanel/releases/latest/download/install.sh | sudo bash
 set -euo pipefail
 
 REPO="${CRAFTPANEL_REPO:-MCbabel/craftpanel}"

@@ -104,6 +104,15 @@ writes `dist/craftpanel-linux-x86_64.tar.gz` plus its `.sha256` — `linux-aarch
 architecture. `install.sh` downloads exactly those file names from the GitHub release tagged
 `v<version>`.
 
+A release carries five files, not four: `install.sh` is an asset too, with an `install.sh.sha256`
+beside it, and the one-liner in the README fetches it from
+`…/releases/latest/download/install.sh`. It used to come off `HEAD` of the default branch, which
+meant a push there ran as root on every machine that installed in the next minute, having been
+through none of what follows. It now goes through all of it. The bill for that is real and lands
+on whoever maintains the installer: a fix to `install.sh` reaches nobody until it is released, and
+this workflow will not re-release a tag, so it costs a version number like any other fix. Weigh
+that when the temptation is to ship an installer change quietly.
+
 Publishing is a tag and nothing else. Bump `version` in `Cargo.toml`, commit, push `v<version>`, and
 `.github/workflows/release.yml` runs the script on an x86_64 runner and on an arm64 one and makes
 the release out of both bundles and both checksums. It needs no API token: the workflow publishes
@@ -151,13 +160,15 @@ installer downloads nothing and the user only reads `download failed`.
 The `.sha256` beside each bundle is load-bearing in the same way. `install.sh` refuses to install a
 bundle it cannot check, so a release carrying `craftpanel-linux-x86_64.tar.gz` without
 `craftpanel-linux-x86_64.tar.gz.sha256` stops every installation of that version, with an error
-that names the release page. That is deliberate — a missing sum used to be a warning nobody read
+that names the release page. `install.sh.sha256` is not load-bearing in that sense — nothing reads
+it but a person — and it is published all the same, because a sum a careful reader cannot find is
+a sum they are being asked to take on faith. That is deliberate — a missing sum used to be a warning nobody read
 while the bytes went in as root — and it makes a half-finished upload something to notice rather
 than something to shrug at. Look at the release page before telling anybody the version is out.
 
-Each bundle is signed before the release is created. `actions/attest` in the publishing job asks
-GitHub's OIDC provider for a token that names this repository, this workflow file, the tagged
-commit and that run; Sigstore issues a certificate against exactly that and against nothing else,
+Each bundle, and `install.sh` with them, is signed before the release is created. `actions/attest`
+in the publishing job asks GitHub's OIDC provider for a token that names this repository, this
+workflow file, the tagged commit and that run; Sigstore issues a certificate against exactly that and against nothing else,
 and the signed statement is stored under the repository rather than laid down beside the asset,
 which is the whole difference between it and the `.sha256`. That is what `id-token: write` and
 `attestations: write` on the publishing job are for, and why the build job has neither: it runs a
