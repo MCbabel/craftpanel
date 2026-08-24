@@ -34,13 +34,79 @@ current versions. A JRE that is already on the machine is used as it stands, and
 can switch the fetching off in the panel settings; then the panel names the runtime a server is
 missing instead of going and getting it. Details in `docs/JAVA.md`.
 
-Before the first release is published there is nothing for the installer to download. Build a
-bundle yourself and hand it to the same script:
+What the installer fetches is one bundle for this machine — `craftpanel-linux-x86_64.tar.gz` or
+`craftpanel-linux-aarch64.tar.gz` from the newest release, checked against the `sha256` published
+beside it. Both binaries in it are linked statically against musl, so one file runs on an old
+Debian as on a current Ubuntu: the panel asks the machine it lands on for no glibc of its own age.
+
+A bundle you built yourself is taken just as readily, which is the way in on a machine that cannot
+reach GitHub, on an architecture no release covers, and when trying a change before it is tagged:
 
 ```bash
 scripts/release.sh
-sudo CRAFTPANEL_BUNDLE=dist/craftpanel-x86_64-unknown-linux-gnu.tar.gz ./install.sh
+sudo CRAFTPANEL_BUNDLE=dist/craftpanel-linux-x86_64.tar.gz ./install.sh
 ```
+
+### Doing it deliberately
+
+The one-liner pipes a script into a root shell, so here is everything needed to not have to take
+that on trust.
+
+**Read it first.** Nothing is lost by taking the two steps apart, and the file is worth keeping:
+the same script updates and uninstalls later.
+
+```bash
+curl -fsSL -o install.sh https://raw.githubusercontent.com/MCbabel/craftpanel/HEAD/install.sh
+less install.sh
+sudo bash install.sh
+```
+
+**A download that breaks off installs nothing.** The last line of `install.sh` is `main "$@"`, and
+everything above it only defines functions and sets variables. A connection that dies in the middle
+therefore leaves `bash` with definitions and no call, and it exits having touched nothing — which
+is the one failure a pipe into a shell is otherwise genuinely bad at.
+
+**`HEAD` is the tip of the default branch, not a fixed version**, and that is deliberate:
+`install.sh` is also the update and the uninstall path, so a fix to the installer has to reach
+people who already have one, and a version number in the address above would have to be corrected
+by hand at every release — a line nobody remembered to bump is worse than no line. What lands on
+the disk is pinned regardless: the release tag is in the download URL and the bundle is checked
+against its published `sha256`. If you want the script itself nailed down too, put a full commit id
+where `HEAD` is; that address always serves the same bytes, where a branch — and a tag — can be
+moved.
+
+**The bundle is checked, and the sum is printed.** The installer says
+`checksum verified: sha256 <the number>`, so it can be held against what the release page shows. A
+bundle whose `sha256` is not published is **not installed**: an empty answer for that one small
+file used to be a warning you read afterwards, and it is a hard stop now. If the sum is genuinely
+absent — your own bundle, copied without its `.sha256` — `CRAFTPANEL_NO_CHECKSUM=yes` says so out
+loud, and there is no quiet way past it. What the sum is worth and what it is not is in
+[SECURITY.md](SECURITY.md).
+
+**Where a bundle came from can be checked too, and that is the part the sum cannot do.** Every
+release is signed as it is published, and the [GitHub CLI](https://cli.github.com) says whether a
+file came out of a run of this repository's release workflow:
+
+```bash
+gh attestation verify craftpanel-linux-x86_64.tar.gz \
+  --repo MCbabel/craftpanel \
+  --signer-workflow MCbabel/craftpanel/.github/workflows/release.yml
+```
+
+The installer does not do this — a fresh machine has neither `gh` nor an account signed in — so it
+is a step for whoever wants it, taken before the install or long afterwards; the attestation is
+found by the digest of the file, not by its name or its age.
+
+Four variables are worth knowing. The installer reads a good many more (`CRAFTPANEL_PREFIX`,
+`CRAFTPANEL_PORT`, `CRAFTPANEL_NONINTERACTIVE` and the rest of the unattended answers), but these
+four decide *what* gets installed:
+
+| | |
+|---|---|
+| `CRAFTPANEL_VERSION=1.2.3` | install exactly that release, instead of whatever is newest today |
+| `CRAFTPANEL_REPO=owner/name` | fetch from another repository — a fork, or a mirror. Unset, it is `MCbabel/craftpanel` |
+| `CRAFTPANEL_BUNDLE=<file>` | install a `.tar.gz` that is already on the machine; nothing is downloaded |
+| `CRAFTPANEL_NO_CHECKSUM=yes` | install a bundle that has **no** published sum. Not a way past a sum that does not match — that always stops |
 
 ## What it does
 
@@ -147,6 +213,12 @@ cargo build --release
 
 scripts/release.sh                 # both of the above, plus the bundle and its checksum
 ```
+
+`cargo build --release` gives an ordinary binary for this machine, which is what tests and a local
+run want. `scripts/release.sh` builds what a release carries instead: statically linked against
+musl, so it does not ask the machine it lands on for a glibc of its own age. That target is fetched
+once with `rustup target add x86_64-unknown-linux-musl` and `apt install musl-tools`, and
+`CRAFTPANEL_TARGET` picks another one.
 
 Checks, the same eight the CI runs:
 

@@ -664,7 +664,7 @@ removes the system account with them), set the limits per user, define the port 
 every server of every user.
 
 The installer creates the first administrator, through `craftpanel admin create`, **before**
-either of the two services runs (`install.sh:1336`). Three things follow from that, which together
+either of the two services runs (`install.sh:1434`). Three things follow from that, which together
 are a small interface:
 
 * **Standard output carries the password and nothing else.** The installer catches it and

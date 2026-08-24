@@ -776,16 +776,16 @@ machine is a warning nobody reads.
 
 ## 11. What the installer does, and what it deliberately does not
 
-`ensure_accounts` (`install.sh:275`) creates the directory (`:326`):
+`ensure_accounts` (`install.sh:373`) creates the directory (`:424`):
 
 ```
 install -d -o "$SERVICE_USER" -g "$SERVICE_GROUP" -m 0755 "$DATA_DIR/runtimes"
 ```
 
 * **The panel owns it**, because the panel is the only thing that writes there. `$DATA_DIR` itself
-  is `root:craftpanel 1771` (`:315`), so the panel could create `runtimes/` on its first fetch
+  is `root:craftpanel 1771` (`:413`), so the panel could create `runtimes/` on its first fetch
   anyway; doing it here makes the mode deterministic instead of leaving it to a umask.
-* **0755, not 0750 like the `cache/` beside it** (`:317`). A game server runs as its own managed
+* **0755, not 0750 like the `cache/` beside it** (`:415`). A game server runs as its own managed
   account, which shares no group with the panel, and it has to execute
   `runtimes/java-<major>/bin/java`. `0750` would make every server that needs a fetched runtime fail
   to start, and the message would be about a missing file, not about a mode.

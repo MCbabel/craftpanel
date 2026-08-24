@@ -15,7 +15,8 @@ Node 22 and pnpm 11; Rust 1.85 or newer.
 
 ## The checks
 
-These eight are what CI runs, and what a change is expected to keep green:
+These ten are what CI runs, and what a change is expected to keep green — a release too, since
+`.github/workflows/release.yml` runs the same file:
 
 ```bash
 cargo test -p craftpanel-proto
@@ -26,6 +27,8 @@ scripts/check-types.sh
 scripts/check-no-branding.sh
 python3 scripts/comments-test.py
 scripts/check-no-comments.sh
+scripts/check-shell.sh
+python3 scripts/check-doc-lines.py
 ```
 
 The three `cargo` calls are separate on purpose. A workspace-wide build links three binaries at
@@ -97,9 +100,81 @@ what a failure prints.
 ## Releasing
 
 `scripts/release.sh` builds the interface, builds the two binaries, re-checks the branding and
-writes `dist/craftpanel-<target>.tar.gz` plus its `.sha256`. `install.sh` downloads exactly those two
-file names from the GitHub release tagged `v<version>`, so a release is: bump `version` in
-`Cargo.toml`, run the script, and attach both files to the tag.
+writes `dist/craftpanel-linux-x86_64.tar.gz` plus its `.sha256` — `linux-aarch64` for the other
+architecture. `install.sh` downloads exactly those file names from the GitHub release tagged
+`v<version>`.
+
+Publishing is a tag and nothing else. Bump `version` in `Cargo.toml`, commit, push `v<version>`, and
+`.github/workflows/release.yml` runs the script on an x86_64 runner and on an arm64 one and makes
+the release out of both bundles and both checksums. It needs no API token: the workflow publishes
+with the `GITHUB_TOKEN` Actions hands it, which is what `permissions: contents: write` on the
+publishing job is for. Before either runner starts it refuses a tag that disagrees with `Cargo.toml`
+— a v0.2.0 holding a binary that answers 0.1.0 is found months later, if at all — and it refuses a
+tag that already has a release, so nothing published is ever quietly replaced; a botched one has to
+be deleted by hand before that tag can serve again. Running the script yourself is still how you get
+a bundle to try before tagging (`CRAFTPANEL_BUNDLE=`), and the only way to serve an architecture no
+release covers.
+
+Nothing is published that has not been tested. `release.yml` calls `.github/workflows/ci.yml`
+rather than repeating its steps, so a tag goes through the same guards, the same web tests and the
+same three `cargo test` runs a pull request goes through, on the tagged commit and on no other one
+— a run started by hand from a branch is refused, because the tests would then be testing something
+else. It puts the better part of an hour in front of the build. A tarball a stranger installs as
+root has not earned less.
+
+Every action in `.github/workflows/` hangs on a full commit SHA with its version in the comment
+beside it. `@v4` is whatever its owner points it at today, and one change under such a tag in
+`tj-actions/changed-files` printed the secrets of thousands of repositories into their build logs.
+To move a pin, read the SHA off the tag instead of guessing it —
+`git ls-remote --tags https://github.com/actions/checkout` prints one line per tag and the `^{}`
+line of an annotated tag is the commit it names — and change the comment in the same edit as the
+SHA. `dtolnay/rust-toolchain` hangs on its `stable` branch, which has no version to quote: its
+comment carries the date that branch head was read, and the compiler it installs is whatever rustup
+calls stable on the day the job runs. A pin nobody ever moves is its own kind of stale, so this is
+worth a pass whenever the workflows are opened for something else.
+
+The build target is `<arch>-unknown-linux-musl` unless `CRAFTPANEL_TARGET` says otherwise, and the
+script refuses a bundle whose binaries came out dynamically linked. That is what lets one file serve
+every distribution: built against a current glibc, the panel answers Debian 12 with
+`GLIBC_2.39 not found`, and there is no way out of that from inside a `curl | sudo bash`. Two things
+keep it possible — the TLS is rustls, so no OpenSSL is wanted, and nothing in the tree calls
+`getpwnam` and its relatives, which static musl cannot serve; the helper makes system accounts with
+`useradd` and reads `/etc/passwd` and `/etc/group` itself. Whoever changes either of those has to
+weigh the release against it. On a fresh machine the target needs
+`rustup target add x86_64-unknown-linux-musl` and `apt install musl-tools`.
+
+The file name is not the Rust target triple on purpose: how the binaries are linked is a decision
+that may be revisited, and the name people download should not change with it. `install.sh`
+`detect_arch` writes the same two names; both sides have to keep saying the same thing, or the
+installer downloads nothing and the user only reads `download failed`.
+
+The `.sha256` beside each bundle is load-bearing in the same way. `install.sh` refuses to install a
+bundle it cannot check, so a release carrying `craftpanel-linux-x86_64.tar.gz` without
+`craftpanel-linux-x86_64.tar.gz.sha256` stops every installation of that version, with an error
+that names the release page. That is deliberate — a missing sum used to be a warning nobody read
+while the bytes went in as root — and it makes a half-finished upload something to notice rather
+than something to shrug at. Look at the release page before telling anybody the version is out.
+
+Each bundle is signed before the release is created. `actions/attest` in the publishing job asks
+GitHub's OIDC provider for a token that names this repository, this workflow file, the tagged
+commit and that run; Sigstore issues a certificate against exactly that and against nothing else,
+and the signed statement is stored under the repository rather than laid down beside the asset,
+which is the whole difference between it and the `.sha256`. That is what `id-token: write` and
+`attestations: write` on the publishing job are for, and why the build job has neither: it runs a
+toolchain installer and a package manager, and a token that can sign in this project's name has no
+business in that job.
+
+Make the check once yourself after a release. A failing step is loud, but whether the identity a
+reader is told to type actually matches the certificate is not something the run tells you:
+
+```bash
+gh attestation verify craftpanel-linux-x86_64.tar.gz \
+  --repo MCbabel/craftpanel \
+  --signer-workflow MCbabel/craftpanel/.github/workflows/release.yml
+```
+
+What that proves, what the `.sha256` proves, and what neither of them proves is written out in
+[SECURITY.md](SECURITY.md). The release notes carry the short version, for the people downloading.
 
 ## Licence and security
 

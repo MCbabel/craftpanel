@@ -334,9 +334,11 @@ after every panel start therefore never counts as a new process.
 
 **What the user sees.** The one-line installer promised in the project goal aborts.
 
-**Evidence.** **own**: `install.sh:6` points at `MCbabel/craftpanel`;
-`https://api.github.com/repos/MCbabel/craftpanel` answers `404`, and so does
-`…/releases/latest`. Neither the repository nor a release exists.
+**Evidence.** **own**: `install.sh:6` points at `MCbabel/craftpanel`. The repository is
+there — `https://api.github.com/repos/MCbabel/craftpanel` answers `200` — and
+`…/releases/latest` answers `404`: nothing has been published from it yet, which is the
+one that makes the installer stop. (The first version of this line said neither existed.
+That was wrong about the repository, and re-measured on 2026-08-24 it reads as above.)
 
 **Size of the fix.** No code — publish. But as long as that has not happened, `install.sh`
 (349 lines) is entirely unchecked, see part 3.

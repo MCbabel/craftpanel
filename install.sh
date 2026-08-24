@@ -157,11 +157,17 @@ require_root() {
 	[ "$(id -u)" -eq 0 ] || die "this installer needs root. Try: curl -fsSL … | sudo bash"
 }
 
+# The half of the file name that the machine decides; the released bundles are
+# craftpanel-linux-x86_64.tar.gz and craftpanel-linux-aarch64.tar.gz. Not the
+# Rust target triple: how the binaries are linked is a build decision that may
+# change, and the name a user downloads should not change with it. scripts/release.sh
+# writes exactly these two names — the two sides have to keep saying the same thing,
+# or this installer downloads nothing and the user only reads "download failed".
 detect_arch() {
 	case "$(uname -m)" in
-		x86_64|amd64)  printf 'x86_64-unknown-linux-gnu' ;;
-		aarch64|arm64) printf 'aarch64-unknown-linux-gnu' ;;
-		*) die "unsupported architecture: $(uname -m)" ;;
+		x86_64|amd64)  printf 'x86_64' ;;
+		aarch64|arm64) printf 'aarch64' ;;
+		*) die "no CraftPanel release is built for $(uname -m) — the published bundles are x86_64 and aarch64. What still works here: build one on this machine with scripts/release.sh and install that, sudo CRAFTPANEL_BUNDLE=<the file it writes into dist/> ./install.sh" ;;
 	esac
 }
 
@@ -225,14 +231,100 @@ installed_version() {
 	"$PREFIX/craftpanel" --version 2>/dev/null | awk '{print $2}' || true
 }
 
+# curl that answers with the body and, on a line of its own at the end, the HTTP
+# status. Without that line every miss looks alike, and they are not alike: 404
+# is GitHub saying there is no such thing, 000 is curl saying it never got that
+# far. The `|| true` is there because a curl that gave up still wrote the status
+# line, and that line is the whole point of asking.
+github_api() {
+	curl -sL --max-time 20 -H 'Accept: application/vnd.github+json' -w '\n%{http_code}' "$1" 2>/dev/null || true
+}
+
+# The newest published release. Every way this can go wrong used to end in the
+# one sentence "could not reach GitHub" — and the likeliest of them by far, a
+# repository whose releases page is simply still empty, then sent the very person
+# who had just run the one-liner off to look at his network. releases/latest
+# answers 404 both for a repository that is not there and for one that has
+# published nothing, so telling those two apart takes a second question, and it
+# is only ever asked on the way to an error message.
 latest_version() {
-	curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null |
-		grep -m1 '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/' || true
+	local answer code tag
+
+	answer="$(github_api "https://api.github.com/repos/$REPO/releases/latest")"
+	code="${answer##*$'\n'}"
+
+	case "$code" in
+		200)
+			# Anchored on the field name and read off one long line, so it does not
+			# depend on GitHub pretty-printing its JSON one field to a line — which is
+			# the only reason the old `grep | sed` ever picked the right string.
+			tag="$(printf '%s' "${answer%$'\n'*}" | tr -d '\n' | sed -nE 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v?([^"]+)".*/\1/p')" || true
+			[ -n "$tag" ] ||
+				die "GitHub named the newest release of $REPO without a version in it. Name the one you want and nothing is asked: CRAFTPANEL_VERSION=1.2.3 bash install.sh"
+			printf '%s' "$tag"
+			;;
+		404)
+			answer="$(github_api "https://api.github.com/repos/$REPO")"
+			[ "${answer##*$'\n'}" != "404" ] ||
+				die "there is no repository $REPO on GitHub. CRAFTPANEL_REPO says which one to install from; left alone it is MCbabel/craftpanel"
+			die "$REPO has published no release yet — GitHub answers fine, there is simply nothing there to download. Until the first one is out, build a bundle on this machine and install that: scripts/release.sh, then sudo CRAFTPANEL_BUNDLE=<the file it writes into dist/> ./install.sh"
+			;;
+		403|429)
+			die "GitHub is rate-limiting this machine and will not say what the newest release is. Wait an hour, or name the version and skip the question: CRAFTPANEL_VERSION=1.2.3 bash install.sh"
+			;;
+		000)
+			die "GitHub could not be reached — no network, no name resolution, or a proxy in the way. A machine that stays offline installs from a bundle built elsewhere: sudo CRAFTPANEL_BUNDLE=<the .tar.gz> ./install.sh"
+			;;
+		*)
+			die "GitHub answered $code when asked for the newest release of $REPO. Name the version to install and it is not asked again: CRAFTPANEL_VERSION=1.2.3 bash install.sh"
+			;;
+	esac
+}
+
+# Set out loud or not at all. `CRAFTPANEL_NO_CHECKSUM=no` reading as "yes, skip
+# it" would be a nasty way to end up installing something unchecked, so anything
+# that is neither yes nor no stops the run instead of being guessed at.
+skipping_checksum() {
+	case "${CRAFTPANEL_NO_CHECKSUM:-}" in
+		"") return 1 ;;
+		y*|Y*|1|true|TRUE) return 0 ;;
+		n*|N*|0|false|FALSE) return 1 ;;
+		*) die "CRAFTPANEL_NO_CHECKSUM is set to '$CRAFTPANEL_NO_CHECKSUM', which is neither yes nor no. Write yes to install a bundle that has no checksum, or leave it unset" ;;
+	esac
+}
+
+# The last point at which a stranger who piped this into a root shell can still
+# turn the bundle down. A missing sum used to be a warning he read afterwards: a
+# 404 or a timed-out request on the .sha256 alone was enough to unpack unchecked
+# bytes and install them as root, and nothing asked him first. So a missing sum
+# ends the run now. The one honest reason to go on anyway is a bundle of your own
+# that never had a sum beside it, and that reason has a name to type rather than
+# a default to be caught out by.
+#
+# The sum is printed and not merely approved of. "checksum verified" against a
+# number nobody sees says only that a file matched a file that travelled with it;
+# printed, it is something to hold against what the release page shows. It is
+# still not a signature — whoever could change the bundle could change the sum
+# beside it — and what it catches is a download that went wrong, not a bundle
+# that was swapped.
+verify_bundle() {
+	local tmp="$1" missing="$2" want got
+
+	if [ ! -s "$tmp/sum" ]; then
+		skipping_checksum || die "$missing"
+		warn "installing the bundle unchecked, because CRAFTPANEL_NO_CHECKSUM says to"
+		return 0
+	fi
+
+	want="$(awk '{print $1; exit}' "$tmp/sum")"
+	got="$(sha256sum "$tmp/bundle.tar.gz" | awk '{print $1}')"
+	[ "$want" = "$got" ] ||
+		die "the bundle is not what its checksum says it is, and nothing has been installed. published $want, arrived here $got"
+	say "  checksum verified: sha256 $got"
 }
 
 fetch_binaries() {
-	local version="$1" arch tmp
-	arch="$(detect_arch)"
+	local version="$1" arch tmp missing
 	tmp="$(mktemp -d)" || die "no temporary directory could be made. Is there room on this machine, and is TMPDIR writable?"
 	# Not a RETURN trap: bash does not scope those to the function, so it would
 	# fire again later with $tmp long gone and take `set -u` down with it.
@@ -244,24 +336,30 @@ fetch_binaries() {
 		[ -f "$CRAFTPANEL_BUNDLE" ] || die "CRAFTPANEL_BUNDLE is set but $CRAFTPANEL_BUNDLE is not there"
 		step "installing from $CRAFTPANEL_BUNDLE"
 		cp "$CRAFTPANEL_BUNDLE" "$tmp/bundle.tar.gz"
-		[ -f "$CRAFTPANEL_BUNDLE.sha256" ] && cp "$CRAFTPANEL_BUNDLE.sha256" "$tmp/sum"
+		if [ -f "$CRAFTPANEL_BUNDLE.sha256" ]; then
+			cp "$CRAFTPANEL_BUNDLE.sha256" "$tmp/sum"
+		fi
+		missing="$CRAFTPANEL_BUNDLE has no $CRAFTPANEL_BUNDLE.sha256 beside it, so there is nothing to hold it against — and nothing has been installed. scripts/release.sh writes that file next to the bundle it builds; copy it along. To install this bundle unchecked all the same: CRAFTPANEL_NO_CHECKSUM=yes"
 	else
 		local base="https://github.com/$REPO/releases/download/v$version"
+		# Only now, because a machine this installer has no bundle for can still be
+		# served by one built on it — and that path does not need an architecture
+		# this release knows.
+		arch="$(detect_arch)"
 		step "downloading CraftPanel $version for $arch"
 
-		curl -fsSL "$base/craftpanel-$arch.tar.gz" -o "$tmp/bundle.tar.gz" ||
-			die "download failed — is v$version published for $arch?"
+		curl -fsSL "$base/craftpanel-linux-$arch.tar.gz" -o "$tmp/bundle.tar.gz" ||
+			die "download failed — is craftpanel-linux-$arch.tar.gz attached to release v$version? https://github.com/$REPO/releases/tag/v$version says what is there"
 
-		curl -fsSL "$base/craftpanel-$arch.tar.gz.sha256" -o "$tmp/sum" 2>/dev/null || true
+		# Some curl versions leave the half-made output file behind when the request
+		# turns out to be a 404, and an empty sum file would go on to fail the
+		# comparison rather than say the far more useful "there is no sum here".
+		curl -fsSL "$base/craftpanel-linux-$arch.tar.gz.sha256" -o "$tmp/sum" 2>/dev/null ||
+			rm -f "$tmp/sum"
+		missing="no checksum is published beside craftpanel-linux-$arch.tar.gz in release v$version, so there is nothing to hold the download against — and nothing has been installed. Every release publishes one, so this is an upload that broke off, or something between here and GitHub answering in its place. https://github.com/$REPO/releases/tag/v$version says what is really attached. To install the bundle unchecked all the same: CRAFTPANEL_NO_CHECKSUM=yes"
 	fi
 
-	if [ -f "$tmp/sum" ]; then
-		(cd "$tmp" && awk '{print $1"  bundle.tar.gz"}' sum | sha256sum -c - >/dev/null) ||
-			die "checksum mismatch — refusing to install"
-		say "  checksum verified"
-	else
-		warn "no checksum published for this release"
-	fi
+	verify_bundle "$tmp" "$missing"
 
 	tar -xzf "$tmp/bundle.tar.gz" -C "$tmp"
 	[ -e "$PREFIX/craftpanel" ] || remember "file:$PREFIX/craftpanel"
@@ -1882,8 +1980,9 @@ main() {
 	if [ -n "${CRAFTPANEL_BUNDLE:-}" ]; then
 		latest="${CRAFTPANEL_VERSION:-local}"
 	else
+		# latest_version says itself what went wrong, in the words of the thing that
+		# actually went wrong, and ends the run there.
 		latest="${CRAFTPANEL_VERSION:-$(latest_version)}"
-		[ -n "$latest" ] || die "could not reach GitHub to find the newest version"
 	fi
 
 	# Before install and before update, because an installation under the old name

@@ -1,0 +1,372 @@
+name: release
+
+# Publishes what the curl one-liner in the README downloads. Nobody here has an API
+# token — the deploy key can only push over SSH — so the release has to be made by
+# the workflow itself, with the GITHUB_TOKEN Actions hands it. That is what
+# `permissions: contents: write` on the publish job is for; without it nobody can
+# publish a release at all.
+#
+# Every action is pinned to a full commit SHA with the version beside it, for the
+# reason written at the top of ci.yml; CONTRIBUTING.md, "Releasing", says how to move
+# a pin. Nothing is published that has not been through ci.yml on the tagged commit:
+# the `tests` job below is that workflow, called, not copied.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The tag to release, e.g. v0.1.0. Start the run from the tag itself; leave this empty and it is taken from the ref.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+# Never cancel a release halfway. Two pushes of the same tag queue up behind each
+# other instead of racing two `gh release create` calls at the same asset names.
+concurrency:
+  group: release-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      tag: ${{ steps.read.outputs.tag }}
+      version: ${{ steps.read.outputs.version }}
+      sha: ${{ steps.read.outputs.sha }}
+    steps:
+      # No `ref:` on purpose. This checks out the commit the run was started from,
+      # which is the commit `tests` will test and the commit everything after it
+      # builds — and the step below refuses to go on unless the tag names that same
+      # commit. Checking out the tag by name here instead would mean the version
+      # read from Cargo.toml and the code that gets tested could be two different
+      # things.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # Everything that can be said no to is said no to here, before the tests and
+      # two runners spend an hour on it. A tag that disagrees with Cargo.toml is the
+      # expensive mistake: v0.2.0 carrying a binary that answers 0.1.0 is not
+      # noticed for months, because nothing about it looks wrong.
+      - id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          # install.sh asks the API for releases/latest, and that endpoint skips
+          # drafts and pre-releases: a v1.0.0-rc1 published as a normal release
+          # would go out to every machine that runs the installer, and published
+          # as a pre-release it would be invisible to all of them. Neither is what
+          # somebody tagging an rc means. Three numbers, or do it by hand.
+          case "$TAG" in
+            v[0-9]*.[0-9]*.[0-9]*)
+              case "${TAG#v}" in
+                *[!0-9.]*)
+                  echo "::error::$TAG is not a plain version tag. install.sh installs whatever releases/latest names, and that endpoint has no idea an -rc is meant to be tried out first. Publish such a build by hand."
+                  exit 1 ;;
+              esac ;;
+            *)
+              echo "::error::$TAG is not a version tag. This workflow makes releases for tags like v0.1.0."
+              exit 1 ;;
+          esac
+
+          # The tests run on the commit this run was started from — a called
+          # workflow cannot be pointed at some other ref — so a release is only
+          # honest if that commit is the tagged one. On a tag push it always is;
+          # a hand-started run from a branch is the case this catches.
+          tagged="$(gh api "repos/$REPO/commits/$TAG" --jq .sha 2>/dev/null)" || {
+            echo "::error::$REPO has no tag $TAG. Push the tag first — this workflow releases a tag that exists, it does not create one."
+            exit 1
+          }
+          here="$(git rev-parse HEAD)"
+          if [ "$tagged" != "$here" ]; then
+            echo "::error::this run started at $here and $TAG names $tagged. Everything below — the tests as much as the build — runs on the commit the run started from, so this would publish bytes that nothing tested. Start the run from the tag itself: Actions → release → Run workflow, and choose $TAG in the ref list."
+            exit 1
+          fi
+
+          version="$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')"
+          [ -n "$version" ] || {
+            echo "::error::no version line in Cargo.toml — scripts/release.sh reads the same line and would name the bundle after nothing"
+            exit 1
+          }
+
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::the tag says $TAG and Cargo.toml says $version. The binaries report the Cargo.toml version, so v$version is the only release this commit can honestly be. Either bump Cargo.toml and tag again, or delete the tag and push v$version."
+            exit 1
+          fi
+
+          # A tag can be force-pushed, and a finished run can be re-run from the
+          # web interface. Neither may quietly replace bytes somebody has already
+          # downloaded and checked the sum of.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::$TAG already has a release: https://github.com/$REPO/releases/tag/$TAG . Nothing was changed. To replace it, delete that release first (gh release delete $TAG); to ship a fix, bump the version and tag again."
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "sha=$here" >> "$GITHUB_OUTPUT"
+          echo "releasing $TAG from $here" >> "$GITHUB_STEP_SUMMARY"
+
+  # The guards, the web tests and the three cargo test runs, exactly as a pull
+  # request gets them: this is ci.yml itself, called, so the two can never drift
+  # apart. A called workflow is read and run at the commit of the run that calls
+  # it, and `check` above has just established that this commit is the tagged one.
+  # It costs the better part of an hour before the build even starts. A release may
+  # take its time; a released tarball that no test ever saw may not exist.
+  tests:
+    name: tests
+    needs: check
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    name: build ${{ matrix.arch }}
+    needs: [check, tests]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      # Both architectures are built out even when one has already failed: a first
+      # release wants to know about both problems, not the earlier of the two.
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          # arm64 standard runners are free and unlimited on public repositories
+          # (generally available since August 2025), and this repository is public.
+          # Native beats cross-compiling here: aws-lc-sys, libsqlite3-sys and
+          # zstd-sys all compile C, and a cross build has to be handed a matching
+          # C compiler and linker for each of them.
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+    steps:
+      # The commit, not the tag name: a tag can be force-pushed while this run is
+      # going, and what gets built has to be what was checked and tested.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      # musl-tools brings <arch>-linux-musl-gcc, which is the compiler the cc crate
+      # reaches for on a musl target. Without it the C in aws-lc-sys, libsqlite3-sys
+      # and zstd-sys is built against the runner's glibc headers and linked into a
+      # musl binary — a mismatch that does not fail the build, only the program.
+      - name: the musl C compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends musl-tools
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        with:
+          version: 11.21.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The `stable` branch of this action as it stood on 2026-08-05, the same pin
+      # ci.yml uses; the compiler it installs is whatever rustup calls stable that
+      # day, 1.98.0 at the time of writing.
+      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c # stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # .cargo/config.toml keeps cargo to six jobs so that building here leaves a
+      # panel serving people on the maintainer's own machine. A runner is nobody's
+      # machine and has four cores; let it use what it has.
+      - name: as many jobs as this runner has cores
+        run: echo "CARGO_BUILD_JOBS=$(nproc)" >> "$GITHUB_ENV"
+
+      # scripts/release.sh builds the interface first (rust-embed compiles web/dist
+      # into the binary), then both binaries, re-checks the Modrinth branding, and
+      # refuses a bundle whose binaries came out dynamically linked.
+      - name: build the bundle
+        env:
+          CRAFTPANEL_TARGET: ${{ matrix.target }}
+        run: scripts/release.sh
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: bundle-${{ matrix.arch }}
+          path: |
+            dist/craftpanel-linux-${{ matrix.arch }}.tar.gz
+            dist/craftpanel-linux-${{ matrix.arch }}.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: publish
+    needs: [check, tests, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      # What the signing needs, and it sits here rather than in the job that builds
+      # on purpose. id-token lets this job ask GitHub's OIDC provider for a token
+      # that names the repository, the workflow file, the commit and the run;
+      # Sigstore issues a certificate against that name and against nothing else.
+      # attestations lets the signed statement be stored under this repository,
+      # which is where `gh attestation verify` goes looking for it. The build job
+      # keeps contents: read: it is the one that runs a toolchain installer and a
+      # package manager, and neither has any business holding a token that can put
+      # this project's name on a file.
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: bundle-*
+          merge-multiple: true
+          path: dist
+
+      # The sums were written on the machine that built the tarballs; this is the
+      # first time anything checks them after they have travelled. install.sh does
+      # the same thing on the user's machine, and it should not be the first to
+      # find out.
+      - name: the sums, once more
+        working-directory: dist
+        run: |
+          for sum in *.tar.gz.sha256; do
+            printf '%s  %s\n' "$(cat "$sum")" "${sum%.sha256}"
+          done | sha256sum -c -
+
+      # The .sha256 travels with the tarball: written in the same job, carried as
+      # the same artifact, served from the same page under a URL one character
+      # away. Whoever can put other bytes in one place can put a matching sum in
+      # the other, so it catches a download that broke and nothing that was meant.
+      # This does not travel with the file. The bundle is signed with a short-lived
+      # Sigstore certificate whose subject GitHub's OIDC provider fills in — this
+      # repository, this workflow file, this commit, this run — and the statement
+      # is stored by the bundle's digest under the repository and written to the
+      # public transparency log, not laid down beside the asset. Replacing what the
+      # release page serves is no longer enough; a run of this workflow has to be
+      # made to sign for the new bytes.
+      #
+      # Before the release is created rather than after: a bundle whose origin
+      # cannot be checked should not become the thing install.sh calls newest.
+      # Both names are written out instead of globbed so that a missing bundle
+      # fails here, the way it would fail `gh release create` two steps down.
+      # create-storage-record is off because the record is an artifact-metadata
+      # feature nothing here reads, and leaving it on would ask for a third write
+      # permission to no end.
+      - name: where these bytes came from
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            dist/craftpanel-linux-x86_64.tar.gz
+            dist/craftpanel-linux-aarch64.tar.gz
+          create-storage-record: false
+
+      - name: what the release page says
+        env:
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          x86_64_sum="$(cat dist/craftpanel-linux-x86_64.tar.gz.sha256)"
+          aarch64_sum="$(cat dist/craftpanel-linux-aarch64.tar.gz.sha256)"
+          cat > notes.md <<NOTES
+          On the machine that is to run the servers:
+
+          \`\`\`bash
+          curl -fsSL https://raw.githubusercontent.com/$REPO/HEAD/install.sh | sudo bash
+          \`\`\`
+
+          The installer picks the bundle for the machine's architecture out of this release,
+          checks it against the \`.sha256\` beside it, creates the system accounts and the two
+          systemd units, and prints the administrator password once. Run it again on a machine
+          that already has CraftPanel and it offers to update to $VERSION.
+
+          **Needs:** Linux with systemd and cgroup v2, on x86_64 or aarch64. The installer checks
+          both and says what is missing. Java is not needed — the panel fetches the runtime a game
+          version asks for. Both binaries are linked statically against musl, so no version of the
+          system's glibc comes into it.
+
+          Each bundle holds \`craftpanel\`, \`craftpanel-helper\`, \`LICENSE\` and \`COPYING.md\`.
+
+          **Where these files came from**
+
+          Both bundles are signed during the run that publishes this release, with a
+          short-lived Sigstore certificate that GitHub's OIDC provider names after this
+          repository, this workflow file, this commit and this run. The signed statement is
+          stored by the bundle's digest and not beside the file, so replacing what this page
+          serves does not replace it. With the [GitHub CLI](https://cli.github.com) signed in:
+
+          \`\`\`bash
+          gh attestation verify craftpanel-linux-x86_64.tar.gz \\
+            --repo $REPO \\
+            --signer-workflow $REPO/.github/workflows/release.yml
+          \`\`\`
+
+          That says these exact bytes came out of a run of that workflow in this repository. It
+          does not say the source they were built from is any good, and the installer does not
+          check it — a fresh machine has no GitHub CLI and nobody signed in. \`SECURITY.md\` says
+          what else it does not prove.
+
+          **SHA-256**
+
+          \`\`\`
+          $x86_64_sum  craftpanel-linux-x86_64.tar.gz
+          $aarch64_sum  craftpanel-linux-aarch64.tar.gz
+          \`\`\`
+
+          These sums, and the \`.sha256\` files the installer compares against, were written in
+          the same run and are served from the same page as the bundles. They catch a download
+          that broke on the way. They cannot catch a substitution — whoever could replace a
+          bundle here could replace the sum beside it — which is what the attestation above is
+          for.
+          NOTES
+
+      # install.sh reads releases/latest and nothing else, and that endpoint sorts
+      # by the date of the commit a release was cut from rather than by version, so
+      # a fix tagged off an older commit could otherwise never become the newest
+      # one. --latest settles it instead of leaving it to the dates. No --draft and
+      # no --prerelease: the endpoint skips both, and the installer would go on
+      # handing out the release before this one as though nothing had happened.
+      - name: create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ needs.check.outputs.tag }}
+          VERSION: ${{ needs.check.outputs.version }}
+          SHA: ${{ needs.check.outputs.sha }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::$TAG gained a release while this run was building. Nothing was uploaded, so nothing was overwritten."
+            exit 1
+          fi
+          # An hour is long enough for somebody to force-push the tag onto another
+          # commit. The release would then say it is that commit while the tarballs
+          # are this one, and nothing in it would have been tested.
+          now="$(gh api "repos/$REPO/commits/$TAG" --jq .sha 2>/dev/null)" || {
+            echo "::error::$TAG is gone from $REPO. Nothing was uploaded. What is here was built and tested at $SHA; tag that commit again if it is still the one wanted."
+            exit 1
+          }
+          if [ "$now" != "$SHA" ]; then
+            echo "::error::$TAG named $SHA when this run started and names $now now. Nothing was uploaded. The bundles here were built and tested at $SHA; tag the new commit with a new version instead."
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --verify-tag \
+            --latest \
+            --title "CraftPanel $VERSION" \
+            --notes-file notes.md \
+            dist/craftpanel-linux-x86_64.tar.gz \
+            dist/craftpanel-linux-x86_64.tar.gz.sha256 \
+            dist/craftpanel-linux-aarch64.tar.gz \
+            dist/craftpanel-linux-aarch64.tar.gz.sha256
+          echo "https://github.com/$REPO/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
