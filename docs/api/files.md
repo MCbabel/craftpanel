@@ -1270,7 +1270,7 @@ this guard hits is the refusal the panel hits in operation, and no substitute fo
 time: `setfsuid` answers with the **previous** value, so a second call is the
 only way to ask whether the first took hold; and the `errno` branch itself
 (`EACCES`/`EPERM` → `409 file_not_accessible` instead of `500 internal`) is secured, where it cannot
-be staged, with the table as a yardstick of its own (`files/mod.rs:802-806`).
+be staged, with the table as a yardstick of its own (`files/mod.rs:671-682`).
 
 The same situation holds for the `chown-tree` hand-back before a copy, a deletion or an
 extraction: that the panel **asks** at all is checkable, the refusal behind it is not. So the
@@ -1278,4 +1278,4 @@ tests measure two things — that it asks where a tree has to be walked, and tha
 **not** ask where there is nothing to walk (a single file is unlinked from its
 parent directory) — and on top of that the modes afterwards, which are visible to root:
 if `below_server` points one segment off, they fall over (`api/files.rs:1461-1466,1484-1485`,
-`files/mod.rs:837-842`).
+`files/mod.rs:718-722`).

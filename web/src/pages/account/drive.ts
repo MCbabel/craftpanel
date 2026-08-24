@@ -1,5 +1,5 @@
 import type { DriveLink, DriveStatus } from '@/api/drive'
-import { linkPhase, storageLeft, storageShare } from '@/api/drive'
+import { dayLeft, dayShare, linkPhase, storageLeft, storageShare } from '@/api/drive'
 
 export type DriveStage = 'unavailable' | 'unconnected' | 'linking' | 'connected'
 
@@ -11,9 +11,19 @@ export interface DriveStorageView {
 	nearlyFull: boolean
 }
 
+export interface DriveDayView {
+	sentBytes: number
+	limitBytes: number
+	freeBytes: number
+	share: number
+	closing: boolean
+	spent: boolean
+}
+
 export interface DriveView {
 	stage: DriveStage
 	storage: DriveStorageView
+	day: DriveDayView
 	broken: boolean
 	lastFailure: string | null
 	link: DriveLink | null
@@ -27,9 +37,25 @@ const NOTHING: DriveStorageView = {
 	nearlyFull: false,
 }
 
+const NO_DAY: DriveDayView = {
+	sentBytes: 0,
+	limitBytes: 0,
+	freeBytes: 0,
+	share: 0,
+	closing: false,
+	spent: false,
+}
+
 export function driveView(status: DriveStatus | null): DriveView {
 	if (status === null) {
-		return { stage: 'unavailable', storage: NOTHING, broken: false, lastFailure: null, link: null }
+		return {
+			stage: 'unavailable',
+			storage: NOTHING,
+			day: NO_DAY,
+			broken: false,
+			lastFailure: null,
+			link: null,
+		}
 	}
 
 	const link = status.link !== null && linkPhase(status.link) === 'waiting' ? status.link : null
@@ -44,6 +70,7 @@ export function driveView(status: DriveStatus | null): DriveView {
 	return {
 		stage,
 		storage: storageView(status),
+		day: dayView(status),
 		broken: status.configured && status.state !== 'connected',
 		lastFailure: status.configured ? null : status.last_error,
 		link,
@@ -58,6 +85,18 @@ function storageView(status: DriveStatus): DriveStorageView {
 		freeBytes: storageLeft(status),
 		share,
 		nearlyFull: share !== null && share >= 0.9,
+	}
+}
+
+function dayView(status: DriveStatus): DriveDayView {
+	const share = dayShare(status)
+	return {
+		sentBytes: status.uploaded_today_bytes,
+		limitBytes: status.daily_upload_limit_bytes,
+		freeBytes: dayLeft(status),
+		share,
+		closing: share >= 0.9,
+		spent: dayLeft(status) === 0 && status.daily_upload_limit_bytes > 0,
 	}
 }
 

@@ -97,7 +97,7 @@ ULID on its own with `400 text/plain "Invalid URL: …"`. That is neither an `er
 `404 … _not_found` in the envelope from 1.7: a segment that cannot be a ULID names nothing, and
 "misspelled" and "does not exist" should get the same answer (`api/settings.rs:62`,
 `api/content.rs:73`, `api/files.rs:53`, `api/console.rs:54`, `api/backups.rs:361`,
-`api/playit.rs:43`, `api/mail.rs:42`, `api/registration.rs:190`, `api/admin.rs:928`,
+`api/playit.rs:43`, `api/mail.rs:42`, `api/registration.rs:160`, `api/admin.rs:928`,
 `api/servers.rs:113`). Once every area needs it, it belongs next to `Caller` in
 `crate::auth::extract`.
 
@@ -1148,8 +1148,16 @@ two sources for the same lock.
 | `drive_not_connected` | `filesystem` | own text — the target is `drive`, the account has none connected |
 | `drive_revoked` | `filesystem` | own text — Google withdrew the access (22.17) |
 | `drive_file_missing` | `filesystem` | own text — the file is no longer in the Drive |
-| `drive_quota_exceeded` | `filesystem` | own text — the user's Drive is full |
+| `drive_quota_exceeded` | `filesystem` | own text — the user's Drive is full, or the archive does not fit in what is left of it |
+| `drive_throttled` | `filesystem` | own text — Google turned the run away until the run's whole waiting budget was gone |
+| `drive_day_full` | `filesystem` | own text — the account has handed Google its 750 GB for the day |
+| `drive_session_expired` | `filesystem` | own text — Google let the resumable session run out and forgot the second one as well (22.15) |
+| `drive_checksum_mismatch` | `download` | own text — what lies in the Drive is not what left this machine (22.15) |
+| `drive_abuse_blocked` | `download` | own text — Google calls the archive malware or spam and hands it back only on an express acknowledgement (22.16) |
+| `drive_busy` | `filesystem` | own text — another run is already sending this backup |
 | `drive_unavailable` | `download` | own text — Google was not reachable |
+| `drive_unconfirmed` | `download` | own text — the archive went up and Google would not say afterwards what it holds; no file id is written down (22.15) |
+| `drive_file_replaced` | `download` | own text — the transfer was sound, and the file in the owner's Drive is no longer the archive the panel put there (22.15) |
 | `payload_timeout` | `internal` | own text |
 | `panel_restarted` | `internal` | own text |
 | `timeout` | `internal` | own text — no progress for over 10 minutes |
@@ -1453,7 +1461,7 @@ Measured twice before the way in was walked like this:
   configuration to anyone with `BASE_READ`, a `PATCH` overwrote it (`settings/disk.rs:4-8`);
 * a server directory that had been replaced by a link — `200 OK`, and another account's
   `server.properties` carried the attacker's text, because the panel reaches every tree through
-  the `craftpanel` group (`api/settings.rs:2057-2062`).
+  the `craftpanel` group (`api/settings.rs:1906-1940`).
 
 On kernels before 5.6 there is no `openat2`. The fallback is one `openat` per segment with
 `O_NOFOLLOW`, which therefore rejects **every** link instead of only the ones that lead out:
@@ -2539,7 +2547,7 @@ actually use. Measured without this check: a `game_version` of `../../velocity/v
 answered `200` with Velocity's build list under `loader: "paper"`, because the URL parser folds the
 `..` away before the request goes out. That is two things at once: a caller who picks which
 endpoint of the source the panel asks, and one cache key per spelling
-(`settings/catalog.rs:391-398`, counter-check `api/settings.rs:2099-2103`).
+(`settings/catalog.rs:347-359`, counter-check `api/settings.rs:1942-1962`).
 
 **With Purpur and Leaf the spelling is not a second opinion but the only one.** Both hand out every
 series as stable; without the rule from the spelling, `1.21.9-rc1` would go out as `release`, and
@@ -2796,9 +2804,15 @@ Three subtleties you cannot guess:
   otherwise the panel greets you every morning with a success banner; `true` for **failed**
   automatic ones, because the fact that the schedule is not running is something you have to learn.
 
-Three fields belong to section 22 and appear in **every** backup, including a local one:
-`location` (`"local"` or `"drive"`), `drive_state` and `drive_web_link`. For a local backup the
-last two are `null`. `location` is the place where the bytes **lie**, not the target that is set
+Five fields belong to section 22 and appear in **every** backup, including a local one:
+`location` (`"local"` or `"drive"`), `drive_state`, `drive_verified`, `drive_content_changed` and
+`drive_web_link`. For a local backup the last four are `null`. `drive_verified` is `false` where
+Google named no checksum for the archive it stored, so nothing confirms the upload arrived whole — a
+state of its own, not a quiet `true`. `drive_content_changed` is `true` where the hourly sweep found
+that the file in the owner's Drive no longer holds the archive the panel put there — the file is
+still present, so `drive_state` stays `"present"`; the two answer different questions and both can
+be true at once. A row with `drive_content_changed: true` is refused by restore with
+`409 backup_not_restorable`. `location` is the place where the bytes **lie**, not the target that is set
 for the next run (22.9): a row keeps its value forever, and changing the target setting moves no
 byte.
 
@@ -2939,7 +2953,15 @@ world, and a refusal has to be safe rather than clever (`backups/mod.rs:1156-116
 
 Permission: `BACKUPS`. No body, response `202` `RetryBackupResponse`. Creates a **new** operation of
 the same kind as the most recent failed one. For `create`, the broken file is cleared away first
-and the same backup row is reused: the ID stays, so the banner does not jump.
+and the same backup row is reused: the ID stays, so the banner does not jump. The one exception is
+an archive that is half in Google's hands already: with a live, matching upload session (22.15) it
+stays where it is and the retry sends the rest instead of packing it again.
+
+**One query parameter, `?acknowledge_abuse=true`**, and it exists for exactly one answer of
+Google's: an archive that Drive has flagged as malware or spam is handed back only if the caller
+says outright that the risk is accepted, and Google demands that the person be warned first
+(22.16). Anything but `true` or `false` is `400 invalid_request`; the acknowledgement is spent on
+this one run and is not remembered. On a `create` retry it means nothing and is ignored.
 
 This endpoint exists next to the generic 5.6 because `backups_queue_v1.retry(serverId, worldId,
 backupId)` passes the **backup ID**, not the operation ID; 5.6 therefore excludes `backup_*`.
@@ -2955,9 +2977,10 @@ most recently failed run. On the second retry the difference shows up: the run t
 *used* the copy of the first attempt and therefore has none of its own — asking it would answer
 "none" and buy a fresh one on every further click. A copy that somebody has deleted in the meantime
 leaves `target_id` at `NULL` and reads as "none", which is exactly right here
-(`backups/store.rs:240-246`, counter-test `backups/tests.rs:720-722`).
+(`backups/store.rs`, `safety_copy_for`).
 
-Errors: `409 nothing_to_retry` (`history[0].state` is neither `failed` nor `timed_out`),
+Errors: `400 invalid_request` (a word other than `true` or `false` in `acknowledge_abuse`),
+`409 nothing_to_retry` (`history[0].state` is neither `failed` nor `timed_out`),
 `409 server_running` (on `restore`), `409 server_busy`, `409 disk_limit_reached`,
 `507 no_space`.
 
@@ -3218,7 +3241,7 @@ differently (`audit/page.rs:22-26`):
   names every mod it brought along, so a single entry can carry more IDs than a statement has room
   for. The lookup therefore happens in bites. Without that, a lookup that falls over would take the
   whole page with it — this server's log would answer `500` from then on, and forever
-  (`audit/mod.rs:190-193`, `audit/page.rs:346-347`).
+  (`audit/mod.rs:190-193`, `audit/page.rs:306-307`).
 
 ---
 
@@ -4731,6 +4754,10 @@ export interface Backup {
 	location: BackupLocation
 	/** null for location === 'local'. Set by the sweeper (22.17). */
 	drive_state: DriveFileState | null
+	/** null for location === 'local'; false where Google named no checksum to check against. */
+	drive_verified: boolean | null
+	/** null for location === 'local'; true where the file in the Drive is no longer that archive. */
+	drive_content_changed: boolean | null
 	/** null for location === 'local'; otherwise the way to download it (22.19). */
 	drive_web_link: string | null
 	/** Newest first, at most 20. */
@@ -5510,6 +5537,12 @@ export interface DriveStatus {
 	/** null = unlimited (Workspace). */
 	storage_limit_bytes: number | null
 	storage_usage_bytes: number | null
+	/** What this panel handed Google today, counted by the panel and not by Google. */
+	uploaded_today_bytes: number
+	/** Google's 750 GB a day, so the page need not hard-code it. 750 × 1000³ bytes: Google
+	 * writes GB and never says which prefix, and only the smaller reading keeps the count a
+	 * floor under Google's own meter (22.15). The page shows it in the same 1000s. */
+	daily_upload_limit_bytes: number
 	/** Only your own running operation. */
 	link: DriveLink | null
 	/** A sentence, never an identifier: the reason for a failed operation too (22.5). */
@@ -5526,6 +5559,8 @@ export interface DriveOverview {
 	google_email: string | null
 	storage_limit_bytes: number | null
 	storage_usage_bytes: number | null
+	uploaded_today_bytes: number
+	daily_upload_limit_bytes: number
 	/** How many backups of this account lie in the Drive, and how large they are. */
 	backups: number
 	backup_bytes: number
@@ -6223,7 +6258,7 @@ Permission: panel admin. Response `200` `MailSettings`.
 | `state` | means |
 |---|---|
 | `not_configured` | no key file — the normal case on the first day. The **file** decides and not `key_set_at`: a row that claims a key which does not exist would send the panel outside empty-handed. The sender address does not belong in this question, it cannot be missing (default `onboarding@resend.dev`, and 19.3 takes no empty one) |
-| `configured` | a key is here. Does **not** say that it still works (the same honesty as `PlayitStatus.configured`, `playit/mod.rs:103-104`) |
+| `configured` | a key is here. Does **not** say that it still works (the same honesty as `PlayitStatus.configured`, `playit/mod.rs`) |
 | `file_sink` | `CRAFTPANEL_MAIL_SINK` is set: every mail lands as a file and **no** request goes onto the network |
 
 `file_sink` is deliberately a state of its own and not a silent redirect. With it the whole sign-up
@@ -6270,7 +6305,7 @@ Permission: panel admin. Request `UpdateMailSettingsRequest`, response `200` `Ma
 
 `api_key` has three meanings, and all three have to be there: `null` (field left out) means
 **unchanged**. Otherwise every save of the sender address would delete the key; `""` means
-**delete**; a text means **replace**. Writing goes as in `playit/agent.rs:345-359`: create the
+**delete**; a text means **replace**. Writing goes as in `playit/agent.rs`, `write_secret`: create the
 directory, `0700`, write into `api_key.part`, `0600`, `sync_all`, then `rename`, so that half a
 file is never read.
 
@@ -6430,7 +6465,7 @@ column.
 Two distinctions hang on pieces of text (`not verified`, `own email address`). If Resend changes
 the wording, the message falls back to the general sentence — nothing crashes, the advice goes
 blurry. The `#[ignore]` test against the real service is the place that notices it (pattern
-`playit/http.rs:267-311`).
+`playit/http.rs:233-274`).
 
 ### 19.12 The eight mails
 
@@ -7115,8 +7150,9 @@ Limited Input devices"**, enter the id and the secret in 22.12.
 
 **Step four is mandatory and has a warning of its own.** "A Google Cloud Platform project with an
 OAuth consent screen configured for an external user type and a publishing status of *Testing* is
-issued a refresh token expiring in **7 days**"
-(developers.google.com/identity/protocols/oauth2). On "Testing" every connection therefore breaks
+issued a refresh token expiring in **7 days**, unless the only OAuth scopes requested are a subset
+of name, email address, and user profile" (developers.google.com/identity/protocols/oauth2, under
+`cloud_lock`; `drive.file` is none of those three). On "Testing" every connection therefore breaks
 after a week — silently, and exactly when somebody needs a backup. The panel **cannot query** this
 state; Google offers no interface for it. It can only say it and guess: if a refresh fails with
 `invalid_grant` on a token younger than ten days, `last_error` says literally that this looks like
@@ -7140,7 +7176,7 @@ Permission: signed in, and it is always your own state. Response `200` `DriveSta
 Reads one row and calls nobody. `panel_configured` is the question "has the operator set something
 up", `configured` the question "has *this account* connected something". `configured: true` does
 **not** say that it still works — the same honesty as `PlayitStatus.configured`
-(`playit/mod.rs:103-104`); `state` is there for that.
+(`playit/mod.rs`); `state` is there for that.
 
 **`state` is a statement about a connection, and `null` means there is none.** Three situations
 fall under it — never connected, in the middle of it, last attempt went wrong — and none of them
@@ -7341,8 +7377,8 @@ and `folder_name` — in the shape of 19.3: `client_secret` left out or `null` m
 rule would delete the secret.
 
 The id goes into the row, the secret into the file (`0600` in `0700`, written as in
-`playit/agent.rs:345-359`: `.part`, `sync_all`, `rename`) and **never** comes out again. Errors:
-`400 invalid_request`.
+`playit/agent.rs`, `write_secret`: `.part`, `sync_all`, `rename`) and **never** comes out again.
+Errors: `400 invalid_request`.
 
 These four values are explicitly **not** in `panel_settings`: there 12.11 writes the row as a
 whole, and two areas in one row would mean two hands on `auth/settings.rs`, `api/admin.rs` and the
@@ -7372,13 +7408,13 @@ Writes a `warn!` line with the actor and the target; an audit entry after 11.9 i
 
 **Build → upload → delete locally**, in that order, and the first reason settles it:
 
-`quiesce::Held::take` switches `save-off`, `Drop` switches it back, and today the bracket encloses
-exactly the packing (`crates/craftpanel/src/backups/mod.rs:671-712`). `quiesce.rs:5-8` names "the
-whole risk of this area: a server left with saving switched off looks perfectly healthy and loses
-everything since the last flush the moment it crashes." **A streaming upload would hold `save-off`
-for the whole duration of the upload** — with 2 GB and 10 Mbit/s that is half an hour without
-saving. That alone decides the question. The upload lies **outside** the bracket, and that belongs
-at the place as a comment with its reason; a test holds it down.
+`quiesce::Held::take` switches `save-off`, `Drop` switches it back, and the bracket encloses exactly
+the packing (`backups/mod.rs`, `pack()`). The whole risk of that area is this: a server left with
+saving switched off looks perfectly healthy and loses everything since the last flush the moment it
+crashes. **A streaming upload would hold `save-off` for the whole duration of the upload** — with
+2 GB and 10 Mbit/s that is half an hour without saving. That alone decides the question. The upload
+lies **outside** the bracket; the reason stands here and in `docs/DRIVE.md`, not as a comment in the
+code, and a test holds it down.
 
 Two further reasons say the same: a `tar`+zstd stream is not reproducible (`archive.rs` has tests
 of its own for the case "the file shrinks while it is read"), but a resume demands the same bytes
@@ -7388,7 +7424,7 @@ at the same place; and the finished file knows its length, so `X-Upload-Content-
 One run, one operation (`backup_create`), three sections: packing as today (progress 0 → 0.5),
 uploading (0.5 → 1.0), then **write the row first, delete the local file second** — the other way
 round, a crash in between would be a file without a row *and* without a local copy (the same
-ordering argument as `forget()`, `backups/mod.rs:435-437`). **No new `OperationPhase` value**
+ordering argument as `forget()`). **No new `OperationPhase` value**
 (5.9).
 
 The upload (developers.google.com/workspace/drive/api/guides/manage-uploads):
@@ -7396,23 +7432,39 @@ The upload (developers.google.com/workspace/drive/api/guides/manage-uploads):
 in the `Location` header, valid for **one week**; chunks as `PUT` in multiples of 256 KiB, chosen
 **8 MiB**; `308` means carry on, and the `Range` header of the answer says what arrived — **the
 answer may carry a new `Location`, and then that one counts**; the state after an abort over an
-empty `PUT` with `Content-Range: bytes */<total>`; `404` means "session expired, start over";
+empty `PUT` with `Content-Range: bytes */<total>`; `404` means "session expired", and starting over
+is the **running run's** job, not the next one's: it lets the dead address go, opens a session of
+its own and sends the archive from the front, once. A Google that forgets the second session too
+ends the run with `drive_session_expired` — an expired session is not a missing file and no longer
+says so (`drive/mod.rs`, `Account::upload`, and the test
+`a_session_google_forgets_in_mid_flight_is_opened_again_in_the_same_run`);
 `5xx` and `429` with `min(2^n + jitter, 64 s)`
 (developers.google.com/workspace/drive/api/guides/limits), five attempts per chunk.
 
 Three limits must **not** get into the backoff cycle, otherwise the upload hammers for a minute
-against a wall that only opens tomorrow: 750 GB of upload per user account per day, 5 TB per file,
+against a wall that only opens tomorrow: 750 GB of upload per user account per day (`day::CEILING`
+= 750 × 1000³ bytes — Google writes GB and does not say which prefix, so the panel takes the
+smaller reading and can only stop earlier than Google, never later), 5 TB per file,
 and `storageQuotaExceeded` — according to Google that one is explicitly not to be retried, and it
 becomes `507 drive_quota_exceeded` or the operation error `drive_quota_exceeded`.
 
 **Canceling** (5.4) checks the same `archive::Progress::is_cancelled` between two chunks. The
 consolation: as long as a resumable session is not finished, **no file appears in the user's
 Drive** — an aborted run leaves nothing lying there, and an unfinished session expires by itself
-after a week. That is why **nothing has to be added** for 5.12 (restart): `recover()` throws the
-half archive away, and there was never anything to see in the Drive.
+after a week.
+
+**A restart (5.12) does have something to add, and it is built.** The first version of this section
+said the opposite — that `recover()` throws the half archive away and there was never anything to
+see in the Drive — and that stopped being true with `0018_drive_upload_sessions.sql`. Today the
+session address survives a restart in `<data_dir>/drive/<user_id>/sessions/<backup_id>`, the row in
+`drive_uploads` holds the size, modification time and inode of the archive it belongs to, and
+`recover()` **keeps** a half archive that has a live matching session
+(`backups/mod.rs`, `Backups::recover`; `drive/mod.rs`, `Drive::pick_up` and `Account::carry_on`).
+Nothing resumes by itself — the Retry of 10.7 does it, and it sends the rest instead of packing
+again. The whole reasoning is in `docs/DRIVE.md` section 4b.
 
 File name `<server-slug>--<backup-slug>--<created_at>.tar.zst` (`slug()` already exists,
-`api/backups.rs:300`), plus `appProperties { panel: "craftpanel", server_id, backup_id }` — the
+`api/backups.rs`), plus `appProperties { panel: "craftpanel", server_id, backup_id }` — the
 limits are 30 private properties per app and 124 bytes per property, and three ULIDs fit into that
 twenty times over.
 
@@ -7420,18 +7472,74 @@ twenty times over.
 
 Download, then the existing `unroll` — **no second restore path**.
 
-1. `files.get?fields=size,md5Checksum,trashed` — is it there, and how big.
+1. `files.get?fields=id,name,size,trashed,md5Checksum,sha256Checksum,isAppAuthorized` — is it
+   there, how big, and what does Google say it hashes to. No checksum field is promised — the MD5
+   "is only applicable to files with binary content in Google Drive", the other two are there "if
+   available" (developers.google.com/workspace/drive/api/reference/rest/v3/files) — and
+   `sha256Checksum` costs nothing next to `md5Checksum`, so both are asked for;
+   `isAppAuthorized` is Google's own answer to "was this file ever opened by this app", and a
+   `false` there is written into the log before the download that will fail on it
+   (developers.google.com/workspace/drive/api/reference/rest/v3/files).
 2. **Check the space before anything runs**: free space ≥ (archive size + estimated unpacked size)
-   × 1.1, plus the owner's disk limit. A finding on the side, so that it does not pass as a silent
-   rebuild: today `unroll` checks **none** of this (`backups/mod.rs:780-851`) — with a local
-   backup the archive was at least there already, on the Drive path it has to get there first.
+   × 1.1, plus the owner's disk limit. A finding on the side, so that it did not pass as a silent
+   rebuild: `unroll` used to check **none** of this — with a local backup the archive was at least
+   there already, on the Drive path it has to get there first. `room_for` does it now
+   (`backups/mod.rs`, `bring_down`).
 3. `GET …/files/<id>?alt=media` into a `.part` file (progress 0 → 0.4).
-4. **`md5Checksum` against what was computed locally** (`md-5` is already in the `Cargo.toml`).
-   Half a download is half a server; here a checksum is no ornament.
+4. **The checksum over the whole result**, `md5Checksum` if Google names one, otherwise
+   `sha256Checksum`. Half a download is half a server; here a checksum is no ornament. If Google
+   names neither, the download counts and a `warn!` line says that nothing confirms it — the same
+   honesty as 22.15 one floor up.
 5. Rename, `unroll` unchanged (0.4 → 1.0), delete the local copy at the end.
 
-Errors of the operation: `drive_file_missing`, `drive_revoked`, `drive_unavailable`, `no_space`,
-`disk_limit_reached` (5.11).
+**A download that breaks off carries on where it stopped.** The upload has been resumable since
+0018 while the way back began at zero on every attempt, and the guard that deletes a mismatched
+archive made sure there was never even a half to start from. Now the `.part` file **stays** when
+the line dies, and the next attempt sends `Range: bytes=<what is here>-`
+(developers.google.com/workspace/drive/api/guides/manage-downloads: "You can specify the portion of
+the file you want to download by using a byte range with the `Range` header"). Three rules keep
+that from turning into the upload's chimera:
+
+* **The checksum is computed over the whole file, not over the last piece.** The bytes already on
+  disk are read back into the digest before the first new byte arrives.
+* **Without a checksum from Google nothing is resumed at all.** A prefix that cannot be checked
+  afterwards is worth less than the bandwidth to fetch it again.
+* **A `.part` carries a note saying whose it is** — `<file id> <size> <checksum>` in
+  `<archive>.part.source`. A note that does not match what `files.get` says this minute means the
+  half belongs to some other file, and it is thrown away rather than glued on
+  (`half_a_download_of_another_file_is_never_glued_to_this_one`).
+
+A `200` where a `206` was asked for is a server that ignored the range: then the file is truncated
+and written from the front. A stream that ends clean but short ends the run with the sentence
+"Google broke off after n of m bytes" and **keeps** what came — that is the case the next Retry
+resumes (`a_restore_that_breaks_off_halfway_carries_on_at_the_next_press`). What is *not* kept: a
+cancel (5.4), a file Google no longer has, and a half whose checksum came out wrong.
+
+**A file Google calls abusive needs a person, and never the panel alone.** "Files identified as
+abusive (such as harmful software) are only downloadable by the file owner. Additionally, the
+`acknowledgeAbuse` query parameter must be set to `true` … Your application should interactively
+warn the user before using this query parameter"
+(developers.google.com/workspace/drive/api/guides/manage-downloads). A backup is a whole server
+tree with its mods and plugins, so this is not a corner case. Therefore:
+
+* The refusal gets an operation error of its own, `drive_abuse_blocked`, and is never repeated —
+  no waiting it out lifts it. Google's own error list does **not** document the `reason` string
+  they send with it (`cannotDownloadAbusiveFile` is on none of the pages under
+  developers.google.com/workspace/drive/api/guides/handle-errors), so a 403 with any other reason
+  stays the plain refusal it was, with Google's own sentence.
+* The backups page turns that code into a **warning with the reason and no button that lies**:
+  the Admonition says Google calls this archive malware or spam, and the only control it offers is
+  "I accept the risk, fetch it anyway" (`web/src/pages/servers/Backups.vue`, `abuseBlocked()` and
+  the `@click="retry(backup.id, true)"` in the failure Admonition).
+* That press, and only that press, sends `POST …/backups/:backup_id/retry?acknowledge_abuse=true`
+  (10.7), and only that request carries `acknowledgeAbuse=true` to Google. The acknowledgement is
+  held for exactly one run, in memory, and a run that fails again needs a fresh press: a warning
+  that is given once and then remembered for ever is not a warning.
+  `an_archive_google_calls_abusive_comes_back_only_after_the_owner_says_yes` measures both halves,
+  and `backup-abuse-path.test.ts` watches the chain from the button to the query from outside.
+
+Errors of the operation: `drive_file_missing`, `drive_revoked`, `drive_abuse_blocked`,
+`drive_unavailable`, `no_space`, `disk_limit_reached` (5.11).
 
 ### 22.17 The sweeper and `drive_state`
 
@@ -7439,11 +7547,13 @@ The user can delete, rename and move things in their Drive. Renaming and moving 
 difference (we hold the id). Deleting and the trash do.
 
 **One sweeper per connected user, once an hour**, spread out like playit's sync
-(`playit/connection.rs:806`: `spread % SYNC_TICK`, so that they do not all start calling at the
-same time on startup). Three calls: refresh the token (which is at the same time the check for
+(`playit/connection.rs`, `offset_of`: `spread % SYNC_TICK`, so that they do not all start calling
+at the same time on startup). Three calls: refresh the token (which is at the same time the check for
 `invalid_grant`), `about.get` for the storage level, and **one** `files.list` with
-`q = "appProperties has { key='panel' and value='craftpanel' } and trashed=false"` for all backups
-of this user.
+`q = "appProperties has { key='panel' and value='craftpanel' }"` for all backups of this user —
+**without** `trashed=false`, and that is not an oversight: the table below has a row for `trashed`,
+and a query that hides binned files could only ever report them as `missing`
+(`drive/files.rs`, `ours`).
 
 | Situation | `drive_state` | Consequence |
 |---|---|---|
@@ -7474,8 +7584,8 @@ ninth; the hook for it sits in the sweeper and today only writes `warn!`.
   sum leaves Drive rows out. **That is the one line where a bug gets built in if nobody looks.**
 * **On the way it counts all the same** (22.15, 10.2), and that is right: the archive really is on
   the disk. After the run it is gone. A limit of the honesty that you have to know: `Disks`
-  remembers for 60 seconds (`auth/disk.rs:31`), so a file that has just been deleted still counts
-  for up to a minute afterwards. That is already the case today.
+  remembers for 60 seconds (`auth/disk.rs`, `WINDOW`), so a file that has just been deleted still
+  counts for up to a minute afterwards. That is already the case today.
 * **Schedules (10.10) carry unchanged.** `skipped_unchanged` compares mtimes in the server tree,
   not the target. Cleaning up still happens only among automatic backups; for a Drive row,
   cleaning up means `files.delete` and then the row — the row first, the file after, as in

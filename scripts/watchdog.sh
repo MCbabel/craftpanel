@@ -18,6 +18,7 @@ note() { printf '%s  %s\n' "$(date +%H:%M:%S)" "$*" >>"$LOG"; }
 # Newest first: a server that just started is the one an agent can most cheaply
 # try again, and the long-running one is more likely to be the user's.
 newest_servers() {
+	# shellcheck disable=SC2009  # pgrep prints neither the start time nor the command
 	ps -eo lstart=,pid=,cmd= | grep '[j]ava -Xmx' |
 		while read -r _ mon day time year pid _; do
 			printf '%s %s\n' "$(date -d "$mon $day $time $year" +%s 2>/dev/null || echo 0)" "$pid"

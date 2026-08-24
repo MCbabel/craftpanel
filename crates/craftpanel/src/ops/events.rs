@@ -349,7 +349,9 @@ impl Bus {
 pub fn power_state_of(state: crate::servers::RunState) -> (PowerState, bool) {
     use crate::servers::RunState;
     match state {
-        RunState::Stopped | RunState::Installing => (PowerState::Stopped, false),
+        RunState::Stopped | RunState::Installing | RunState::Terminated => {
+            (PowerState::Stopped, false)
+        }
         RunState::Starting => (PowerState::Starting, false),
         RunState::Running => (PowerState::Running, false),
         RunState::Stopping => (PowerState::Stopping, false),

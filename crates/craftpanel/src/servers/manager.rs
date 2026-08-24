@@ -1199,6 +1199,7 @@ impl Manager {
         let name = server.to_string();
         let waiting_since = Instant::now();
         let mut last = self.current(server).await.unwrap_or(RunState::Stopped);
+        let mut held: Option<Arc<super::Link>> = None;
 
         loop {
             tokio::time::sleep(WATCH_TICK).await;
@@ -1208,6 +1209,7 @@ impl Manager {
                         self.hand_over(server, &link).await;
                     }
                     let now = link.state().await;
+                    held = Some(link);
                     if now != last {
                         last = now;
                         let (state, oom) = crate::ops::power_state_of(now);
@@ -1219,7 +1221,12 @@ impl Manager {
                 }
                 None if last == RunState::Starting
                     && waiting_since.elapsed() < START_TIMEOUT => {}
-                None => break,
+                None => {
+                    if let Some(gone) = held.take() {
+                        last = gone.state().await;
+                    }
+                    break;
+                }
             }
         }
 
@@ -1267,7 +1274,9 @@ impl Manager {
             RunState::OutOfMemory => (PowerState::Crashed, true),
             _ if stopping_on_purpose => (PowerState::Stopped, false),
             RunState::Crashed => (PowerState::Crashed, false),
-            RunState::Stopped | RunState::Installing => (PowerState::Stopped, false),
+            RunState::Stopped | RunState::Installing | RunState::Terminated => {
+                (PowerState::Stopped, false)
+            }
             _ => (PowerState::Crashed, false),
         };
 
@@ -2331,6 +2340,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn a_pool_the_installer_set_is_the_one_the_first_server_draws_from() {
+        let fixture = Fixture::new().await;
+        let wanted = crate::model::PortRange { from: 25800, to: 25810 };
+        crate::auth::cli::set_ports(&fixture.pool, wanted).await.unwrap();
+
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+        let first =
+            fixture.manager.create(&caller, fixture.loader_wish("one", max, 512)).await.unwrap();
+
+        assert_eq!(first.server.net.port, 25800, "not 25565 out of the migration");
+    }
+
+    #[tokio::test]
     async fn an_exhausted_pool_is_a_conflict_and_not_a_second_server_on_one_port() {
         let fixture = Fixture::new().await;
         let max = a_user(&fixture.pool, "max").await;
@@ -3093,6 +3116,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn an_ending_nobody_in_the_panel_ordered_is_weighed_on_the_ending_itself() {
+        let fixture = Fixture::new().await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+        let made = fixture
+            .manager
+            .create(&caller, fixture.loader_wish("survival", max, 1024))
+            .await
+            .unwrap();
+        fixture.manager.run(made.operation.id).await;
+        let server = made.server.id;
+
+        fixture.manager.set_wish(server, Wish::default());
+        fixture.manager.settle(server, RunState::Terminated).await;
+        assert_eq!(
+            power_of(&fixture, server).await,
+            PowerState::Stopped,
+            "somebody outside sent SIGTERM and the game saved and left"
+        );
+
+        fixture.manager.set_wish(server, Wish::default());
+        fixture.manager.settle(server, RunState::Crashed).await;
+        assert_eq!(power_of(&fixture, server).await, PowerState::Crashed, "and a crash still is");
+    }
+
+    #[tokio::test]
     async fn a_stop_that_had_to_be_forced_is_not_reported_as_a_crash() {
         let fixture = Fixture::new().await;
         let max = a_user(&fixture.pool, "max").await;
@@ -3133,6 +3182,85 @@ mod tests {
         );
         fixture.manager.settle(server, RunState::OutOfMemory).await;
         assert_eq!(power_of(&fixture, server).await, PowerState::Crashed);
+    }
+
+    #[tokio::test]
+    async fn the_last_word_of_a_supervisor_that_hangs_up_is_the_one_that_counts() {
+        use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+
+        let fixture = Fixture::new().await;
+        let max = a_user(&fixture.pool, "max").await;
+        let caller = fixture.caller(max).await;
+        let made = fixture
+            .manager
+            .create(&caller, fixture.loader_wish("survival", max, 1024))
+            .await
+            .unwrap();
+        fixture.manager.run(made.operation.id).await;
+        let server = made.server.id;
+        let listening = tokio::spawn(Arc::clone(&fixture.hub).listen());
+
+        fixture.manager.power(&caller, server, PowerAction::Start).await.unwrap();
+        let token: String = sqlx::query_scalar("SELECT supervisor_token FROM servers WHERE id = ?")
+            .bind(server)
+            .fetch_one(&fixture.pool)
+            .await
+            .unwrap();
+        let stream = loop {
+            match tokio::net::UnixStream::connect(fixture.hub.socket()).await {
+                Ok(stream) => break stream,
+                Err(_) => tokio::time::sleep(Duration::from_millis(20)).await,
+            }
+        };
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader).lines();
+        let say = |message: &craftpanel_proto::SupervisorMessage| {
+            let mut line = serde_json::to_vec(message).unwrap();
+            line.push(b'\n');
+            line
+        };
+        let hello = say(&craftpanel_proto::SupervisorMessage::Hello {
+            server_id: server.to_string(),
+            token,
+            pid: std::process::id(),
+            protocol: craftpanel_proto::HELPER_PROTOCOL_VERSION,
+        });
+        writer.write_all(&hello).await.unwrap();
+        writer.flush().await.unwrap();
+        assert!(reader.next_line().await.unwrap().unwrap().contains("accepted"));
+        assert_eq!(
+            settled_state(&fixture, server, PowerState::Starting).await,
+            PowerState::Running,
+            "the watcher has the game running before anything ends it"
+        );
+
+        let ended = say(&craftpanel_proto::SupervisorMessage::Exited {
+            code: Some(143),
+            signal: None,
+            oom_killed: false,
+        });
+        writer.write_all(&ended).await.unwrap();
+        writer.flush().await.unwrap();
+        drop(writer);
+
+        assert_eq!(
+            settled_state(&fixture, server, PowerState::Running).await,
+            PowerState::Stopped,
+            "the supervisor said how it ended and then hung up; the ending is what counts"
+        );
+
+        listening.abort();
+    }
+
+    async fn settled_state(fixture: &Fixture, server: Id, was: PowerState) -> PowerState {
+        for _ in 0..100 {
+            let now = power_of(fixture, server).await;
+            if now != was {
+                return now;
+            }
+            tokio::time::sleep(Duration::from_millis(100)).await;
+        }
+        panic!("the panel is still reporting {was:?}");
     }
 
     #[tokio::test]

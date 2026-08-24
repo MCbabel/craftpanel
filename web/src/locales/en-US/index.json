@@ -53,6 +53,12 @@
   "account.drive.connected-intro": {
     "defaultMessage": "Your backups go into your own Drive. You can open, download and delete them there yourself."
   },
+  "account.drive.day-full.body": {
+    "defaultMessage": "Google accepts 750 GB a day from one account. Backups into your Drive stop here rather than being retried into a wall; a half-sent archive is kept and carries on where it stopped once Google takes uploads again. Google does not publish when that is — this panel counts the day from midnight UTC."
+  },
+  "account.drive.day-full.header": {
+    "defaultMessage": "Today’s share of Google is used up"
+  },
   "account.drive.disconnect": {
     "defaultMessage": "Disconnect"
   },
@@ -79,6 +85,18 @@
   },
   "account.drive.fact.account-unknown": {
     "defaultMessage": "Not known yet"
+  },
+  "account.drive.fact.day": {
+    "defaultMessage": "Sent to Google today"
+  },
+  "account.drive.fact.day-free": {
+    "defaultMessage": "Google takes another {free} from this account before the day is out."
+  },
+  "account.drive.fact.day-spent": {
+    "defaultMessage": "Google takes nothing more from this account today."
+  },
+  "account.drive.fact.day-value": {
+    "defaultMessage": "{sent} of {limit}"
   },
   "account.drive.fact.folder": {
     "defaultMessage": "Folder"
@@ -314,6 +332,9 @@
   "admin.drive.column.checked": {
     "defaultMessage": "Last checked"
   },
+  "admin.drive.column.day": {
+    "defaultMessage": "Sent today"
+  },
   "admin.drive.column.state": {
     "defaultMessage": "State"
   },
@@ -337,6 +358,9 @@
   },
   "admin.drive.cut.files": {
     "defaultMessage": "His backups stay in his Drive. There is no button here that deletes files in somebody else’s storage, and that is on purpose: he can see them and throw them away himself."
+  },
+  "admin.drive.day-value": {
+    "defaultMessage": "{sent} of {limit}"
   },
   "admin.drive.folder-hint": {
     "defaultMessage": "The folder the panel makes in each user’s Drive. Renaming it here does not rename the folders that already exist."
@@ -1967,6 +1991,15 @@
   "craftpanel.access.role-viewer-description": {
     "defaultMessage": "Watch the console and start or stop the server. No changes."
   },
+  "craftpanel.backups.abuse-fetch-anyway": {
+    "defaultMessage": "I accept the risk, fetch it anyway"
+  },
+  "craftpanel.backups.abuse-header": {
+    "defaultMessage": "Google has this archive down as harmful"
+  },
+  "craftpanel.backups.abuse-warning": {
+    "defaultMessage": "Google scanned this archive and calls it malware or spam. It hands it back only if you say outright that you accept the risk of downloading a possibly harmful file. If you did not pack a suspicious mod or plugin, restore an older backup instead."
+  },
   "craftpanel.backups.action-failed": {
     "defaultMessage": "The action was refused"
   },
@@ -1975,6 +2008,12 @@
   },
   "craftpanel.backups.busy": {
     "defaultMessage": "A backup is already running."
+  },
+  "craftpanel.backups.carry-on-fetching": {
+    "defaultMessage": "A break does not have to start this over: as long as the archive in the Drive has not changed, what is already on the disk stays there and the panel fetches only the rest."
+  },
+  "craftpanel.backups.carry-on-sending": {
+    "defaultMessage": "A break does not have to start this over: as long as Google still holds the half-sent archive, the panel asks how far it got and sends only the rest."
   },
   "craftpanel.backups.clear-selection": {
     "defaultMessage": "Clear"
@@ -2000,11 +2039,17 @@
   "craftpanel.backups.drive-broken.not-connected-owner": {
     "defaultMessage": "You need to connect a Google account before this server can be backed up: its backups go into your Google Drive, and until one is connected every backup of this server fails."
   },
+  "craftpanel.backups.drive-changed-hint": {
+    "defaultMessage": "The file in your Google Drive is no longer the archive the panel put there — something has written over it since. It cannot be restored from here."
+  },
   "craftpanel.backups.drive-connect": {
     "defaultMessage": "Connect Google Drive"
   },
   "craftpanel.backups.drive-gone-hint": {
     "defaultMessage": "Put it back in your Drive to restore it from here."
+  },
+  "craftpanel.backups.drive-unconfirmed-hint": {
+    "defaultMessage": "Unconfirmed: Google named no checksum, so nothing says it arrived whole."
   },
   "craftpanel.backups.empty-description": {
     "defaultMessage": "A backup holds the whole server directory and can be restored at any time."
@@ -2068,6 +2113,9 @@
   },
   "craftpanel.backups.selected": {
     "defaultMessage": "{count} selected"
+  },
+  "craftpanel.backups.state.changed": {
+    "defaultMessage": "Not this backup any more"
   },
   "craftpanel.backups.state.in-drive": {
     "defaultMessage": "In Google Drive"
@@ -2584,6 +2632,21 @@
   },
   "craftpanel.settings.network.swap-needs-give-back": {
     "defaultMessage": "While that address stands, the primary port cannot be moved: where the tunnel points is kept at playit.gg and cannot be changed from here. The owner or a panel administrator gives the address back on the overview page; until then the panel refuses the swap."
+  },
+  "format.decimal-bytes.0": {
+    "defaultMessage": "{count, plural, one {# byte} other {# bytes}}"
+  },
+  "format.decimal-bytes.1": {
+    "defaultMessage": "{count, number} kB"
+  },
+  "format.decimal-bytes.2": {
+    "defaultMessage": "{count, number} MB"
+  },
+  "format.decimal-bytes.3": {
+    "defaultMessage": "{count, number} GB"
+  },
+  "format.decimal-bytes.4": {
+    "defaultMessage": "{count, number} TB"
   },
   "panel.copy.failed": {
     "defaultMessage": "Nothing was copied"

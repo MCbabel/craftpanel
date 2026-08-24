@@ -183,7 +183,7 @@
 					:columns="columns"
 					:data="rows"
 					row-key="user_id"
-					:table-min-width="wide ? '60rem' : undefined"
+					:table-min-width="wide ? '72rem' : undefined"
 					:row-below-visible="!wide"
 				>
 					<template #empty-state>
@@ -216,6 +216,10 @@
 						<span class="text-sm text-contrast">{{ storageLabel(index) }}</span>
 					</template>
 
+					<template #cell-day="{ index }">
+						<span class="text-sm text-contrast">{{ dayLabel(index) }}</span>
+					</template>
+
 					<template #cell-backups="{ index }">
 						<span class="text-sm text-contrast">{{ backupsLabel(index) }}</span>
 					</template>
@@ -245,6 +249,9 @@
 
 							<dt class="text-secondary">{{ formatMessage(messages.columnStorage) }}</dt>
 							<dd class="m-0 text-contrast">{{ storageLabel(index) }}</dd>
+
+							<dt class="text-secondary">{{ formatMessage(messages.columnDay) }}</dt>
+							<dd class="m-0 text-contrast">{{ dayLabel(index) }}</dd>
 
 							<dt class="text-secondary">{{ formatMessage(messages.columnBackups) }}</dt>
 							<dd class="m-0 text-contrast">{{ backupsLabel(index) }}</dd>
@@ -328,11 +335,13 @@ import {
 } from '@/api/drive'
 import { actionsColumnWidth, ICON_LABEL_BUTTON_REM } from '@/components/table-widths'
 import { useWideScreen } from '@/composables/breakpoint'
+import { useFormatDecimalBytes } from '@/composables/format-bytes'
 
 import { blankDraft, type DriveDraft, draftOf, POLICIES } from './drive'
 
 const { formatMessage } = useVIntl()
 const formatBytes = useFormatBytes()
+const decimalBytes = useFormatDecimalBytes()
 const formatNumber = useFormatNumber()
 const relativeTime = useRelativeTime()
 const wide = useWideScreen()
@@ -465,6 +474,8 @@ const messages = defineMessages({
 	columnUser: { id: 'admin.drive.column.user', defaultMessage: 'User' },
 	columnState: { id: 'admin.drive.column.state', defaultMessage: 'State' },
 	columnStorage: { id: 'admin.drive.column.storage', defaultMessage: 'Drive storage' },
+	columnDay: { id: 'admin.drive.column.day', defaultMessage: 'Sent today' },
+	dayValue: { id: 'admin.drive.day-value', defaultMessage: '{sent} of {limit}' },
 	columnBackups: { id: 'admin.drive.column.backups', defaultMessage: 'Backups there' },
 	columnChecked: { id: 'admin.drive.column.checked', defaultMessage: 'Last checked' },
 	columnActions: { id: 'admin.drive.column.actions', defaultMessage: 'Actions' },
@@ -519,7 +530,7 @@ const POLICY_HINTS: Record<BackupTargetPolicy, typeof messages.policyUserChoiceH
 	local_only: messages.policyLocalOnlyHint,
 }
 
-type DriveColumn = 'user' | 'state' | 'storage' | 'backups' | 'checked' | 'actions'
+type DriveColumn = 'user' | 'state' | 'storage' | 'day' | 'backups' | 'checked' | 'actions'
 type DriveRow = { user_id: Ulid; line: DriveOverview }
 
 const overview = ref<DriveAdminOverview | null>(null)
@@ -544,6 +555,7 @@ const columns = computed<TableColumn<DriveColumn>[]>(() =>
 				{ key: 'user', label: formatMessage(messages.columnUser), width: '18rem' },
 				{ key: 'state', label: formatMessage(messages.columnState), width: '12rem' },
 				{ key: 'storage', label: formatMessage(messages.columnStorage), width: '12rem' },
+				{ key: 'day', label: formatMessage(messages.columnDay), width: '12rem' },
 				{ key: 'backups', label: formatMessage(messages.columnBackups), width: '10rem' },
 				{ key: 'checked', label: formatMessage(messages.columnChecked), width: '10rem' },
 				{
@@ -569,6 +581,14 @@ function storageLabel(index: number): string {
 	return formatMessage(messages.storageValue, {
 		used: formatBytes(account.storage_usage_bytes ?? 0),
 		limit: formatBytes(account.storage_limit_bytes),
+	})
+}
+
+function dayLabel(index: number): string {
+	const account = at(index)
+	return formatMessage(messages.dayValue, {
+		sent: decimalBytes(account.uploaded_today_bytes),
+		limit: decimalBytes(account.daily_upload_limit_bytes),
 	})
 }
 

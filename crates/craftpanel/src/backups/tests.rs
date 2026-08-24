@@ -603,7 +603,8 @@ async fn repeating_a_failed_create_keeps_the_backup_id() {
     );
 
     std::fs::remove_dir(game.backups.archive_of(game.server, queued.backup)).expect("out of the way");
-    let again = game.backups.retry(game.server, queued.backup, game.owner).await.expect("a retry");
+    let again =
+        game.backups.retry(game.server, queued.backup, game.owner, false).await.expect("a retry");
     assert_eq!(again.operation_type, BackupOperationType::Create);
     assert_ne!(again.operation_id, queued.operation, "10.7: a new run");
     assert_eq!(game.await_backup(queued.backup).await, BackupStatus::Done);
@@ -636,7 +637,7 @@ async fn repeating_a_restore_uses_the_safety_copy_it_already_made() {
         .expect("it fails");
 
     let before = game.backup_rows().await;
-    let again = game.backups.retry(game.server, source, game.owner).await.expect("a retry");
+    let again = game.backups.retry(game.server, source, game.owner, false).await.expect("a retry");
     assert_eq!(again.operation_type, BackupOperationType::Restore);
     assert_eq!(
         game.backup_rows().await,
@@ -673,7 +674,8 @@ async fn a_restore_retried_twice_still_makes_do_with_the_first_safety_copy() {
             .await
             .expect("it fails");
 
-        let again = game.backups.retry(game.server, source, game.owner).await.expect("a retry");
+        let again =
+            game.backups.retry(game.server, source, game.owner, false).await.expect("a retry");
         game.await_operation(again.operation_id).await;
         assert_eq!(
             game.backup_rows().await,
@@ -713,7 +715,7 @@ async fn a_retry_that_cannot_afford_a_safety_copy_leaves_no_run_behind() {
 
     let refused = game
         .backups
-        .retry(game.server, source, game.owner)
+        .retry(game.server, source, game.owner, false)
         .await
         .expect_err("the copy does not fit");
     assert_eq!(refused.code(), "backup_limit_reached");
@@ -749,7 +751,10 @@ async fn repeating_a_failed_create_asks_the_disk_pot_again() {
         .unwrap();
 
     let refused =
-        game.backups.retry(game.server, queued.backup, game.owner).await.expect_err("no room");
+        game.backups
+            .retry(game.server, queued.backup, game.owner, false)
+            .await
+            .expect_err("no room");
     assert_eq!(refused.code(), "disk_limit_reached");
     assert!(broken.exists(), "the door comes before the broken file is cleared away");
     assert!(
@@ -763,7 +768,7 @@ async fn repeating_a_failed_create_asks_the_disk_pot_again() {
         .await
         .unwrap();
     std::fs::remove_dir(&broken).expect("out of the way");
-    game.backups.retry(game.server, queued.backup, game.owner).await.expect("a retry");
+    game.backups.retry(game.server, queued.backup, game.owner, false).await.expect("a retry");
     assert_eq!(game.await_backup(queued.backup).await, BackupStatus::Done);
 }
 
@@ -798,7 +803,8 @@ async fn repeating_a_restore_that_needs_a_new_copy_asks_the_disk_pot_too() {
         .await
         .unwrap();
 
-    let refused = game.backups.retry(game.server, source, game.owner).await.expect_err("no room");
+    let refused =
+        game.backups.retry(game.server, source, game.owner, false).await.expect_err("no room");
     assert_eq!(refused.code(), "disk_limit_reached");
     assert!(
         game.operations.guard_write(game.server).await.is_ok(),
@@ -815,7 +821,7 @@ async fn a_backup_whose_last_run_went_well_has_nothing_to_repeat() {
 
     let refused = game
         .backups
-        .retry(game.server, backup, game.owner)
+        .retry(game.server, backup, game.owner, false)
         .await
         .expect_err("nothing failed");
     assert_eq!(refused.code(), "nothing_to_retry");
@@ -1033,6 +1039,133 @@ async fn a_backup_into_a_drive_leaves_nothing_on_our_disk() {
         seen.drive_web_link.as_deref(),
         Some(format!("https://drive.google.com/file/d/{file_id}/view").as_str())
     );
+    assert_eq!(
+        row.drive_md5.as_deref(),
+        Some(md5_of(&there.bytes).as_str()),
+        "what Google says it stored is what we hashed on the way out"
+    );
+    assert_eq!(seen.drive_verified, Some(true), "and the page may say so");
+}
+
+#[tokio::test]
+async fn an_archive_that_arrives_mangled_is_no_backup_at_all() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"a world worth keeping");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+    game.google().garble_what_arrives();
+
+    let queued =
+        game.backups.create(game.server, "mangled", Some(game.owner), false).await.unwrap();
+    game.backups.run(queued.operation).await;
+
+    let run = game.operations.get(queued.operation).await.unwrap();
+    assert_eq!(run.state, OperationState::Failed, "a mangled upload passed as a backup");
+    let error = run.error.expect("an error");
+    assert_eq!(error.code, "drive_checksum_mismatch");
+    assert!(error.message.contains("hashes to"), "the sentence names both sides: {}", error.message);
+
+    let row = store::find(game.pool(), queued.backup).await.unwrap();
+    assert_eq!(row.drive_file_id, None, "the database points at a backup that is not one");
+    assert_eq!(row.drive_state, None);
+    assert_eq!(row.drive_md5, None);
+    assert!(
+        game.google().files().iter().all(|file| file.folder),
+        "the mangled archive was left lying in the user's Drive: {:?}",
+        game.google().files()
+    );
+    assert!(
+        !game.backups.archive_of(game.server, queued.backup).exists(),
+        "a failed run leaves no archive behind"
+    );
+}
+
+#[tokio::test]
+async fn a_backup_google_names_no_checksum_for_is_kept_and_called_unconfirmed() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"a world worth keeping");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+    game.google().name_no_checksum_at_all();
+
+    let backup = game.a_finished_backup("nothing to compare").await;
+    assert_eq!(
+        game.await_backup(backup).await,
+        BackupStatus::Done,
+        "a missing checksum is not a broken upload"
+    );
+
+    let row = store::find(game.pool(), backup).await.unwrap();
+    assert!(row.drive_file_id.is_some(), "the archive is in the Drive");
+    assert_eq!(row.drive_md5, None, "and there was nothing to hold it against");
+
+    let listed = game.backups.list(game.server).await.unwrap();
+    let seen = listed.backups.iter().find(|entry| entry.id == backup).expect("the row");
+    assert_eq!(
+        seen.drive_verified,
+        Some(false),
+        "no check is no check, and the page has to say which one is unconfirmed"
+    );
+}
+
+#[tokio::test]
+async fn a_silent_upload_answer_is_followed_by_asking_google_outright() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"a world worth keeping");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+    game.google().finish_without_a_checksum();
+
+    let backup = game.a_finished_backup("asked after").await;
+    assert_eq!(game.await_backup(backup).await, BackupStatus::Done);
+
+    assert!(
+        game.google().calls().contains(&"files/get".to_owned()),
+        "the upload answer carried no checksum and nobody went and asked: {:?}",
+        game.google().calls()
+    );
+    let row = store::find(game.pool(), backup).await.unwrap();
+    let there = game.google().file_of_backup(backup).expect("the archive");
+    assert_eq!(row.drive_md5.as_deref(), Some(md5_of(&there.bytes).as_str()));
+}
+
+#[tokio::test]
+async fn an_upload_google_will_not_speak_about_afterwards_is_no_backup() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"a world worth keeping");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+    game.google().finish_without_a_checksum();
+    game.google().turn_away_with_body(
+        "files/get",
+        9,
+        404,
+        r#"{"error":{"code":404,"errors":[{"reason":"notFound","domain":"global",
+            "message":"File not found."}],"message":"File not found."}}"#,
+    );
+
+    let queued = game.backups.create(game.server, "denied", Some(game.owner), false).await.unwrap();
+    game.backups.run(queued.operation).await;
+
+    let run = game.operations.get(queued.operation).await.unwrap();
+    assert_eq!(run.state, OperationState::Failed, "a file Google denies having passed as a backup");
+    let error = run.error.expect("an error");
+    assert_eq!(error.code, "drive_unconfirmed");
+
+    let row = store::find(game.pool(), queued.backup).await.unwrap();
+    assert_eq!(row.drive_file_id, None, "the database points at a file Google says it has not got");
+    assert_eq!(row.drive_md5, None);
+    assert!(
+        !game.backups.archive_of(game.server, queued.backup).exists(),
+        "a failed run leaves no archive behind"
+    );
+}
+
+fn md5_of(bytes: &[u8]) -> String {
+    use md5::Digest;
+    let mut digest = md5::Md5::new();
+    digest.update(bytes);
+    hex::encode(digest.finalize())
 }
 
 #[tokio::test]
@@ -1068,6 +1201,44 @@ async fn saving_is_switched_back_on_before_a_single_byte_goes_to_google() {
 }
 
 #[tokio::test]
+async fn a_run_that_is_waiting_on_google_says_so_where_a_person_can_read_it() {
+    let game = FakeServer::stopped().await;
+    let queued =
+        game.backups.create(game.server, "waiting", Some(game.owner), false).await.unwrap();
+
+    let progress = Arc::new(archive::Progress::default());
+    progress.waiting(
+        "sending an archive up: Google is turning us away, so the next try (2 of 7) is in \
+         8 seconds"
+            .to_owned(),
+    );
+    let watcher = game.backups.watch(queued.operation, Arc::clone(&progress), 1_000);
+
+    let said = told(&game, queued.operation, |message| message.contains("turning us away")).await;
+    assert!(
+        said.contains("next try (2 of 7)"),
+        "a bar that stands still has to say why, and for how long: {said:?}"
+    );
+
+    progress.moving_again();
+    let cleared = told(&game, queued.operation, str::is_empty).await;
+    assert!(cleared.is_empty(), "the note outlived the wait: {cleared:?}");
+    watcher.abort();
+}
+
+async fn told(game: &FakeServer, id: Id, is_it: impl Fn(&str) -> bool) -> String {
+    for _ in 0..100 {
+        let run = game.operations.get(id).await.expect("the run");
+        let message = run.message.unwrap_or_default();
+        if is_it(&message) {
+            return message;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
+    }
+    panic!("the operation never said what the run was doing")
+}
+
+#[tokio::test]
 async fn a_multi_chunk_upload_survives_a_503_and_a_short_acknowledgement() {
     let game = FakeServer::stopped().await;
     game.file("world/region/r.0.0.mca", &noise(17 * 1024 * 1024));
@@ -1083,6 +1254,11 @@ async fn a_multi_chunk_upload_survives_a_503_and_a_short_acknowledgement() {
     let there = game.google().file_of_backup(backup).expect("the archive is in the Drive");
     assert_eq!(there.bytes.len() as i64, row.size_bytes, "the file in the Drive is the wrong size");
     assert!(game.google().chunks_seen() >= 3, "17 MiB is more than one chunk");
+    assert_eq!(
+        row.drive_md5.as_deref(),
+        Some(md5_of(&there.bytes).as_str()),
+        "the running digest counted a resent chunk twice"
+    );
 
     let unpacked = game.backups.dir_of(game.server).join("check.tar.zst");
     std::fs::write(&unpacked, &there.bytes).unwrap();
@@ -1153,6 +1329,156 @@ async fn a_backup_comes_back_out_of_the_drive_again() {
 }
 
 #[tokio::test]
+async fn a_restore_that_breaks_off_halfway_carries_on_at_the_next_press() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"the original world");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+
+    let backup = game.a_finished_backup("for restoring").await;
+    assert_eq!(game.await_backup(backup).await, BackupStatus::Done);
+    std::fs::write(game.server_dir().join("world/level.dat"), b"ruined").unwrap();
+    game.google().cut_the_next_download_in_half();
+
+    let accepted = game.backups.restore(game.server, backup, "safe", game.owner).await.unwrap();
+    assert_eq!(
+        game.await_operation(accepted.restore_operation_id).await,
+        OperationState::Failed,
+        "half an archive was unrolled over a server"
+    );
+
+    let archive = game.backups.archive_of(game.server, backup);
+    let part = std::path::PathBuf::from(format!("{}.part", archive.display()));
+    let half = std::fs::metadata(&part).expect("the half that arrived").len();
+    assert!(half > 0, "the half that arrived was thrown away and has to come down again");
+
+    let again = game.backups.retry(game.server, backup, game.owner, false).await.unwrap();
+    assert_eq!(game.await_operation(again.operation_id).await, OperationState::Done);
+
+    let level = std::fs::read(game.server_dir().join("world/level.dat")).unwrap();
+    assert_eq!(level, b"the original world");
+    assert_eq!(
+        game.google().ranges_asked_for(),
+        vec![None, Some(format!("bytes={half}-"))],
+        "the second attempt started at the front again"
+    );
+    assert!(!part.exists(), "the half stayed behind after the restore");
+}
+
+#[tokio::test]
+async fn an_archive_google_calls_abusive_comes_back_only_after_the_owner_says_yes() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"the original world");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+
+    let backup = game.a_finished_backup("for restoring").await;
+    assert_eq!(game.await_backup(backup).await, BackupStatus::Done);
+    std::fs::write(game.server_dir().join("world/level.dat"), b"ruined").unwrap();
+    game.google().call_the_file_abusive();
+
+    let accepted = game.backups.restore(game.server, backup, "safe", game.owner).await.unwrap();
+    assert_eq!(
+        game.await_operation(accepted.restore_operation_id).await,
+        OperationState::Failed
+    );
+    let run = game.operations.get(accepted.restore_operation_id).await.unwrap();
+    let error = run.error.expect("an error");
+    assert_eq!(error.code, "drive_abuse_blocked");
+    assert_eq!(game.google().acknowledgements(), 0, "nobody was asked and it was sent anyway");
+
+    let plain = game.backups.retry(game.server, backup, game.owner, false).await.unwrap();
+    assert_eq!(game.await_operation(plain.operation_id).await, OperationState::Failed);
+    assert_eq!(
+        game.google().acknowledgements(),
+        0,
+        "a plain retry owned up to the risk on the owner's behalf"
+    );
+
+    let owned_up = game.backups.retry(game.server, backup, game.owner, true).await.unwrap();
+    assert_eq!(game.await_operation(owned_up.operation_id).await, OperationState::Done);
+    assert_eq!(game.google().acknowledgements(), 1);
+    let level = std::fs::read(game.server_dir().join("world/level.dat")).unwrap();
+    assert_eq!(level, b"the original world");
+}
+
+#[tokio::test]
+async fn an_archive_that_is_no_longer_ours_is_never_unrolled_over_a_world() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"the original world");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+
+    let backup = game.a_finished_backup("for restoring").await;
+    assert_eq!(game.await_backup(backup).await, BackupStatus::Done);
+    let file = store::find(game.pool(), backup).await.unwrap().drive_file_id.unwrap();
+    let there = game.google().file_of_backup(backup).expect("the archive in her Drive");
+    let mut stranger = there.bytes.clone();
+    stranger[0] ^= 0xff;
+    game.google().swap_the_file(&file, &stranger);
+    std::fs::write(game.server_dir().join("world/level.dat"), b"ruined").unwrap();
+
+    let accepted = game.backups.restore(game.server, backup, "safe", game.owner).await.unwrap();
+    assert_eq!(
+        game.await_operation(accepted.restore_operation_id).await,
+        OperationState::Failed,
+        "a file that is no longer this backup was unrolled over the world"
+    );
+    let run = game.operations.get(accepted.restore_operation_id).await.unwrap();
+    let error = run.error.expect("an error");
+    assert_eq!(error.code, "drive_file_replaced");
+    assert!(
+        error.message.contains("not the archive the panel put there"),
+        "the sentence leaves the owner guessing what happened: {}",
+        error.message
+    );
+    let level = std::fs::read(game.server_dir().join("world/level.dat")).unwrap();
+    assert_eq!(level, b"ruined", "the world was written over out of a file nobody vouches for");
+
+    let listed = game.backups.list(game.server).await.unwrap();
+    let seen = listed.backups.iter().find(|entry| entry.id == backup).expect("the row");
+    assert_eq!(
+        seen.drive_content_changed,
+        Some(true),
+        "the panel knew for certain and left the page to find out at the next sweep"
+    );
+
+    game.drive.of(game.owner).check().await.expect("the hourly look");
+
+    let listed = game.backups.list(game.server).await.unwrap();
+    let seen = listed.backups.iter().find(|entry| entry.id == backup).expect("the row");
+    assert_eq!(
+        seen.drive_content_changed,
+        Some(true),
+        "the page shows a backup that is not the backup as though nothing were the matter"
+    );
+    assert_eq!(seen.drive_state, Some(DriveFileState::Present), "the file itself is still there");
+    assert_eq!(seen.drive_verified, Some(true), "and it was sound when it went up");
+
+    let other = game.a_finished_backup("swapped too").await;
+    assert_eq!(game.await_backup(other).await, BackupStatus::Done);
+    let its_file = store::find(game.pool(), other).await.unwrap().drive_file_id.unwrap();
+    let its_bytes = game.google().file_of_backup(other).expect("the archive").bytes;
+    let mut its_stranger = its_bytes.clone();
+    its_stranger[0] ^= 0xff;
+    game.google().swap_the_file(&its_file, &its_stranger);
+    game.drive.of(game.owner).check().await.expect("the hourly look");
+
+    let downloads = game.google().times_called("files/download");
+    let refused = game.backups.restore(game.server, other, "safe", game.owner).await.unwrap_err();
+    assert_eq!(refused.code(), "backup_not_restorable");
+    assert!(
+        refused.to_string().contains("no longer the archive"),
+        "the refusal has to say why: {refused}"
+    );
+    assert_eq!(
+        game.google().times_called("files/download"),
+        downloads,
+        "a byte of the wrong archive was fetched before anybody looked at what was written down"
+    );
+}
+
+#[tokio::test]
 async fn a_backup_that_left_the_drive_cannot_be_restored() {
     let game = FakeServer::stopped().await;
     game.file("world/level.dat", b"a world");
@@ -1206,7 +1532,7 @@ async fn a_backup_in_a_drive_does_not_hold_the_owners_disk_quota() {
     let row = store::insert(game.pool(), game.server, "in the Drive", false, BackupLocation::Drive)
         .await
         .unwrap();
-    store::finish_upload(game.pool(), row.id, "a-file-id", 1000 * MIB, Timestamp::now())
+    store::finish_upload(game.pool(), row.id, "a-file-id", 1000 * MIB, None, Timestamp::now())
         .await
         .unwrap();
 
@@ -1297,6 +1623,77 @@ async fn drive_only_refuses_a_backup_rather_than_falling_back_to_our_disk() {
         .await
         .unwrap();
     assert_eq!(rows, 0, "no row, and above all no archive on the disk the operator ruled out");
+}
+
+#[tokio::test]
+async fn a_retry_after_a_restart_carries_the_upload_on_instead_of_packing_again() {
+    let game = FakeServer::stopped().await;
+    game.file("world/level.dat", b"a world worth keeping");
+    game.connect_drive().await;
+    game.aim_at_drive().await;
+    game.google().hold_the_first_chunk(Duration::from_secs(5));
+
+    let queued = game
+        .backups
+        .create(game.server, "Monday", Some(game.owner), false)
+        .await
+        .expect("a queued backup");
+    let running = {
+        let backups = Arc::clone(&game.backups);
+        let operation = queued.operation;
+        tokio::spawn(async move { backups.run(operation).await })
+    };
+    for _ in 0..2_000 {
+        if game.google().chunks_seen() >= 1 {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(5)).await;
+    }
+    assert_eq!(game.google().chunks_seen(), 1, "the upload never got going");
+    running.abort();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    let archive = game.backups.archive_of(game.server, queued.backup);
+    assert!(archive.exists(), "a restart does not run the cleanup, so the archive is still here");
+    assert!(
+        crate::drive::store::upload_of(game.pool(), queued.backup).await.unwrap().is_some(),
+        "and neither does it take the upload session with it"
+    );
+
+    game.operations
+        .fail(
+            queued.operation,
+            crate::model::OperationError {
+                code: "panel_restarted".to_owned(),
+                message: "the panel restarted while this was running".to_owned(),
+                step: crate::model::OperationErrorStep::Internal,
+            },
+        )
+        .await
+        .expect("the run is settled the way a restart settles it");
+
+    let again = game
+        .backups
+        .retry(game.server, queued.backup, game.owner, false)
+        .await
+        .expect("the button that is already on the page");
+    assert_eq!(again.operation_type, BackupOperationType::Create);
+    assert_eq!(game.await_backup(queued.backup).await, BackupStatus::Done);
+
+    let begun = game.google().calls().iter().filter(|call| *call == "upload/begin").count();
+    assert_eq!(
+        begun, 1,
+        "a second session means the archive was packed again and the first half thrown away"
+    );
+    let row = store::find(game.pool(), queued.backup).await.unwrap();
+    let there = game.google().file_of_backup(queued.backup).expect("the archive in the Drive");
+    assert_eq!(there.bytes.len() as i64, row.size_bytes);
+    assert_eq!(row.drive_md5.as_deref(), Some(md5_of(&there.bytes).as_str()));
+    assert!(
+        crate::drive::store::upload_of(game.pool(), queued.backup).await.unwrap().is_none(),
+        "and the spent session is not left lying about"
+    );
+    assert!(!archive.exists(), "the archive that reached Google is off our disk");
 }
 
 fn noise(bytes: usize) -> Vec<u8> {

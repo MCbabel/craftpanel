@@ -52,8 +52,9 @@ struct Cli {
 enum Command {
     /// Run the panel (the default when no subcommand is given).
     Serve,
-    /// Look after panel accounts from the command line. The installer uses this
-    /// to make the first administrator before anything is listening.
+    /// Look after the panel from the command line, before anything is listening:
+    /// the installer makes the first administrator this way, and sets the range
+    /// the servers' ports are handed out from.
     #[command(subcommand)]
     Admin(auth::cli::AdminCommand),
     /// Look at the mails the panel sends, without a Resend key and without a

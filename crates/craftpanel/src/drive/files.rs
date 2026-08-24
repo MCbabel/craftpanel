@@ -1,17 +1,17 @@
 use std::path::Path;
 
-use md5::Digest;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 
 use crate::backups::archive::Progress;
 
 use super::http::{self, DriveError, Http, Result};
 use super::oauth::Access;
+use super::retry::Waiting;
 use super::store::Who;
 
 const FOLDER_TYPE: &str = "application/vnd.google-apps.folder";
 
-pub async fn about(http: &Http, access: &Access) -> Result<Who> {
+pub async fn about(http: &Http, access: &Access, over: &Waiting<'_>) -> Result<Who> {
     #[derive(serde::Deserialize)]
     struct About {
         #[serde(default)]
@@ -34,16 +34,12 @@ pub async fn about(http: &Http, access: &Access) -> Result<Who> {
         usage: Option<String>,
     }
 
-    let response = http
-        .client()
-        .get(http.api_url(&http::with_query(
-            "/drive/v3/about",
-            &[("fields", "user(displayName,emailAddress),storageQuota(limit,usage)")],
-        )))
-        .bearer_auth(access.expose())
-        .send()
-        .await
-        .map_err(http::unreachable)?;
+    let url = http.api_url(&http::with_query(
+        "/drive/v3/about",
+        &[("fields", "user(displayName,emailAddress),storageQuota(limit,usage)")],
+    ));
+    let response =
+        http.send_again(over, || http.client().get(&url).bearer_auth(access.expose())).await?;
 
     let about: About = http::read_api(response).await?;
     Ok(Who {
@@ -54,8 +50,13 @@ pub async fn about(http: &Http, access: &Access) -> Result<Who> {
     })
 }
 
-pub async fn ensure_folder(http: &Http, access: &Access, name: &str) -> Result<String> {
-    if let Some(id) = find_folder(http, access, name).await? {
+pub async fn ensure_folder(
+    http: &Http,
+    access: &Access,
+    name: &str,
+    over: &Waiting<'_>,
+) -> Result<String> {
+    if let Some(id) = find_folder(http, access, name, over).await? {
         return Ok(id);
     }
 
@@ -64,31 +65,35 @@ pub async fn ensure_folder(http: &Http, access: &Access, name: &str) -> Result<S
         id: String,
     }
 
+    let url = http.api_url(&http::with_query("/drive/v3/files", &[("fields", "id")]));
+    let wanted = serde_json::json!({
+        "name": name,
+        "mimeType": FOLDER_TYPE,
+        "appProperties": { "panel": super::PANEL_TAG },
+    });
     let response = http
-        .client()
-        .post(http.api_url(&http::with_query("/drive/v3/files", &[("fields", "id")])))
-        .bearer_auth(access.expose())
-        .json(&serde_json::json!({
-            "name": name,
-            "mimeType": FOLDER_TYPE,
-            "appProperties": { "panel": super::PANEL_TAG },
-        }))
-        .send()
-        .await
-        .map_err(http::unreachable)?;
+        .send_again(over, || {
+            http.client().post(&url).bearer_auth(access.expose()).json(&wanted)
+        })
+        .await?;
 
     let made: Made = http::read_api(response).await?;
     Ok(made.id)
 }
 
-async fn find_folder(http: &Http, access: &Access, name: &str) -> Result<Option<String>> {
+async fn find_folder(
+    http: &Http,
+    access: &Access,
+    name: &str,
+    over: &Waiting<'_>,
+) -> Result<Option<String>> {
     let query = format!(
         "mimeType = '{FOLDER_TYPE}' and name = '{}' and trashed = false \
          and appProperties has {{ key='panel' and value='{}' }}",
         escape(name),
         super::PANEL_TAG
     );
-    let listed = list(http, access, &query, "files(id)").await?;
+    let listed = list(http, access, &query, "files(id)", over).await?;
     Ok(listed.into_iter().next().map(|file| file.id))
 }
 
@@ -103,6 +108,10 @@ pub struct File {
     pub size: Option<String>,
     #[serde(default, rename = "md5Checksum")]
     pub md5_checksum: Option<String>,
+    #[serde(default, rename = "sha256Checksum")]
+    pub sha256_checksum: Option<String>,
+    #[serde(default, rename = "isAppAuthorized")]
+    pub is_app_authorized: Option<bool>,
     #[serde(default, rename = "appProperties")]
     pub app_properties: Option<Properties>,
 }
@@ -127,7 +136,7 @@ impl File {
     }
 }
 
-pub async fn ours(http: &Http, access: &Access) -> Result<Vec<File>> {
+pub async fn ours(http: &Http, access: &Access, over: &Waiting<'_>) -> Result<Vec<File>> {
     let query = format!(
         "appProperties has {{ key='panel' and value='{}' }}",
         super::PANEL_TAG
@@ -137,11 +146,18 @@ pub async fn ours(http: &Http, access: &Access) -> Result<Vec<File>> {
         access,
         &query,
         "nextPageToken,files(id,name,size,trashed,md5Checksum,appProperties)",
+        over,
     )
     .await
 }
 
-async fn list(http: &Http, access: &Access, query: &str, fields: &str) -> Result<Vec<File>> {
+async fn list(
+    http: &Http,
+    access: &Access,
+    query: &str,
+    fields: &str,
+    over: &Waiting<'_>,
+) -> Result<Vec<File>> {
     #[derive(serde::Deserialize)]
     struct Page {
         #[serde(default)]
@@ -157,13 +173,11 @@ async fn list(http: &Http, access: &Access, query: &str, fields: &str) -> Result
         if let Some(token) = token.as_deref() {
             fields.push(("pageToken", token));
         }
-        let request = http
-            .client()
-            .get(http.api_url(&http::with_query("/drive/v3/files", &fields)))
-            .bearer_auth(access.expose());
+        let url = http.api_url(&http::with_query("/drive/v3/files", &fields));
+        let response =
+            http.send_again(over, || http.client().get(&url).bearer_auth(access.expose())).await?;
 
-        let page: Page =
-            http::read_api(request.send().await.map_err(http::unreachable)?).await?;
+        let page: Page = http::read_api(response).await?;
         found.extend(page.files);
         match page.next {
             Some(next) => token = Some(next),
@@ -175,28 +189,24 @@ async fn list(http: &Http, access: &Access, query: &str, fields: &str) -> Result
     ))
 }
 
-pub async fn get(http: &Http, access: &Access, id: &str) -> Result<File> {
-    let response = http
-        .client()
-        .get(http.api_url(&http::with_query(
-            &format!("/drive/v3/files/{}", segment(id)),
-            &[("fields", "id,name,size,trashed,md5Checksum")],
-        )))
-        .bearer_auth(access.expose())
-        .send()
-        .await
-        .map_err(http::unreachable)?;
+pub async fn get(http: &Http, access: &Access, id: &str, over: &Waiting<'_>) -> Result<File> {
+    let url = http.api_url(&http::with_query(
+        &format!("/drive/v3/files/{}", segment(id)),
+        &[(
+            "fields",
+            "id,name,size,trashed,md5Checksum,sha256Checksum,isAppAuthorized",
+        )],
+    ));
+    let response =
+        http.send_again(over, || http.client().get(&url).bearer_auth(access.expose())).await?;
     http::read_api(response).await
 }
 
-pub async fn delete(http: &Http, access: &Access, id: &str) -> Result<()> {
+pub async fn delete(http: &Http, access: &Access, id: &str, over: &Waiting<'_>) -> Result<()> {
+    let url = http.api_url(&format!("/drive/v3/files/{}", segment(id)));
     let response = http
-        .client()
-        .delete(http.api_url(&format!("/drive/v3/files/{}", segment(id))))
-        .bearer_auth(access.expose())
-        .send()
-        .await
-        .map_err(http::unreachable)?;
+        .send_again(over, || http.client().delete(&url).bearer_auth(access.expose()))
+        .await?;
 
     let status = response.status().as_u16();
     if (200..300).contains(&status) || status == 404 {
@@ -206,25 +216,93 @@ pub async fn delete(http: &Http, access: &Access, id: &str) -> Result<()> {
     Err(http::api_refusal(status, &body))
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct Fetch<'a> {
+    pub id: &'a str,
+    pub into: &'a Path,
+    pub from: u64,
+    pub acknowledge_abuse: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct Fetched {
+    pub md5: String,
+    pub sha256: String,
+}
+
+impl Fetched {
+    pub fn holds(&self, file: &File) -> Option<bool> {
+        if let Some(theirs) = file.md5_checksum.as_deref() {
+            return Some(theirs.trim().eq_ignore_ascii_case(&self.md5));
+        }
+        let theirs = file.sha256_checksum.as_deref()?;
+        Some(theirs.trim().eq_ignore_ascii_case(&self.sha256))
+    }
+}
+
+struct Both {
+    md5: md5::Md5,
+    sha256: sha2::Sha256,
+}
+
+impl Both {
+    fn new() -> Self {
+        Self {
+            md5: <md5::Md5 as md5::Digest>::new(),
+            sha256: <sha2::Sha256 as sha2::Digest>::new(),
+        }
+    }
+
+    fn update(&mut self, bytes: &[u8]) {
+        md5::Digest::update(&mut self.md5, bytes);
+        sha2::Digest::update(&mut self.sha256, bytes);
+    }
+
+    fn finish(self) -> Fetched {
+        Fetched {
+            md5: hex::encode(md5::Digest::finalize(self.md5)),
+            sha256: hex::encode(sha2::Digest::finalize(self.sha256)),
+        }
+    }
+
+    async fn take_in(&mut self, file: &mut tokio::fs::File, upto: u64) -> Result<()> {
+        file.seek(std::io::SeekFrom::Start(0)).await.map_err(write_failed)?;
+        let mut buffer = vec![0u8; 1024 * 1024];
+        let mut left = upto;
+        while left > 0 {
+            let wanted = left.min(buffer.len() as u64) as usize;
+            file.read_exact(&mut buffer[..wanted]).await.map_err(write_failed)?;
+            self.update(&buffer[..wanted]);
+            left -= wanted as u64;
+        }
+        Ok(())
+    }
+}
+
 pub async fn download(
     http: &Http,
     access: &Access,
-    id: &str,
-    into: &Path,
+    fetch: Fetch<'_>,
     progress: &Progress,
-) -> Result<String> {
+    over: &Waiting<'_>,
+) -> Result<Fetched> {
     use futures::StreamExt;
 
+    let mut query = vec![("alt", "media")];
+    if fetch.acknowledge_abuse {
+        query.push(("acknowledgeAbuse", "true"));
+    }
+    let url = http
+        .api_url(&http::with_query(&format!("/drive/v3/files/{}", segment(fetch.id)), &query));
     let response = http
-        .upload_client()
-        .get(http.api_url(&http::with_query(
-            &format!("/drive/v3/files/{}", segment(id)),
-            &[("alt", "media")],
-        )))
-        .bearer_auth(access.expose())
-        .send()
-        .await
-        .map_err(http::unreachable)?;
+        .send_again(over, || {
+            let asking = http.upload_client().get(&url).bearer_auth(access.expose());
+            match fetch.from {
+                0 => asking,
+                from => asking.header(reqwest::header::RANGE, format!("bytes={from}-")),
+            }
+        })
+        .await?;
 
     let status = response.status().as_u16();
     if !(200..300).contains(&status) {
@@ -232,27 +310,48 @@ pub async fn download(
         return Err(http::api_refusal(status, &body));
     }
 
-    if let Some(parent) = into.parent() {
+    if let Some(parent) = fetch.into.parent() {
         tokio::fs::create_dir_all(parent).await.map_err(write_failed)?;
     }
-    let mut file = tokio::fs::File::create(into).await.map_err(write_failed)?;
-    let mut digest = md5::Md5::new();
+    let carrying_on = fetch.from > 0 && status == 206;
+    let mut digests = Both::new();
+    let mut file = if carrying_on {
+        let mut open = tokio::fs::File::options()
+            .read(true)
+            .write(true)
+            .open(fetch.into)
+            .await
+            .map_err(write_failed)?;
+        open.set_len(fetch.from).await.map_err(write_failed)?;
+        digests.take_in(&mut open, fetch.from).await?;
+        open.seek(std::io::SeekFrom::Start(fetch.from)).await.map_err(write_failed)?;
+        progress.add_bytes(fetch.from);
+        open
+    } else {
+        tokio::fs::File::create(fetch.into).await.map_err(write_failed)?
+    };
     let mut stream = response.bytes_stream();
 
     while let Some(piece) = stream.next().await {
         if progress.is_cancelled() {
-            drop(file);
-            tokio::fs::remove_file(into).await.ok();
+            file.flush().await.ok();
             return Err(DriveError::Cancelled);
         }
-        let piece = piece.map_err(http::unreachable)?;
-        digest.update(&piece);
+        let piece = match piece {
+            Ok(piece) => piece,
+            Err(err) => {
+                file.flush().await.ok();
+                file.sync_all().await.ok();
+                return Err(http::unreachable(err));
+            }
+        };
+        digests.update(&piece);
         file.write_all(&piece).await.map_err(write_failed)?;
         progress.add_bytes(piece.len() as u64);
     }
     file.sync_all().await.map_err(write_failed)?;
 
-    Ok(hex::encode(digest.finalize()))
+    Ok(digests.finish())
 }
 
 fn write_failed(err: std::io::Error) -> DriveError {
@@ -279,7 +378,7 @@ fn segment(id: &str) -> String {
         .collect()
 }
 
-fn number(text: Option<&str>) -> Option<u64> {
+pub(super) fn number(text: Option<&str>) -> Option<u64> {
     text?.parse().ok()
 }
 

@@ -6,7 +6,7 @@
 #   scripts/acceptance.sh --keep     leave it running afterwards
 set -uo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 ROOT="$PWD"
 KEEP="${1:-}"
 SHOT=/tmp/craftpanel-acceptance
@@ -16,6 +16,7 @@ fail() { printf '\033[31mFAILED:\033[0m %s\n' "$*"; FAILURES=$((FAILURES + 1)); 
 ok()   { printf '  \033[32mok\033[0m  %s\n' "$*"; }
 FAILURES=0
 
+# shellcheck disable=SC2317  # only ever reached through the EXIT trap below
 teardown() {
 	[ "$KEEP" = "--keep" ] && { say "left running — http://127.0.0.1:8099"; return; }
 	remove_everything
@@ -52,10 +53,10 @@ fi
 say "building a release bundle"
 rm -f "$ROOT"/dist/craftpanel-*.tar.gz
 ./scripts/release.sh >"$SHOT/release.log" 2>&1 || { tail -20 "$SHOT/release.log"; exit 1; }
-BUNDLE="$(ls -1t "$ROOT"/dist/craftpanel-*.tar.gz 2>/dev/null | head -1)"
-[ -n "$BUNDLE" ] && [ -f "$BUNDLE" ] || {
+BUNDLE="$(printf '%s\n' "$ROOT"/dist/craftpanel-*.tar.gz | head -1)"
+if [ ! -f "$BUNDLE" ]; then
 	echo "release.sh produced no bundle:"; tail -20 "$SHOT/release.log"; exit 1
-}
+fi
 ok "$(du -h "$BUNDLE" | cut -f1)  $(basename "$BUNDLE")"
 
 say "installing it"
@@ -68,26 +69,28 @@ PW=$(grep -oP 'Password\s+\K\S+' "$SHOT/install.log" | tail -1 | sed 's/\x1b\[[0
 ok "installed, admin password captured"
 
 sleep 2
-systemctl is-active --quiet craftpanel.service && ok "craftpanel.service active" || fail "service not active"
-systemctl is-active --quiet craftpanel-helper.service && ok "helper active" || fail "helper not active"
+if systemctl is-active --quiet craftpanel.service; then ok "craftpanel.service active"; else fail "service not active"; fi
+if systemctl is-active --quiet craftpanel-helper.service; then ok "helper active"; else fail "helper not active"; fi
 
 say "checking that the panel runs unprivileged and the helper does not"
-ps -o user= -C craftpanel 2>/dev/null | grep -q craftpanel && ok "panel runs as craftpanel" || fail "panel is not running as craftpanel"
-ps -eo user,cmd | grep -q "^root.*craftpanel-helper" && ok "helper runs as root" || fail "helper is not root"
+if pgrep -x -u craftpanel craftpanel >/dev/null 2>&1; then ok "panel runs as craftpanel"; else fail "panel is not running as craftpanel"; fi
+if pgrep -u root -f craftpanel-helper >/dev/null 2>&1; then ok "helper runs as root"; else fail "helper is not root"; fi
 
 # The panel fetches its own Java into here (docs/JAVA.md), so it has to own the
 # directory, and a game server under its own account has to be able to walk in.
-[ "$(stat -c '%U %a' /var/lib/craftpanel/runtimes 2>/dev/null)" = "craftpanel 755" ] &&
-	ok "runtimes/ belongs to the panel, 0755" ||
+if [ "$(stat -c '%U %a' /var/lib/craftpanel/runtimes 2>/dev/null)" = "craftpanel 755" ]; then
+	ok "runtimes/ belongs to the panel, 0755"
+else
 	fail "runtimes/ is not there as craftpanel 0755: $(stat -c '%U %a' /var/lib/craftpanel/runtimes 2>/dev/null)"
+fi
 
 say "driving the interface in a browser"
-CHROME=$(ls -d /root/.cache/ms-playwright/chromium-*/chrome-linux*/chrome 2>/dev/null | head -1)
+CHROME=$(printf '%s\n' /root/.cache/ms-playwright/chromium-*/chrome-linux*/chrome | head -1)
 [ -x "$CHROME" ] || { echo "no chromium; skipping the browser part"; exit $FAILURES; }
 
 CRAFTPANEL_PW="$PW" CRAFTPANEL_SHOT="$SHOT" python3 scripts/drive.py
 DRIVE=$?
-[ $DRIVE -eq 0 ] && ok "browser walkthrough passed" || fail "browser walkthrough failed"
+if [ $DRIVE -eq 0 ]; then ok "browser walkthrough passed"; else fail "browser walkthrough failed"; fi
 
 say "result"
 if [ "$FAILURES" -eq 0 ]; then

@@ -655,10 +655,13 @@ async fn clean_up_after(
         }
         BackupCreate => {
             if let Some(backup) = target {
-                sqlx::query("DELETE FROM backups WHERE id = ?")
-                    .bind(backup)
-                    .execute(pool)
-                    .await?;
+                sqlx::query(
+                    "DELETE FROM backups WHERE id = ? \
+                       AND id NOT IN (SELECT backup_id FROM drive_uploads)",
+                )
+                .bind(backup)
+                .execute(pool)
+                .await?;
             }
         }
         InstallContent | UpdateContent | InstallJava | Unarchive | ServerDelete => {}

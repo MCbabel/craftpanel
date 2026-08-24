@@ -142,8 +142,8 @@ tool under GPL-3.0. That fits "fully open source", but rules out AGPL and GPL-2.
 `packages/api-client` is LGPL-3.0.
 
 **The trademark is excluded.** The logo, `components/brand/*` and `ModrinthServersIcon.vue`
-are "all rights reserved © Rinth, Inc.". They have to be replaced with our own before any
-release. That is not a formality but trademark law. It holds regardless of the rest of the
+are "All rights reserved. © 2020-2025 Rinth, Inc." (`vendor/modrinth/ui/COPYING.md`). They have to
+be replaced with our own before any release. That is not a formality but trademark law. It holds regardless of the rest of the
 code being free.
 
 ## Privileges and isolation
@@ -457,7 +457,7 @@ silence is exactly the difference between a limit and a number in a table, so th
 when there is no controller file in a group (`cgroup.rs:78-83`). A field that arrives empty is
 **written** as `max` and not left out: for an account with no limits at all, a panel
 administrator, all four files end up carrying `max`; leave them out and the previous number would
-stay (`cgroup.rs:98-107`).
+stay (`cgroup.rs:75-84`).
 
 So that a limit really catches the process, the **supervisor itself** enters the group, in the
 breath before its `exec`. For that the helper opens the group's `cgroup.procs` file as root and
@@ -564,7 +564,7 @@ yardstick itself is measured.
 
 **Probe 7 of the contract review**, set up by hand instead of run on luck, and twice over the
 same tree: once on the route the helper used to take, and once on today's
-(`crates/craftpanel-helper/src/main.rs:524-591`). The swap happens at the same place both times:
+(`crates/craftpanel-helper/src/main.rs:464-522`). The swap happens at the same place both times:
 at a **middle** segment, after the target was already fixed, so exactly what an account may do
 with its own directories at any time. The first half **must** lose the file outside the tree; if
 it stopped losing it, the second half would prove nothing. That is why the old route —
@@ -574,11 +574,11 @@ test swaps with a rename and a symlink; either way the name is never missing.
 
 **And the same in a race.** One thread walks the tree, four keep swapping names in the tree for
 links out of it, with `RENAME_EXCHANGE`, so the name is never missing and the walk sees nothing
-but the swap (`crates/craftpanel-helper/src/users.rs:990-1085`). Whether a swap falls into the
+but the swap (`crates/craftpanel-helper/src/users.rs:803-894`). Whether a swap falls into the
 window of a particular entry is up to the scheduler, so the test asserts the property and not the
 hit: nothing outside may move, and the walk must not fall over either. Why there are eight passes
 and not one is measured: **one** pass caught the old walk, which resolved names twice, in two out
-of three attempts, **eight** caught it in twelve out of twelve (`users.rs:1058-1069`).
+of three attempts, **eight** caught it in twelve out of twelve (`users.rs:871-882`).
 
 Two small things somebody who touches these tests later would otherwise get stuck on. Where
 `O_NOFOLLOW` and `O_DIRECTORY` stand together, the kernel answers `ENOTDIR` where either alone
@@ -664,7 +664,7 @@ removes the system account with them), set the limits per user, define the port 
 every server of every user.
 
 The installer creates the first administrator, through `craftpanel admin create`, **before**
-either of the two services runs (`install.sh:196`). Three things follow from that, which together
+either of the two services runs (`install.sh:1336`). Three things follow from that, which together
 are a small interface:
 
 * **Standard output carries the password and nothing else.** The installer catches it and

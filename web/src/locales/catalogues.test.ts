@@ -7,8 +7,38 @@ import { describe, expect, it } from 'vitest'
 
 const SOURCE = resolve(import.meta.dirname, '..')
 const ENGLISH = 'en-US'
-const TRANSLATIONS = ['de-DE']
+const GERMAN = 'de-DE'
+const TRANSLATIONS = [GERMAN]
 const LANGUAGES = [ENGLISH, ...TRANSLATIONS]
+
+const VOWELS = 'aeiouäöü'
+const WORDS = /[A-Za-zÄÖÜäöüß]+/g
+const SUBSTITUTES = /ae|oe|ue/g
+const SPELLED_OUT = [
+	'aero',
+	'does',
+	'goes',
+	'guest',
+	'israel',
+	'michael',
+	'poesie',
+	'poet',
+	'zue',
+]
+const SWISS = [
+	'gross',
+	'strass',
+	'heiss',
+	'weiss',
+	'aussen',
+	'ausser',
+	'draussen',
+	'schliess',
+	'fliess',
+	'geniess',
+	'spass',
+	'dreissig',
+]
 
 const TEXT = 0
 const HASH = 7
@@ -163,5 +193,39 @@ describe.each(TRANSLATIONS)('The translation %s', (language) => {
 		const family = (entries: Record<string, Entry>) =>
 			Object.keys(entries).filter(onlyAtRuntime).sort()
 		expect(family(entries), `${language} against ${ENGLISH}`).toEqual(family(english))
+	})
+})
+
+function writesAroundTheUmlaut(word: string): boolean {
+	const lower = word.toLowerCase()
+	if (SWISS.some((spelling) => lower.includes(spelling))) return true
+	if (SPELLED_OUT.some((real) => lower.startsWith(real))) return false
+	for (const hit of lower.matchAll(SUBSTITUTES)) {
+		const at = hit.index
+		const before = at === 0 ? '' : lower[at - 1]
+		if (at + 2 === lower.length) continue
+		if (lower.startsWith('uell', at)) continue
+		if (hit[0] === 'ue' && before === 'q') continue
+		if (before !== '' && VOWELS.includes(before)) continue
+		return true
+	}
+	return false
+}
+
+describe(`The catalogue ${GERMAN}`, () => {
+	it('writes the umlaut it means instead of spelling around it', () => {
+		const entries = catalogue(GERMAN)
+		const dodging = Object.entries(entries)
+			.flatMap(([id, entry]) =>
+				[...entry.defaultMessage.matchAll(WORDS)]
+					.map((hit) => hit[0])
+					.filter(writesAroundTheUmlaut)
+					.map((word) => `${id}: ${word}`),
+			)
+			.sort()
+		expect(
+			dodging,
+			'ä ö ü ß belong in the text; a word that is right anyway goes into SPELLED_OUT',
+		).toEqual([])
 	})
 })

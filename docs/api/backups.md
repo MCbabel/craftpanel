@@ -1241,16 +1241,22 @@ fields or errors:
 
 | Place | Addition |
 |---|---|
-| `BackupQueueBackup` (1.2) | `location`, `drive_state`, `drive_web_link` — in **every** row; on a local one the last two are `null` |
+| `BackupQueueBackup` (1.2) | `location`, `drive_state`, `drive_verified`, `drive_content_changed`, `drive_web_link` — in **every** row; on a local one the last four are `null`. `drive_verified: false` means Google named no checksum for that archive, so nothing confirms it arrived whole; `drive_content_changed: true` means the file is still in the Drive but no longer holds that archive |
 | Create (2.2) | `409 drive_not_connected` and `409 drive_not_configured` as soon as the target is `drive`; **both disk questions still stand**, because the archive is built here first in any case |
-| Restore (2.6) | `409 backup_not_restorable` for `drive_state ∈ {missing, trashed}` as well |
+| Restore (2.6) | `409 backup_not_restorable` for `drive_state ∈ {missing, trashed}` and for `drive_content_changed: true` as well |
 | Download (2.8, 2.11) | `409 backup_lives_in_drive`; the panel transfers not one byte, the way is `drive_web_link` |
 
-**Modrinth's component stays unchanged.** `BackupItem` does not know the three fields; they simply
+**Modrinth's component stays unchanged.** `BackupItem` does not know the five fields; they simply
 ride along through `toQueueBackup` (`web/src/composables/archon-adapters.ts`), and the backups page
 reads them through `driveFactsOf` (`web/src/pages/servers/backup-target.ts`) — one place where the
 look-up happens exactly once, instead of writing an `as` at every use. The button "Open in Drive"
-sits in the same place where the fallback download already hung (2.11).
+sits in the same place where the fallback download already hung (2.11). Beside the state badge the
+page carries one more sentence: for a row with `drive_state: "present"` and `drive_verified: false`
+it says out loud that nobody confirmed this one, because a backup whose soundness was never checked
+is a hope and must not read like a promise. Beside it stands the harder case: for
+`drive_content_changed: true` the green badge gives way to a red "Not this backup any more" and a
+sentence saying that the file in the Drive has been written over since — a row that still reads
+"In Google Drive" while holding somebody else's bytes is the one lie this page must not tell.
 
 **Two rules from this document stay untouched on purpose:**
 

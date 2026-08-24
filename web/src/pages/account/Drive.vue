@@ -121,7 +121,41 @@
 								}}
 							</span>
 						</div>
+
+						<div class="flex flex-col gap-1.5 rounded-xl bg-surface-2 p-4 sm:col-span-2">
+							<span class="text-sm font-semibold text-secondary">
+								{{ formatMessage(messages.factDay) }}
+							</span>
+							<span class="text-lg font-extrabold text-contrast">
+								{{
+									formatMessage(messages.factDayValue, {
+										sent: decimalBytes(view.day.sentBytes),
+										limit: decimalBytes(view.day.limitBytes),
+									})
+								}}
+							</span>
+							<ProgressBar
+								:progress="Math.round(view.day.share * 100)"
+								:max="100"
+								:color="view.day.closing ? 'red' : 'brand'"
+								full-width
+							/>
+							<span class="text-xs text-secondary">
+								{{
+									view.day.spent
+										? formatMessage(messages.factDaySpent)
+										: formatMessage(messages.factDayFree, { free: decimalBytes(view.day.freeBytes) })
+								}}
+							</span>
+						</div>
 					</div>
+
+					<Admonition
+						v-if="view.day.spent"
+						type="warning"
+						:header="formatMessage(messages.dayFullHeader)"
+						:body="formatMessage(messages.dayFullBody)"
+					/>
 
 					<div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm text-secondary">
 						<span>
@@ -277,10 +311,12 @@ import {
 	linkPhase,
 	statusPollMs,
 } from '@/api/drive'
+import { useFormatDecimalBytes } from '@/composables/format-bytes'
 import { linkCountdown, driveView, readableCode } from './drive'
 
 const { formatMessage } = useVIntl()
 const formatBytes = useFormatBytes()
+const decimalBytes = useFormatDecimalBytes()
 const relativeTime = useRelativeTime()
 const now = useNow({ interval: 1000 })
 
@@ -369,6 +405,25 @@ const messages = defineMessages({
 	factStorageWorkspace: {
 		id: 'account.drive.fact.storage-workspace',
 		defaultMessage: 'This account reports no storage limit.',
+	},
+	factDay: { id: 'account.drive.fact.day', defaultMessage: 'Sent to Google today' },
+	factDayValue: { id: 'account.drive.fact.day-value', defaultMessage: '{sent} of {limit}' },
+	factDayFree: {
+		id: 'account.drive.fact.day-free',
+		defaultMessage: 'Google takes another {free} from this account before the day is out.',
+	},
+	factDaySpent: {
+		id: 'account.drive.fact.day-spent',
+		defaultMessage: 'Google takes nothing more from this account today.',
+	},
+	dayFullHeader: {
+		id: 'account.drive.day-full.header',
+		defaultMessage: 'Today’s share of Google is used up',
+	},
+	dayFullBody: {
+		id: 'account.drive.day-full.body',
+		defaultMessage:
+			'Google accepts 750 GB a day from one account. Backups into your Drive stop here rather than being retried into a wall; a half-sent archive is kept and carries on where it stopped once Google takes uploads again. Google does not publish when that is — this panel counts the day from midnight UTC.',
 	},
 	factFolder: { id: 'account.drive.fact.folder', defaultMessage: 'Folder' },
 	checkedAt: { id: 'account.drive.checked-at', defaultMessage: 'Last confirmed {ago}' },

@@ -143,11 +143,23 @@
 					class="ml-9 flex flex-wrap items-center gap-2 text-sm"
 				>
 					<Badge
+						v-if="noLongerOurs(factsOf(backup))"
+						:type="formatMessage(messages.stateChanged)"
+						color="red"
+					/>
+					<Badge
+						v-else
 						:type="formatMessage(FILE_STATES[factsOf(backup).state ?? 'present'])"
 						:color="FILE_COLORS[factsOf(backup).state ?? 'present']"
 					/>
 					<span v-if="notRestorable(factsOf(backup))" class="text-secondary">
 						{{ formatMessage(messages.driveGoneHint) }}
+					</span>
+					<span v-else-if="noLongerOurs(factsOf(backup))" class="text-red">
+						{{ formatMessage(messages.driveChangedHint) }}
+					</span>
+					<span v-else-if="unconfirmed(factsOf(backup))" class="text-orange">
+						{{ formatMessage(messages.driveUnconfirmedHint) }}
 					</span>
 				</div>
 
@@ -164,17 +176,37 @@
 						:waiting="progressOf(backup) === 0"
 						full-width
 					/>
+					<span v-if="holdupOf(backup)" class="text-sm text-secondary">
+						{{ holdupOf(backup) }}
+					</span>
+					<span v-if="factsOf(backup).location === 'drive'" class="text-sm text-secondary">
+						{{ carriesOn(backup) }}
+					</span>
 				</div>
 				<Admonition
 					v-else-if="failureOf(backup)"
 					class="ml-9"
 					type="critical"
-					:header="formatMessage(messages.failed)"
+					:header="
+						abuseBlocked(backup)
+							? formatMessage(messages.abuseHeader)
+							: formatMessage(messages.failed)
+					"
 					:body="failureBody(backup)"
 					show-actions-underneath
 				>
 					<template #actions>
 						<Button
+							v-if="abuseBlocked(backup)"
+							v-tooltip="retryTooltip"
+							:disabled="retryDisabled"
+							@click="retry(backup.id, true)"
+						>
+							<DownloadIcon />
+							{{ formatMessage(messages.abuseFetchAnyway) }}
+						</Button>
+						<Button
+							v-else
 							v-tooltip="retryTooltip"
 							:disabled="retryDisabled"
 							@click="retry(backup.id)"
@@ -342,9 +374,11 @@ import {
 	backupImpossible,
 	driveFactsOf,
 	needsOwnersDrive,
+	noLongerOurs,
 	notRestorable,
 	openableInDrive,
 	targetIsChoosable,
+	unconfirmed,
 } from './backup-target'
 
 type QueueBackup = Archon.BackupsQueue.v1.BackupQueueBackup
@@ -381,6 +415,19 @@ const messages = defineMessages({
 	creating: { id: 'craftpanel.backups.creating', defaultMessage: 'Creating backup...' },
 	restoring: { id: 'craftpanel.backups.restoring', defaultMessage: 'Restoring backup...' },
 	failed: { id: 'craftpanel.backups.failed', defaultMessage: 'The last attempt failed' },
+	abuseHeader: {
+		id: 'craftpanel.backups.abuse-header',
+		defaultMessage: 'Google has this archive down as harmful',
+	},
+	abuseWarning: {
+		id: 'craftpanel.backups.abuse-warning',
+		defaultMessage:
+			'Google scanned this archive and calls it malware or spam. It hands it back only if you say outright that you accept the risk of downloading a possibly harmful file. If you did not pack a suspicious mod or plugin, restore an older backup instead.',
+	},
+	abuseFetchAnyway: {
+		id: 'craftpanel.backups.abuse-fetch-anyway',
+		defaultMessage: 'I accept the risk, fetch it anyway',
+	},
 	loadFailed: {
 		id: 'craftpanel.backups.load-failed',
 		defaultMessage: 'Failed to load the backups',
@@ -468,6 +515,29 @@ const messages = defineMessages({
 	driveGoneHint: {
 		id: 'craftpanel.backups.drive-gone-hint',
 		defaultMessage: 'Put it back in your Drive to restore it from here.',
+	},
+	driveUnconfirmedHint: {
+		id: 'craftpanel.backups.drive-unconfirmed-hint',
+		defaultMessage: 'Unconfirmed: Google named no checksum, so nothing says it arrived whole.',
+	},
+	stateChanged: {
+		id: 'craftpanel.backups.state.changed',
+		defaultMessage: 'Not this backup any more',
+	},
+	driveChangedHint: {
+		id: 'craftpanel.backups.drive-changed-hint',
+		defaultMessage:
+			'The file in your Google Drive is no longer the archive the panel put there — something has written over it since. It cannot be restored from here.',
+	},
+	carryOnSending: {
+		id: 'craftpanel.backups.carry-on-sending',
+		defaultMessage:
+			'A break does not have to start this over: as long as Google still holds the half-sent archive, the panel asks how far it got and sends only the rest.',
+	},
+	carryOnFetching: {
+		id: 'craftpanel.backups.carry-on-fetching',
+		defaultMessage:
+			'A break does not have to start this over: as long as the archive in the Drive has not changed, what is already on the disk stays there and the panel fetches only the rest.',
 	},
 	targetSwitched: { id: 'craftpanel.backups.target-switched', defaultMessage: 'Target changed' },
 })
@@ -595,6 +665,15 @@ function progressOf(backup: QueueBackup): number {
 	return runningBackupOps.value.find((entry) => entry.target_id === backup.id)?.progress ?? 0
 }
 
+function holdupOf(backup: QueueBackup): string {
+	return runningBackupOps.value.find((entry) => entry.target_id === backup.id)?.message ?? ''
+}
+
+function carriesOn(backup: QueueBackup): string {
+	const fetching = runningOf(backup) === 'restore'
+	return formatMessage(fetching ? messages.carryOnFetching : messages.carryOnSending)
+}
+
 function failureOf(backup: QueueBackup): string | null {
 	const last = backup.history[0]
 	if (!last || (last.state !== 'failed' && last.state !== 'timed_out')) return null
@@ -603,8 +682,16 @@ function failureOf(backup: QueueBackup): string | null {
 
 function failureBody(backup: QueueBackup): string {
 	const why = failureOf(backup) ?? ''
+	if (abuseBlocked(backup)) return `${why} ${formatMessage(messages.abuseWarning)}`.trim()
 	if (!cannotBackUp.value) return why
 	return `${why} ${formatMessage(messages.retryImpossible)}`.trim()
+}
+
+function abuseBlocked(backup: QueueBackup): boolean {
+	const last = operations.value
+		.filter((entry) => entry.kind === 'backup_restore' && entry.target_id === backup.id)
+		.sort((left, right) => right.created_at.localeCompare(left.created_at))[0]
+	return last?.state === 'failed' && last.error?.code === 'drive_abuse_blocked'
 }
 
 function restoreDisabled(backup: QueueBackup): string | undefined {
@@ -612,6 +699,7 @@ function restoreDisabled(backup: QueueBackup): string | undefined {
 	if (backup.status !== 'done') return formatMessage(messages.restoreNotDone)
 	if (activeOperations.value.length > 0) return formatMessage(messages.restoreRunning)
 	if (notRestorable(driveFactsOf(backup))) return formatMessage(messages.driveGoneHint)
+	if (noLongerOurs(driveFactsOf(backup))) return formatMessage(messages.driveChangedHint)
 	return undefined
 }
 
@@ -653,9 +741,9 @@ async function removeMany(chosen: QueueBackup[]): Promise<void> {
 	}
 }
 
-async function retry(backupId: string): Promise<void> {
+async function retry(backupId: string, acknowledgeAbuse = false): Promise<void> {
 	try {
-		await api.backups.retry(serverId, backupId)
+		await api.backups.retry(serverId, backupId, acknowledgeAbuse ? { acknowledge_abuse: true } : {})
 		await invalidate()
 	} catch (cause) {
 		report(cause)

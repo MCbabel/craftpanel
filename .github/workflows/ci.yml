@@ -26,6 +26,8 @@ jobs:
       - run: scripts/check-no-branding.sh
       - run: python3 scripts/comments-test.py
       - run: scripts/check-no-comments.sh
+      - run: scripts/check-shell.sh
+      - run: python3 scripts/check-doc-lines.py
 
   interface:
     name: interface

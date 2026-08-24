@@ -4,7 +4,7 @@
 # They must never reappear in this repository.
 set -uo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
 fail=0
 note() { printf '  %s\n' "$1"; fail=1; }

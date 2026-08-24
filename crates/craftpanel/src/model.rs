@@ -1111,6 +1111,8 @@ pub struct Backup {
     pub history: Vec<BackupOperation>,
     pub location: BackupLocation,
     pub drive_state: Option<DriveFileState>,
+    pub drive_verified: Option<bool>,
+    pub drive_content_changed: Option<bool>,
     pub drive_web_link: Option<String>,
 }
 
@@ -1674,6 +1676,8 @@ mod tests {
             size_bytes: 0,
             location: BackupLocation::Local,
             drive_state: None,
+            drive_verified: None,
+            drive_content_changed: None,
             drive_web_link: None,
             history: vec![BackupOperation {
                 operation_type: BackupOperationType::Create,
@@ -2285,6 +2289,8 @@ mod tests {
           "size_bytes": 0,
           "location": "local",
           "drive_state": null,
+          "drive_verified": null,
+          "drive_content_changed": null,
           "drive_web_link": null,
           "history": [
             {

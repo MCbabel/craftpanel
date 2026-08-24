@@ -769,31 +769,31 @@ An air-gapped installation is not locked out either — unpack a Temurin tarball
 directory is a plain convention, not a registry. Mind §11's modes while doing it: a game account has
 to be able to walk in and execute.
 
-The one moment a human is watching is the installer, so that is where it is said: `install.sh:75-77`
+The one moment a human is watching is the installer, so that is where it is said: `install.sh:177-179`
 warns when the machine has **neither** a `java` nor a reachable `api.adoptium.net`, and names the
 package to install. When either is there, it says nothing — a warning that fires on a healthy
 machine is a warning nobody reads.
 
 ## 11. What the installer does, and what it deliberately does not
 
-`ensure_accounts` (`install.sh:149`) creates the directory (`:186`):
+`ensure_accounts` (`install.sh:275`) creates the directory (`:326`):
 
 ```
 install -d -o "$SERVICE_USER" -g "$SERVICE_GROUP" -m 0755 "$DATA_DIR/runtimes"
 ```
 
 * **The panel owns it**, because the panel is the only thing that writes there. `$DATA_DIR` itself
-  is `root:craftpanel 1771` (`:175`), so the panel could create `runtimes/` on its first fetch
+  is `root:craftpanel 1771` (`:315`), so the panel could create `runtimes/` on its first fetch
   anyway; doing it here makes the mode deterministic instead of leaving it to a umask.
-* **0755, not 0750 like the `cache/` beside it** (`:177`). A game server runs as its own managed
+* **0755, not 0750 like the `cache/` beside it** (`:317`). A game server runs as its own managed
   account, which shares no group with the panel, and it has to execute
   `runtimes/java-<major>/bin/java`. `0750` would make every server that needs a fetched runtime fail
   to start, and the message would be about a missing file, not about a mode.
 * **It is in `ensure_accounts`**, which `do_install`, `do_update` and `do_upgrade` all call
-  (`:757`, `:799`, `:842`), and `install -d` puts an existing directory right as well as making a
+  (`:1320`, `:1432`, `:997`), and `install -d` puts an existing directory right as well as making a
   new one. So an installation from before this feature gets the directory on its next run, and a
   directory somebody chmodded gets its mode back — the same repeatability the other steps have.
-* Nothing is added to the units. `ReadWritePaths=$DATA_DIR` (`:261`) already covers it and
+* Nothing is added to the units. `ReadWritePaths=$DATA_DIR` (`:411`) already covers it and
   `ProtectSystem=strict` does not forbid executing from a path it makes writable.
 
 **The umask was the loose end, and it is tied off — now for every directory.** The tree that
@@ -1103,7 +1103,7 @@ bind-mounting a Temurin 8 over `/usr/lib/jvm`: **50 passed, 2 failed**, exactly 
 data — the roots, `$JAVA_HOME`, the `PATH` — and `discover()`, `cached()` and `candidates()` take
 one instead of reading the machine. `Search::system()` (`:27`) is the same four roots in the same
 order with the same two environment variables behind them, so nothing about a running panel moved.
-`Config` carries it (`config.rs:20`, `#[serde(skip)]`: no key in `config.toml`, nothing for an
+`Config` carries it (`config.rs:18`, `#[serde(skip)]`: no key in `config.toml`, nothing for an
 operator to set wrong), `Inventory` is handed one, and `Runtimes::present()` asks with
 `Search::nowhere()` — it only ever looks at what the panel laid down itself, and a managed runtime
 is read out of `<data_dir>/runtimes/` and takes its `(major, vendor)` slot before any system one is

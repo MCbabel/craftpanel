@@ -238,6 +238,38 @@ async fn a_refusal_the_operator_has_to_fix_says_what_to_change() {
 }
 
 #[tokio::test]
+async fn a_day_spent_at_google_turns_the_backup_button_away_before_it_packs_anything() {
+    let (pool, _dir, _google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+    super::store::set_target(
+        &pool,
+        server,
+        BackupLocation::Drive,
+        crate::model::Timestamp::now(),
+    )
+    .await
+    .expect("a server that backs up into the Drive");
+
+    drive.guard_backup(server).await.expect("the day is still young");
+
+    let now = crate::model::Timestamp::now();
+    super::store::note_sent(&pool, anna, &super::day::day_of(now), super::day::CEILING, now)
+        .await
+        .expect("a day that is spent");
+
+    let refused = drive.guard_backup(server).await.expect_err("Google takes nothing more today");
+    assert_eq!(refused.code(), "drive_day_full");
+    assert_eq!(refused.status(), axum::http::StatusCode::TOO_MANY_REQUESTS);
+    assert!(
+        refused.to_string().contains("750 GB"),
+        "the button says nothing about why: {refused}"
+    );
+}
+
+#[tokio::test]
 async fn a_withdrawn_connection_is_no_target_and_the_page_is_told_so() {
     let (pool, _dir, google, drive) = panel().await;
     harness::with_credentials(&drive).await;
@@ -546,6 +578,83 @@ async fn deleting_an_account_takes_its_google_token_off_the_disk_and_gives_it_ba
     assert!(google.calls().contains(&"revoke".to_owned()), "{:?}", google.calls());
 }
 
+#[tokio::test]
+async fn a_bad_moment_at_google_is_ridden_out_instead_of_ending_the_run() {
+    let (pool, _dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+    let backup = a_drive_backup(&pool, server, &google, "one").await;
+    let file = file_of(&pool, backup).await;
+
+    google.turn_away("token/refresh", 1, 503, None);
+    google.turn_away("files/get", 2, 429, None);
+
+    let seen = drive.size_of(server, &file).await.expect("a 429 is a moment, not an answer");
+    assert_eq!(seen.id, file);
+
+    let calls = google.calls();
+    assert_eq!(
+        calls.iter().filter(|call| *call == "token/refresh").count(),
+        2,
+        "a 503 on the token was taken for a final word: {calls:?}"
+    );
+    assert_eq!(
+        calls.iter().filter(|call| *call == "files/get").count(),
+        3,
+        "the two rate limits were not ridden out: {calls:?}"
+    );
+}
+
+#[tokio::test]
+async fn a_full_drive_is_never_asked_a_second_time() {
+    let (pool, _dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+    let backup = a_drive_backup(&pool, server, &google, "one").await;
+    let file = file_of(&pool, backup).await;
+
+    google.turn_away_with_body(
+        "files/get",
+        5,
+        403,
+        include_str!("testdata/storage_quota_exceeded.json"),
+    );
+
+    let err = drive.size_of(server, &file).await.expect_err("a full Drive does not empty itself");
+    assert_eq!(err.operation_code(), "drive_quota_exceeded");
+    assert_eq!(
+        google.calls().iter().filter(|call| *call == "files/get").count(),
+        1,
+        "a full Drive was asked again and again: {:?}",
+        google.calls()
+    );
+}
+
+#[tokio::test]
+async fn the_wait_google_asks_for_is_the_wait_it_gets() {
+    let (pool, _dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+    let backup = a_drive_backup(&pool, server, &google, "one").await;
+    let file = file_of(&pool, backup).await;
+
+    google.turn_away("files/get", 1, 429, Some("1"));
+
+    let started = std::time::Instant::now();
+    drive.size_of(server, &file).await.expect("the second try got through");
+    assert!(
+        started.elapsed() >= Duration::from_millis(900),
+        "Google asked for a second and got {:?}",
+        started.elapsed()
+    );
+}
+
 async fn a_drive_backup(
     pool: &sqlx::SqlitePool,
     server: Id,
@@ -561,6 +670,7 @@ async fn a_drive_backup(
         backup.id,
         &file,
         27,
+        None,
         crate::model::Timestamp::now(),
     )
     .await
@@ -601,4 +711,467 @@ async fn switch_off(pool: &sqlx::SqlitePool) {
         .execute(pool)
         .await
         .expect("the switch");
+}
+
+async fn a_drive_row(pool: &sqlx::SqlitePool, server: Id, name: &str) -> Id {
+    crate::backups::store::insert(pool, server, name, false, BackupLocation::Drive)
+        .await
+        .expect("a backup row")
+        .id
+}
+
+fn sha256_of(bytes: &[u8]) -> String {
+    use sha2::Digest;
+    let mut digest = sha2::Sha256::new();
+    digest.update(bytes);
+    hex::encode(digest.finalize())
+}
+
+fn md5_of(bytes: &[u8]) -> String {
+    use md5::Digest;
+    let mut digest = md5::Md5::new();
+    digest.update(bytes);
+    hex::encode(digest.finalize())
+}
+
+fn filler(bytes: usize, seed: u64) -> Vec<u8> {
+    (0..bytes)
+        .map(|at| ((at as u64).wrapping_mul(2_654_435_761).wrapping_add(seed) >> 11) as u8)
+        .collect()
+}
+
+fn address_of(dir: &DataDir, user: Id, backup: Id) -> std::path::PathBuf {
+    dir.path()
+        .join("drive")
+        .join(user.to_string())
+        .join("sessions")
+        .join(backup.to_string())
+}
+
+fn mode_of(path: &std::path::Path) -> u32 {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::metadata(path).expect("the path exists").permissions().mode() & 0o777
+}
+
+fn touch_later(path: &std::path::Path) {
+    let file = std::fs::File::options().write(true).open(path).expect("the archive");
+    let later = std::time::SystemTime::now() + Duration::from_secs(5);
+    file.set_times(std::fs::FileTimes::new().set_modified(later))
+        .expect("a later modification time");
+}
+
+fn start_sending(
+    drive: &std::sync::Arc<super::Drive>,
+    server: Id,
+    backup: Id,
+    archive: &std::path::Path,
+    size: u64,
+) -> tokio::task::JoinHandle<()> {
+    let drive = std::sync::Arc::clone(drive);
+    let archive = archive.to_path_buf();
+    tokio::spawn(async move {
+        let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+        let _ = drive
+            .upload_archive(server, backup, &archive, size, "monday.tar.zst", &progress)
+            .await;
+    })
+}
+
+async fn wait_for_chunks(google: &FakeGoogle, how_many: usize) {
+    for _ in 0..2000 {
+        if google.chunks_seen() >= how_many {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(5)).await;
+    }
+    panic!("Google never saw {how_many} chunks of the archive");
+}
+
+async fn session_of(pool: &sqlx::SqlitePool, backup: Id) -> Option<super::store::Upload> {
+    super::store::upload_of(pool, backup).await.expect("no error")
+}
+
+struct Interrupted {
+    pool: sqlx::SqlitePool,
+    dir: DataDir,
+    google: FakeGoogle,
+    anna: Id,
+    server: Id,
+    backup: Id,
+    archive: std::path::PathBuf,
+    whole: Vec<u8>,
+}
+
+async fn an_upload_stopped_by_a_restart(chunks: usize) -> Interrupted {
+    stopped_after(chunks, None).await
+}
+
+async fn an_upload_stopped_with_the_last_chunk_in_the_air() -> Interrupted {
+    stopped_after(3, Some(3)).await
+}
+
+async fn stopped_after(chunks: usize, held: Option<usize>) -> Interrupted {
+    let (pool, dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+
+    let whole = filler((super::upload::CHUNK * 2 + 4096) as usize, 1);
+    tokio::fs::create_dir_all(dir.path()).await.expect("a place for the archive");
+    let archive = dir.path().join("monday.tar.zst");
+    tokio::fs::write(&archive, &whole).await.expect("an archive on the disk");
+    let backup = a_drive_row(&pool, server, "Monday").await;
+
+    if let Some(number) = held {
+        google.hold_the_chunk(number, Duration::from_secs(10));
+    }
+    let sending = start_sending(&drive, server, backup, &archive, whole.len() as u64);
+    wait_for_chunks(&google, chunks).await;
+    sending.abort();
+    tokio::time::sleep(Duration::from_millis(250)).await;
+
+    Interrupted { pool, dir, google, anna, server, backup, archive, whole }
+}
+
+#[tokio::test]
+async fn an_upload_carries_on_where_the_restart_left_it() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+
+    let row = session_of(&pool, backup).await.expect("the session outlived the run");
+    assert_eq!(row.user_id, anna, "it says whose Drive it writes into");
+    assert_eq!(row.total_bytes as u64, whole.len() as u64);
+    assert!(address_of(&dir, anna, backup).exists(), "the address is on the disk, not in the air");
+    let stopped_after = google.chunks_seen();
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    let stored = after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect("the rest of the upload");
+
+    let file = google.file_of_backup(backup).expect("the archive in her Drive");
+    assert_eq!(file.id, stored.file_id);
+    assert_eq!(file.bytes, whole, "the file in Drive is not the archive that was on the disk");
+    assert_eq!(
+        stored.md5.as_deref(),
+        Some(md5_of(&whole).as_str()),
+        "the checksum has to cover the bytes that went up before the restart as well, or a \
+         resumed upload can never be confirmed"
+    );
+    assert!(
+        google.chunks_seen() < stopped_after + 3,
+        "the whole archive went up a second time instead of only the rest: {} chunks",
+        google.chunks_seen()
+    );
+    assert_eq!(
+        progress.bytes(),
+        whole.len() as u64,
+        "the bar has to count what Google already holds, or it lies about the rest"
+    );
+    assert!(session_of(&pool, backup).await.is_none(), "a spent session is not kept");
+    assert!(!address_of(&dir, anna, backup).exists(), "and neither is its address");
+}
+
+#[tokio::test]
+async fn half_of_one_archive_is_never_glued_to_half_of_another() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    assert!(session_of(&pool, backup).await.is_some(), "there is something to be tempted by");
+
+    let repacked = filler(whole.len(), 7);
+    assert_ne!(repacked, whole, "the two worlds have to differ");
+    tokio::fs::write(&archive, &repacked).await.expect("the archive packed again");
+    touch_later(&archive);
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    after_restart
+        .upload_archive(
+            server,
+            backup,
+            &archive,
+            repacked.len() as u64,
+            "monday.tar.zst",
+            &progress,
+        )
+        .await
+        .expect("an upload of the new archive");
+
+    let file = google.file_of_backup(backup).expect("the archive in her Drive");
+    assert_eq!(
+        file.bytes, repacked,
+        "the backup in Drive is stitched out of two different archives, which is worse than \
+         having none at all"
+    );
+    let _ = anna;
+    let _ = dir;
+}
+
+#[tokio::test]
+async fn how_far_an_upload_has_come_is_written_down_before_the_chunk_goes_out() {
+    let stopped = stopped_after(1, Some(1)).await;
+    let Interrupted { pool, google, backup, whole, .. } = stopped;
+
+    let row = session_of(&pool, backup).await.expect("the session outlived the run");
+    let chunk = super::upload::CHUNK;
+    assert_eq!(
+        row.offer(),
+        Some((chunk, sha256_of(&whole[..chunk as usize]).as_str())),
+        "Google was already holding a chunk that nothing on this machine could vouch for"
+    );
+    assert_eq!(google.chunks_seen(), 1, "the first chunk never even got an answer");
+}
+
+#[tokio::test]
+async fn a_session_that_carries_no_mark_is_begun_again_rather_than_carried_on() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    sqlx::query("UPDATE drive_uploads SET offered_sha256 = NULL WHERE backup_id = ?")
+        .bind(backup)
+        .execute(&pool)
+        .await
+        .expect("a session of the kind the older panel left behind");
+    let offered_by_then = google.bytes_offered();
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect("an upload that cannot be proved is begun again, not given up on");
+
+    assert_eq!(google.file_of_backup(backup).expect("the archive").bytes, whole);
+    assert!(
+        google.bytes_offered() >= offered_by_then + whole.len() as u64,
+        "half an upload nothing vouches for was carried on anyway"
+    );
+    let _ = (anna, dir);
+}
+
+#[tokio::test]
+async fn google_holding_more_than_the_mark_covers_is_begun_again_from_the_front() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    sqlx::query("UPDATE drive_uploads SET offered_bytes = 4096 WHERE backup_id = ?")
+        .bind(backup)
+        .execute(&pool)
+        .await
+        .expect("a mark that stayed behind because it could not be written");
+    let offered_by_then = google.bytes_offered();
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect("what cannot be proved is sent again");
+
+    assert_eq!(google.file_of_backup(backup).expect("the archive").bytes, whole);
+    assert!(
+        google.bytes_offered() >= offered_by_then + whole.len() as u64,
+        "the part beyond the mark was carried on although nothing covers it"
+    );
+    let _ = (anna, dir);
+}
+
+#[tokio::test]
+async fn a_session_google_has_forgotten_starts_again_instead_of_failing() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    google.forget_every_session();
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect("a session Google threw away is a reason to begin again, not to give up");
+
+    assert_eq!(google.file_of_backup(backup).expect("the archive").bytes, whole);
+    assert!(session_of(&pool, backup).await.is_none());
+    assert!(!address_of(&dir, anna, backup).exists());
+}
+
+#[tokio::test]
+async fn a_session_whose_archive_is_gone_is_worth_nothing() {
+    let stopped = an_upload_stopped_by_a_restart(2).await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    tokio::fs::remove_file(&archive).await.expect("the archive swept away");
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    assert!(
+        after_restart.resumable(backup, &archive, crate::model::Timestamp::now()).await.is_none(),
+        "there is nothing left to carry on"
+    );
+
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    let refused = after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect_err("nothing can be sent");
+    assert!(matches!(refused, super::http::DriveError::Unreachable(_)), "{refused:?}");
+    let _ = (anna, google);
+}
+
+#[tokio::test]
+async fn an_upload_that_finished_before_the_restart_is_not_sent_a_second_time() {
+    let stopped = an_upload_stopped_with_the_last_chunk_in_the_air().await;
+    let Interrupted { pool, dir, google, anna, server, backup, archive, whole } = stopped;
+    google.take_the_rest_quietly(&whole);
+    let sent_by_then = google.chunks_seen();
+
+    let after_restart = harness::service(&pool, &dir, &google);
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    let stored = after_restart
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect("Google had it all along");
+
+    assert_eq!(
+        google.chunks_seen(),
+        sent_by_then,
+        "asking first is what keeps a finished upload from being done all over again"
+    );
+    assert_eq!(google.file_of_backup(backup).expect("the archive").id, stored.file_id);
+    assert!(session_of(&pool, backup).await.is_none());
+    assert!(!address_of(&dir, anna, backup).exists());
+}
+
+#[tokio::test]
+async fn two_runs_never_hold_the_same_session_at_once() {
+    let (pool, dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+
+    let whole = filler((super::upload::CHUNK + 4096) as usize, 3);
+    tokio::fs::create_dir_all(dir.path()).await.expect("a place for the archive");
+    let archive = dir.path().join("monday.tar.zst");
+    tokio::fs::write(&archive, &whole).await.expect("an archive");
+    let backup = a_drive_row(&pool, server, "Monday").await;
+    google.hold_the_first_chunk(Duration::from_secs(3));
+
+    let sending = start_sending(&drive, server, backup, &archive, whole.len() as u64);
+    wait_for_chunks(&google, 1).await;
+
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    let refused = drive
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect_err("a second run must not write into the same session");
+    assert!(matches!(refused, super::http::DriveError::Busy), "{refused:?}");
+    sending.abort();
+}
+
+#[tokio::test]
+async fn the_session_address_is_kept_like_a_key_and_shown_to_nobody() {
+    let stopped = an_upload_stopped_by_a_restart(1).await;
+    let Interrupted { pool, dir, google, anna, backup, .. } = stopped;
+
+    let address = address_of(&dir, anna, backup);
+    let written = tokio::fs::read_to_string(&address).await.expect("the address on the disk");
+    assert!(written.contains("/upload/session/"), "that is not a session address: {written}");
+    assert_eq!(mode_of(&address), 0o600, "the address itself");
+    assert_eq!(mode_of(address.parent().expect("its directory")), 0o700, "its directory");
+
+    let row: Option<String> = sqlx::query_scalar(
+        "SELECT group_concat(quote(backup_id) || quote(user_id) || quote(total_bytes) || \
+                quote(archive_mtime_ns) || quote(archive_inode) || quote(opened_at) || \
+                quote(updated_at)) FROM drive_uploads",
+    )
+    .fetch_one(&pool)
+    .await
+    .expect("the row");
+    let row = row.unwrap_or_default();
+    assert!(
+        !row.contains("http"),
+        "a database that is itself copied into backups carries a key to somebody's Drive: {row}"
+    );
+
+    let drive = harness::service(&pool, &dir, &google);
+    let status = serde_json::to_string(&drive.of(anna).status().await.expect("a status"))
+        .expect("json");
+    assert!(!status.contains("/upload/session/"), "the owner's own status leaks it: {status}");
+    let overview =
+        serde_json::to_string(&drive.admin_overview().await.expect("the overview")).expect("json");
+    assert!(!overview.contains("/upload/session/"), "the admin overview leaks it: {overview}");
+}
+
+#[tokio::test]
+async fn letting_go_of_an_account_lets_go_of_the_uploads_it_left_open() {
+    let stopped = an_upload_stopped_by_a_restart(1).await;
+    let Interrupted { pool, dir, google, anna, backup, .. } = stopped;
+
+    let drive = harness::service(&pool, &dir, &google);
+    drive.of(anna).disconnect(Files::Keep).await.expect("letting go");
+
+    assert!(session_of(&pool, backup).await.is_none(), "the row went with the account");
+    assert!(!address_of(&dir, anna, backup).exists(), "and so did the address");
+}
+
+#[tokio::test]
+async fn a_session_past_googles_week_is_swept_and_an_address_without_a_row_with_it() {
+    let stopped = an_upload_stopped_by_a_restart(1).await;
+    let Interrupted { pool, dir, google, anna, server, backup, .. } = stopped;
+
+    let stray = a_drive_row(&pool, server, "Tuesday").await;
+    let address = address_of(&dir, anna, stray);
+    tokio::fs::create_dir_all(address.parent().expect("the directory")).await.expect("a directory");
+    tokio::fs::write(&address, "https://upload.example/session/stray").await.expect("a stray");
+
+    let drive = harness::service(&pool, &dir, &google);
+    let later = crate::model::Timestamp::at(
+        crate::model::Timestamp::now().as_datetime() + time::Duration::days(7),
+    );
+    drive.sweep_sessions(later).await;
+
+    assert!(session_of(&pool, backup).await.is_none(), "Google's week ran out");
+    assert!(!address_of(&dir, anna, backup).exists());
+    assert!(!address.exists(), "an address that belongs to no row is a key left lying about");
+}
+
+#[tokio::test]
+async fn an_address_google_moves_is_the_one_kept_for_the_next_try() {
+    let (pool, dir, google, drive) = panel().await;
+    harness::with_credentials(&drive).await;
+    let anna = a_user(&pool, PanelRole::User).await;
+    let server = a_server(&pool, anna).await;
+    drive.of(anna).write_token("1//a-token").await;
+
+    let whole = filler((super::upload::CHUNK * 2 + 4096) as usize, 5);
+    tokio::fs::create_dir_all(dir.path()).await.expect("a place for the archive");
+    let archive = dir.path().join("monday.tar.zst");
+    tokio::fs::write(&archive, &whole).await.expect("an archive on the disk");
+    let backup = a_drive_row(&pool, server, "Monday").await;
+
+    google.move_session_after(1);
+    google.fail_chunk(2, 400);
+
+    let progress = std::sync::Arc::new(crate::backups::archive::Progress::default());
+    let stopped = drive
+        .upload_archive(server, backup, &archive, whole.len() as u64, "monday.tar.zst", &progress)
+        .await
+        .expect_err("Google turned the second chunk away");
+    assert!(
+        matches!(stopped, super::http::DriveError::Refused { status: 400, .. }),
+        "{stopped:?}"
+    );
+
+    let kept = tokio::fs::read_to_string(address_of(&dir, anna, backup))
+        .await
+        .expect("the address is still there for the next try");
+    assert_eq!(
+        google.chunks_seen(),
+        2,
+        "a 308 that carries a new address is the upload protocol speaking, not a redirect for          the HTTP client to follow behind our back"
+    );
+    assert!(
+        kept.contains("/upload/session/moved-"),
+        "the next try would knock at a door Google has already moved away from: {kept}"
+    );
+    assert!(session_of(&pool, backup).await.is_some(), "and the row that goes with it");
 }

@@ -37,11 +37,29 @@ pub struct Progress {
     done: AtomicU64,
     files: AtomicU64,
     cancelled: AtomicBool,
+    holdup: std::sync::Mutex<Option<String>>,
 }
 
 impl Progress {
     pub fn cancel(&self) {
         self.cancelled.store(true, Ordering::Release);
+    }
+
+    pub fn waiting(&self, why: String) {
+        *self.holdup.lock().expect("the holdup") = Some(why);
+    }
+
+    pub fn moving_again(&self) {
+        *self.holdup.lock().expect("the holdup") = None;
+    }
+
+    pub fn holdup(&self) -> Option<String> {
+        self.holdup.lock().expect("the holdup").clone()
+    }
+
+    pub fn back_to(&self, bytes: u64) {
+        self.bytes.store(bytes, Ordering::Relaxed);
+        self.done.store(bytes, Ordering::Relaxed);
     }
 
     pub fn add_bytes(&self, bytes: u64) {

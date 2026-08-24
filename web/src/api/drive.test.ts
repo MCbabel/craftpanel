@@ -8,6 +8,8 @@ import {
 	linkPhase,
 	noLinkOpen,
 	statusPollMs,
+	dayLeft,
+	dayShare,
 	storageLeft,
 	storageShare,
 } from './drive'
@@ -41,6 +43,8 @@ function status(over: Partial<DriveStatus> = {}): DriveStatus {
 		folder_name: 'craftpanel-backups',
 		storage_limit_bytes: 16_106_127_360,
 		storage_usage_bytes: 2_147_483_648,
+		uploaded_today_bytes: 0,
+		daily_upload_limit_bytes: 750_000_000_000,
 		link: null,
 		last_error: null,
 		checked_at: '2026-08-13T10:00:30Z',
@@ -149,6 +153,25 @@ describe('How often it looks again', () => {
 	it('stops when nothing is connected and nothing is running', () => {
 		expect(statusPollMs(status({ configured: false }))).toBeNull()
 		expect(statusPollMs(status())).toBe(30_000)
+	})
+})
+
+describe('The day\u2019s share of Google', () => {
+	it('reads as empty on an account that has sent nothing today', () => {
+		expect(dayShare(status())).toBe(0)
+		expect(dayLeft(status())).toBe(750_000_000_000)
+	})
+
+	it('works out how much of the 750 GB is gone', () => {
+		const half = status({ uploaded_today_bytes: 375_000_000_000 })
+		expect(dayShare(half)).toBeCloseTo(0.5, 6)
+		expect(dayLeft(half)).toBe(375_000_000_000)
+	})
+
+	it('does not let a day that went over read as more than spent', () => {
+		const over = status({ uploaded_today_bytes: 900_000_000_000 })
+		expect(dayShare(over)).toBe(1)
+		expect(dayLeft(over)).toBe(0)
 	})
 })
 

@@ -1,0 +1,40 @@
+-- Section 22: proof that the half in the Drive and the half on the disk are one archive.
+--
+-- 0018 refuses to carry an upload session onto a different archive by comparing
+-- size, modification time and inode. All three are metadata, and metadata is a
+-- hint, not evidence: `touch -d` puts the nanosecond back, a repack under the
+-- same name keeps the inode, and the length of two packs of the same world is
+-- easily the same number. A siege proved it — 16 MB landed in a Drive that were
+-- neither Monday's archive nor Tuesday's, and because Google named no checksum
+-- for the spliced file — the guide promises the finished session nothing beyond
+-- "any metadata associated with the resource"
+-- (developers.google.com/workspace/drive/api/guides/manage-uploads) — the run
+-- ended green.
+--
+-- The only evidence about bytes is the bytes. Before every chunk goes out, the
+-- panel writes down how far this session will then have been fed and the SHA-256
+-- of the local archive up to exactly that mark. A resume asks Google how much it
+-- holds (`308` + `Range`), and Google can never hold more than the mark, because
+-- the mark is written before the chunk and not after it. So re-reading the local
+-- archive up to the mark and comparing the digest either proves the confirmed
+-- prefix or unmasks a different file, with no window left in between.
+--
+-- The re-read costs one pass over the part that already went up. It costs
+-- nothing extra: the sender has always had to read that prefix back anyway to
+-- carry its running digest forward, and it now takes the proof out of the same
+-- pass. What was missing was never the reading. It was something to hold it
+-- against.
+--
+-- SHA-256 and not MD5, although the final comparison with Google is MD5 whenever
+-- that is all Google names. This digest is never sent anywhere; it is the panel
+-- holding one of its own files against another of its own files, and an owner
+-- who wants a chimera in their own backup is exactly the person who could hand
+-- an MD5 two archives that agree. It costs a second pass of arithmetic over
+-- bytes that are already in the cache.
+--
+-- No backfill. A session opened by the older code has no mark, and a session
+-- without a mark is not resumed — it starts over from the front, which is what
+-- the panel did before 0018 and is never wrong, only slower.
+
+ALTER TABLE drive_uploads ADD COLUMN offered_bytes INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE drive_uploads ADD COLUMN offered_sha256 TEXT;

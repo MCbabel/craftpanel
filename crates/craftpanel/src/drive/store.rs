@@ -282,12 +282,15 @@ pub struct DriveBackup {
     pub server_id: Id,
     pub drive_file_id: Option<String>,
     pub drive_state: Option<DriveFileState>,
+    pub drive_md5: Option<String>,
+    pub drive_content_changed_at: Option<Timestamp>,
     pub size_bytes: i64,
 }
 
 pub async fn backups_of(pool: &SqlitePool, user: Id) -> Result<Vec<DriveBackup>> {
     Ok(sqlx::query_as(
-        "SELECT b.id, b.server_id, b.drive_file_id, b.drive_state, b.size_bytes \
+        "SELECT b.id, b.server_id, b.drive_file_id, b.drive_state, b.drive_md5, \
+                b.drive_content_changed_at, b.size_bytes \
            FROM backups b JOIN servers s ON s.id = b.server_id \
           WHERE s.owner_id = ? AND b.location = 'drive' \
           ORDER BY b.created_at DESC",
@@ -360,6 +363,31 @@ pub async fn set_file_state(
     Ok(())
 }
 
+pub async fn set_content_changed(
+    pool: &SqlitePool,
+    backup: Id,
+    when: Option<Timestamp>,
+) -> Result<()> {
+    sqlx::query("UPDATE backups SET drive_content_changed_at = ? WHERE id = ?")
+        .bind(when)
+        .bind(backup)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn note_content_changed(pool: &SqlitePool, file: &str, now: Timestamp) -> Result<()> {
+    sqlx::query(
+        "UPDATE backups SET drive_content_changed_at = ? \
+          WHERE drive_file_id = ? AND drive_content_changed_at IS NULL",
+    )
+    .bind(now)
+    .bind(file)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
 pub async fn forget_drive_backups(pool: &SqlitePool, user: Id) -> Result<()> {
     sqlx::query(
         "DELETE FROM backups WHERE location = 'drive' \
@@ -382,6 +410,222 @@ pub async fn mark_unreachable(pool: &SqlitePool, user: Id, now: Timestamp) -> Re
     .execute(pool)
     .await?;
     Ok(())
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Print {
+    pub bytes: u64,
+    pub mtime_ns: i64,
+    pub inode: u64,
+}
+
+pub async fn print_of(path: &std::path::Path) -> Option<Print> {
+    use std::os::unix::fs::MetadataExt;
+
+    let seen = tokio::fs::metadata(path).await.ok()?;
+    if !seen.is_file() {
+        return None;
+    }
+    Some(Print {
+        bytes: seen.len(),
+        mtime_ns: seen.mtime().saturating_mul(1_000_000_000).saturating_add(seen.mtime_nsec()),
+        inode: seen.ino(),
+    })
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct Upload {
+    pub backup_id: Id,
+    pub user_id: Id,
+    pub total_bytes: i64,
+    pub archive_mtime_ns: i64,
+    pub archive_inode: i64,
+    pub offered_bytes: i64,
+    pub offered_sha256: Option<String>,
+    pub opened_at: Timestamp,
+}
+
+impl Upload {
+    pub fn print(&self) -> Print {
+        Print {
+            bytes: self.total_bytes.max(0) as u64,
+            mtime_ns: self.archive_mtime_ns,
+            inode: self.archive_inode.max(0) as u64,
+        }
+    }
+
+    pub fn offer(&self) -> Option<(u64, &str)> {
+        Some((self.offered_bytes.max(0) as u64, self.offered_sha256.as_deref()?))
+    }
+}
+
+const UPLOAD_COLUMNS: &str = "backup_id, user_id, total_bytes, archive_mtime_ns, archive_inode, \
+     offered_bytes, offered_sha256, opened_at";
+
+pub async fn open_upload(
+    pool: &SqlitePool,
+    backup: Id,
+    user: Id,
+    print: Print,
+    opened: Timestamp,
+    now: Timestamp,
+) -> Result<()> {
+    sqlx::query(
+        "INSERT INTO drive_uploads \
+             (backup_id, user_id, total_bytes, archive_mtime_ns, archive_inode, opened_at, \
+              updated_at) \
+         VALUES (?, ?, ?, ?, ?, ?, ?) \
+         ON CONFLICT(backup_id) DO UPDATE SET user_id = excluded.user_id, \
+             total_bytes = excluded.total_bytes, \
+             archive_mtime_ns = excluded.archive_mtime_ns, \
+             archive_inode = excluded.archive_inode, offered_bytes = 0, \
+             offered_sha256 = NULL, opened_at = excluded.opened_at, \
+             updated_at = excluded.updated_at",
+    )
+    .bind(backup)
+    .bind(user)
+    .bind(print.bytes as i64)
+    .bind(print.mtime_ns)
+    .bind(print.inode as i64)
+    .bind(opened)
+    .bind(now)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn upload_of(pool: &SqlitePool, backup: Id) -> Result<Option<Upload>> {
+    Ok(
+        sqlx::query_as(&format!("SELECT {UPLOAD_COLUMNS} FROM drive_uploads WHERE backup_id = ?"))
+            .bind(backup)
+            .fetch_optional(pool)
+            .await?,
+    )
+}
+
+pub async fn note_offer(
+    pool: &SqlitePool,
+    backup: Id,
+    offered: u64,
+    proof: &str,
+    now: Timestamp,
+) -> Result<()> {
+    sqlx::query(
+        "UPDATE drive_uploads SET offered_bytes = ?, offered_sha256 = ?, updated_at = ? \
+          WHERE backup_id = ?",
+    )
+    .bind(offered.min(i64::MAX as u64) as i64)
+    .bind(proof)
+    .bind(now)
+    .bind(backup)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn forget_upload(pool: &SqlitePool, backup: Id) -> Result<()> {
+    sqlx::query("DELETE FROM drive_uploads WHERE backup_id = ?")
+        .bind(backup)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn forget_uploads_of(pool: &SqlitePool, user: Id) -> Result<Vec<Id>> {
+    let held: Vec<Id> = sqlx::query_scalar("SELECT backup_id FROM drive_uploads WHERE user_id = ?")
+        .bind(user)
+        .fetch_all(pool)
+        .await?;
+    sqlx::query("DELETE FROM drive_uploads WHERE user_id = ?")
+        .bind(user)
+        .execute(pool)
+        .await?;
+    Ok(held)
+}
+
+pub async fn uploads(pool: &SqlitePool) -> Result<Vec<Upload>> {
+    Ok(sqlx::query_as(&format!(
+        "SELECT {UPLOAD_COLUMNS} FROM drive_uploads ORDER BY opened_at"
+    ))
+    .fetch_all(pool)
+    .await?)
+}
+
+pub async fn sent_today(pool: &SqlitePool, user: Id, day: &str) -> Result<u64> {
+    let bytes: Option<i64> =
+        sqlx::query_scalar("SELECT bytes FROM drive_daily_uploads WHERE user_id = ? AND day = ?")
+            .bind(user)
+            .bind(day)
+            .fetch_optional(pool)
+            .await?;
+    Ok(bytes.unwrap_or(0).max(0) as u64)
+}
+
+pub async fn note_sent(
+    pool: &SqlitePool,
+    user: Id,
+    day: &str,
+    bytes: u64,
+    now: Timestamp,
+) -> Result<()> {
+    if bytes == 0 {
+        return Ok(());
+    }
+    sqlx::query(
+        "INSERT INTO drive_daily_uploads (user_id, day, bytes, updated_at) VALUES (?, ?, ?, ?) \
+         ON CONFLICT(user_id, day) DO UPDATE SET bytes = bytes + excluded.bytes, \
+             updated_at = excluded.updated_at",
+    )
+    .bind(user)
+    .bind(day)
+    .bind(bytes.min(i64::MAX as u64) as i64)
+    .bind(now)
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn forget_days_before(pool: &SqlitePool, user: Id, day: &str) -> Result<()> {
+    sqlx::query("DELETE FROM drive_daily_uploads WHERE user_id = ? AND day < ?")
+        .bind(user)
+        .bind(day)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+#[derive(Debug, Clone, sqlx::FromRow)]
+pub struct Today {
+    pub user_id: Id,
+    pub bytes: i64,
+}
+
+pub async fn sent_today_by_everybody(pool: &SqlitePool, day: &str) -> Result<Vec<Today>> {
+    Ok(
+        sqlx::query_as("SELECT user_id, bytes FROM drive_daily_uploads WHERE day = ?")
+            .bind(day)
+            .fetch_all(pool)
+            .await?,
+    )
+}
+
+pub async fn note_holdup(pool: &SqlitePool, user: Id, why: &str, now: Timestamp) -> Result<()> {
+    sqlx::query("UPDATE drive_accounts SET last_error = ?, updated_at = ? WHERE user_id = ?")
+        .bind(why)
+        .bind(now)
+        .bind(user)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn uploads_opened_before(pool: &SqlitePool, moment: Timestamp) -> Result<Vec<Upload>> {
+    Ok(sqlx::query_as(&format!(
+        "SELECT {UPLOAD_COLUMNS} FROM drive_uploads WHERE opened_at < ? ORDER BY opened_at"
+    ))
+    .bind(moment)
+    .fetch_all(pool)
+    .await?)
 }
 
 #[cfg(test)]
@@ -529,6 +773,183 @@ mod tests {
         assert_eq!(row.state, Some(DriveAccountState::Error));
         assert!(row.last_error.is_some(), "0013 reads a missing sentence as 'never connected'");
         assert!(row.checked_at.is_some(), "and a missing moment as the same thing");
+    }
+
+    #[tokio::test]
+    async fn an_upload_session_is_remembered_by_the_archive_it_belongs_to() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let server = a_server(&pool, anna).await;
+        let now = Timestamp::now();
+        let backup =
+            crate::backups::store::insert(&pool, server, "Monday", false, BackupLocation::Drive)
+                .await
+                .expect("a backup")
+                .id;
+
+        assert!(upload_of(&pool, backup).await.expect("no error").is_none(), "nothing is under way");
+
+        let print = Print { bytes: 2_147_483_648, mtime_ns: 1_755_000_000_123_456_789, inode: 4711 };
+        open_upload(&pool, backup, anna, print, now, now).await.expect("a session");
+
+        let row = upload_of(&pool, backup).await.expect("no error").expect("a row");
+        assert_eq!(row.user_id, anna, "the session says whose Drive it writes into");
+        assert_eq!(row.total_bytes, 2_147_483_648, "and the size Google was promised");
+        assert_eq!(row.print(), print, "and the archive it was opened for, to the nanosecond");
+        assert_eq!(row.opened_at, now, "and when Google's week began");
+
+        forget_upload(&pool, backup).await.expect("letting go");
+        assert!(upload_of(&pool, backup).await.expect("no error").is_none());
+    }
+
+    #[tokio::test]
+    async fn what_was_offered_to_google_is_written_down_and_a_new_session_forgets_it() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let server = a_server(&pool, anna).await;
+        let now = Timestamp::now();
+        let backup =
+            crate::backups::store::insert(&pool, server, "Monday", false, BackupLocation::Drive)
+                .await
+                .expect("a backup")
+                .id;
+        let print = Print { bytes: 24, mtime_ns: 5, inode: 9 };
+        open_upload(&pool, backup, anna, print, now, now).await.expect("a session");
+
+        let row = upload_of(&pool, backup).await.expect("no error").expect("a row");
+        assert_eq!(row.offer(), None, "a session nothing has gone into proves nothing");
+
+        note_offer(&pool, backup, 16, "beef", now).await.expect("the mark");
+        let row = upload_of(&pool, backup).await.expect("no error").expect("a row");
+        assert_eq!(
+            row.offer(),
+            Some((16, "beef")),
+            "the mark says how far this session was fed and what the archive hashed to there"
+        );
+
+        open_upload(&pool, backup, anna, print, now, now).await.expect("a second session");
+        let row = upload_of(&pool, backup).await.expect("no error").expect("a row");
+        assert_eq!(
+            row.offer(),
+            None,
+            "a mark left over from the session before could vouch for the wrong archive"
+        );
+    }
+
+    #[tokio::test]
+    async fn a_session_cannot_outlive_the_backup_it_was_opened_for() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let server = a_server(&pool, anna).await;
+        let now = Timestamp::now();
+        let backup =
+            crate::backups::store::insert(&pool, server, "Monday", false, BackupLocation::Drive)
+                .await
+                .expect("a backup")
+                .id;
+        let print = Print { bytes: 17, mtime_ns: 5, inode: 9 };
+        open_upload(&pool, backup, anna, print, now, now).await.expect("a session");
+
+        sqlx::query("DELETE FROM backups WHERE id = ?")
+            .bind(backup)
+            .execute(&pool)
+            .await
+            .expect("deleting the backup");
+
+        assert!(
+            upload_of(&pool, backup).await.expect("no error").is_none(),
+            "a session that points at a backup nobody has any more is a lie"
+        );
+    }
+
+    #[tokio::test]
+    async fn only_the_sessions_past_googles_week_are_swept() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let server = a_server(&pool, anna).await;
+        let now = Timestamp::now();
+        let print = Print { bytes: 17, mtime_ns: 5, inode: 9 };
+
+        let mut made = Vec::new();
+        for (name, age) in [("old", 8), ("young", 1)] {
+            let backup =
+                crate::backups::store::insert(&pool, server, name, false, BackupLocation::Drive)
+                    .await
+                    .expect("a backup")
+                    .id;
+            let opened = Timestamp::at(now.as_datetime() - time::Duration::days(age));
+            open_upload(&pool, backup, anna, print, opened, now).await.expect("a session");
+            made.push(backup);
+        }
+
+        let cutoff = Timestamp::at(now.as_datetime() - time::Duration::days(6));
+        let stale = uploads_opened_before(&pool, cutoff).await.expect("the old ones");
+        assert_eq!(stale.len(), 1, "only one of the two is past the week");
+        assert_eq!(stale[0].backup_id, made[0]);
+        assert_eq!(uploads(&pool).await.expect("all of them").len(), 2);
+
+        let let_go = forget_uploads_of(&pool, anna).await.expect("letting go of hers");
+        assert_eq!(let_go.len(), 2, "the caller is told which addresses to wipe off the disk");
+        assert!(uploads(&pool).await.expect("no error").is_empty());
+    }
+
+    #[tokio::test]
+    async fn the_days_bytes_add_up_and_yesterdays_are_swept_off() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let bert = a_user(&pool, PanelRole::User).await;
+        let now = Timestamp::now();
+        connect(&pool, anna, None, now).await.expect("a connected account");
+        connect(&pool, bert, None, now).await.expect("a connected account");
+
+        assert_eq!(
+            sent_today(&pool, anna, "2026-08-15").await.expect("no row"),
+            0,
+            "an account that has sent nothing today reads as nothing, not as an error"
+        );
+
+        note_sent(&pool, anna, "2026-08-15", 1_000, now).await.expect("a first archive");
+        note_sent(&pool, anna, "2026-08-15", 2_500, now).await.expect("a second one");
+        note_sent(&pool, anna, "2026-08-14", 9_000, now).await.expect("yesterday");
+        note_sent(&pool, bert, "2026-08-15", 7, now).await.expect("somebody else");
+        note_sent(&pool, anna, "2026-08-15", 0, now).await.expect("a run that sent nothing");
+
+        assert_eq!(sent_today(&pool, anna, "2026-08-15").await.expect("today"), 3_500);
+        assert_eq!(
+            sent_today(&pool, anna, "2026-08-14").await.expect("yesterday"),
+            9_000,
+            "one day was added to another"
+        );
+        assert_eq!(
+            sent_today(&pool, bert, "2026-08-15").await.expect("his own day"),
+            7,
+            "one account was charged for another's upload"
+        );
+
+        let everybody = sent_today_by_everybody(&pool, "2026-08-15").await.expect("the day");
+        assert_eq!(everybody.len(), 2);
+
+        forget_days_before(&pool, anna, "2026-08-15").await.expect("the sweep");
+        assert_eq!(sent_today(&pool, anna, "2026-08-14").await.expect("swept"), 0);
+        assert_eq!(sent_today(&pool, anna, "2026-08-15").await.expect("today"), 3_500);
+    }
+
+    #[tokio::test]
+    async fn a_holdup_is_a_sentence_and_not_a_broken_connection() {
+        let pool = schema().await;
+        let anna = a_user(&pool, PanelRole::User).await;
+        let now = Timestamp::now();
+        connect(&pool, anna, None, now).await.expect("a connected account");
+
+        note_holdup(&pool, anna, "Google takes nothing more today", now).await.expect("a note");
+
+        let row = account(&pool, anna).await.expect("no error").expect("the row");
+        assert_eq!(row.last_error.as_deref(), Some("Google takes nothing more today"));
+        assert_eq!(
+            row.state,
+            Some(DriveAccountState::Connected),
+            "a Google that is throttling is not a connection anybody has to make again"
+        );
     }
 
     #[tokio::test]

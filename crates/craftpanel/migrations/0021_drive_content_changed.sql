@@ -1,0 +1,40 @@
+-- Section 22: the checksum that was written down gets looked at again.
+--
+-- 0017 wrote `backups.drive_md5` and nobody ever read it back. The download side
+-- checked what Google says about a file *today* against the bytes that arrive
+-- today (drive/mod.rs, files::get plus the digest of the stream), which proves an
+-- unbroken transfer and nothing else. It does not prove the file is still the one
+-- that went up: this is the *user's own* Drive, drive.file only narrows what we
+-- may see, not what he may do, and any other tool of his may overwrite that file.
+-- Google would then name the new checksum, the download would agree with it, and
+-- the panel would unpack a stranger's archive over a world with nothing lit up
+-- anywhere.
+--
+-- So the restore now holds the digest of what came down against `drive_md5` as
+-- well, and the hourly sweep (drive/mod.rs, take_stock) holds `drive_md5` against
+-- the `md5Checksum` that files.list already returns — the same call, the same
+-- fields, not one extra byte. The point of the sweep doing it is time: a backup
+-- that is no longer the backup is something the owner has to learn while he still
+-- has a night to make another one, not in the minute he needs this one.
+--
+-- This column is what the sweep leaves behind: the moment it first saw a file
+-- under one of our ids whose content is not the content we put there. NULL is
+-- "no difference at the last look", which is also the answer when there was
+-- nothing to compare — a row with `drive_md5 IS NULL` (the unconfirmed state of
+-- 0017) can never be judged, and a Google that names no md5 for a file this round
+-- is not evidence of anything either. Silence stays silence; only a checksum that
+-- is present and different sets this.
+--
+-- It clears itself the same way: the next sweep that finds the checksums equal
+-- again writes NULL back. The owner who puts his file back is not left carrying a
+-- red mark, and a Retry that uploads the archive again clears it with the new
+-- `drive_md5` (backups/store.rs, finish_upload).
+--
+-- Deliberately not a value of `drive_state`, and not only because 0012's CHECK is
+-- applied and a fifth value would mean rebuilding the table. The two answer
+-- different questions and can both be true: `drive_state` says whether the file
+-- is still in the Drive, this says whether the file that is still there holds
+-- what we put in it. A file can be present and wrong, and the page has to be able
+-- to say exactly that.
+
+ALTER TABLE backups ADD COLUMN drive_content_changed_at TEXT;

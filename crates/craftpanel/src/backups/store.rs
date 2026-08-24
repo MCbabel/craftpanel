@@ -22,10 +22,12 @@ pub struct Row {
     pub location: BackupLocation,
     pub drive_file_id: Option<String>,
     pub drive_state: Option<DriveFileState>,
+    pub drive_md5: Option<String>,
+    pub drive_content_changed_at: Option<Timestamp>,
 }
 
 const COLUMNS: &str = "id, server_id, name, automated, size_bytes, created_at, location, \
-     drive_file_id, drive_state";
+     drive_file_id, drive_state, drive_md5, drive_content_changed_at";
 
 #[derive(Debug, Clone, sqlx::FromRow)]
 struct RunRow {
@@ -138,6 +140,10 @@ fn backup_of(row: &Row, runs: &[&RunRow]) -> Backup {
         automated: row.automated,
         location: row.location,
         drive_state: row.drive_state,
+        drive_verified: (row.location == BackupLocation::Drive)
+            .then_some(row.drive_md5.is_some()),
+        drive_content_changed: (row.location == BackupLocation::Drive)
+            .then_some(row.drive_content_changed_at.is_some()),
         drive_web_link: row
             .drive_file_id
             .as_deref()
@@ -291,6 +297,8 @@ pub async fn insert(
         location,
         drive_file_id: None,
         drive_state: None,
+        drive_md5: None,
+        drive_content_changed_at: None,
     };
     sqlx::query(
         "INSERT INTO backups (id, server_id, name, automated, size_bytes, created_at, location) \
@@ -312,14 +320,17 @@ pub async fn finish_upload(
     backup: Id,
     file_id: &str,
     size: u64,
+    md5: Option<&str>,
     now: Timestamp,
 ) -> Result<()> {
     sqlx::query(
-        "UPDATE backups SET size_bytes = ?, drive_file_id = ?, drive_state = 'present', \
+        "UPDATE backups SET size_bytes = ?, drive_file_id = ?, drive_md5 = ?, \
+             drive_state = 'present', drive_content_changed_at = NULL, \
              drive_checked_at = ? WHERE id = ?",
     )
     .bind(size as i64)
     .bind(file_id)
+    .bind(md5)
     .bind(now)
     .bind(backup)
     .execute(pool)

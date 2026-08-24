@@ -870,6 +870,8 @@ export interface Backup {
 	size_bytes: number
 	location: BackupLocation
 	drive_state: DriveFileState | null
+	drive_verified: boolean | null
+	drive_content_changed: boolean | null
 	drive_web_link: string | null
 	history: BackupOperation[]
 }

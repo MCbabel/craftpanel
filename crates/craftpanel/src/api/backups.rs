@@ -40,6 +40,11 @@ struct RestoreBackupRequest {
 }
 
 #[derive(Deserialize)]
+struct RetryQuery {
+    acknowledge_abuse: Option<String>,
+}
+
+#[derive(Deserialize)]
 struct BulkDeleteBackupsRequest {
     backup_ids: Vec<Id>,
 }
@@ -177,10 +182,23 @@ async fn retry(
     Extension(backups): Extension<Arc<Backups>>,
     caller: Caller,
     Route((server, backup)): Route<(Id, Id)>,
+    extract::Params(query): extract::Params<RetryQuery>,
 ) -> Result<(StatusCode, Json<RetryAccepted>)> {
     access::require(&state.pool, &caller, server, Permission::Backups).await?;
-    let accepted = backups.retry(server, backup, caller.id()).await?;
+    let warned = acknowledgement(query.acknowledge_abuse.as_deref())?;
+    let accepted = backups.retry(server, backup, caller.id(), warned).await?;
     Ok((StatusCode::ACCEPTED, Json(accepted)))
+}
+
+fn acknowledgement(said: Option<&str>) -> Result<bool> {
+    match said {
+        None | Some("false") => Ok(false),
+        Some("true") => Ok(true),
+        Some(_) => Err(Failure::bad_request(
+            "invalid_request",
+            "acknowledge_abuse is either true or false",
+        )),
+    }
 }
 
 async fn download(
@@ -708,6 +726,30 @@ mod tests {
             .await;
         assert_eq!(refused.status(), StatusCode::NOT_FOUND);
         assert_eq!(body_json(refused).await["error"], "server_not_found");
+    }
+
+    #[tokio::test]
+    async fn the_acknowledgement_of_10_7_is_a_yes_or_a_no_and_nothing_else() {
+        let panel = panel().await;
+        let backup = panel.a_backup("one").await;
+
+        let nonsense = panel
+            .call(empty("POST", &panel.path(&format!("/{backup}/retry?acknowledge_abuse=maybe"))))
+            .await;
+        assert_eq!(nonsense.status(), StatusCode::BAD_REQUEST);
+        assert_eq!(body_json(nonsense).await["error"], "invalid_request");
+
+        for said in ["", "?acknowledge_abuse=false", "?acknowledge_abuse=true"] {
+            let answer = panel
+                .call(empty("POST", &panel.path(&format!("/{backup}/retry{said}"))))
+                .await;
+            assert_eq!(
+                answer.status(),
+                StatusCode::CONFLICT,
+                "22.16: the acknowledgement is read, and nothing else about the call changes"
+            );
+            assert_eq!(body_json(answer).await["error"], "nothing_to_retry");
+        }
     }
 
     #[tokio::test]

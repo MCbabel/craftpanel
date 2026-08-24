@@ -243,6 +243,51 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn a_game_that_saved_and_left_on_a_sigterm_is_not_reported_as_a_crash() {
+        let (operations, dir, pool) = testing::operations().await;
+        let owner = testing::a_user(&pool, PanelRole::User).await;
+        let server = testing::a_server(&pool, owner).await;
+
+        let hub = Arc::new(crate::servers::Hub::new(dir.path().join("supervisors.sock")));
+        hub.set_token(server.to_string(), "a-token").await;
+        let listening = tokio::spawn(Arc::clone(&hub).listen());
+        let following = tokio::spawn(follow(Arc::clone(&operations), Arc::clone(&hub)));
+
+        let mut events = operations.channel(server).await.expect("a channel").attach().events;
+
+        let stream = connect(hub.socket()).await;
+        let (reader, mut writer) = stream.into_split();
+        let mut reader = BufReader::new(reader).lines();
+
+        say(
+            &mut writer,
+            &SupervisorMessage::Hello {
+                server_id: server.to_string(),
+                token: "a-token".to_owned(),
+                pid: 4242,
+                protocol: craftpanel_proto::HELPER_PROTOCOL_VERSION,
+            },
+        )
+        .await;
+        let greeting = reader.next_line().await.expect("a line").expect("the hub answers");
+        assert!(greeting.contains("accepted"), "{greeting}");
+        assert_eq!(next_message(&mut events, "state").await["power_state"], "running");
+
+        say(
+            &mut writer,
+            &SupervisorMessage::Exited { code: Some(143), signal: None, oom_killed: false },
+        )
+        .await;
+
+        let state = next_message(&mut events, "state").await;
+        assert_eq!(state["power_state"], "stopped", "the installer asked for this ending");
+        assert_eq!(state["oom_killed"], false);
+
+        following.abort();
+        listening.abort();
+    }
+
+    #[tokio::test]
     async fn the_first_state_of_a_server_nobody_supervises_is_stopped() {
         let (operations, _dir, pool) = testing::operations().await;
         let owner = testing::a_user(&pool, PanelRole::User).await;

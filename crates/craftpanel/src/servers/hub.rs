@@ -205,13 +205,7 @@ impl Hub {
                 *link.state.write().await = RunState::Running;
             }
             SupervisorMessage::Exited { code, signal, oom_killed } => {
-                let next = if oom_killed {
-                    RunState::OutOfMemory
-                } else if code == Some(0) {
-                    RunState::Stopped
-                } else {
-                    RunState::Crashed
-                };
+                let next = RunState::after_exit(code, signal, oom_killed);
                 tracing::info!(server = %link.server_id, ?code, ?signal, ?next, "server ended");
                 *link.state.write().await = next;
             }

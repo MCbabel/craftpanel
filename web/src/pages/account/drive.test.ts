@@ -14,6 +14,8 @@ function status(over: Partial<DriveStatus> = {}): DriveStatus {
 		folder_name: 'craftpanel-backups',
 		storage_limit_bytes: 16_106_127_360,
 		storage_usage_bytes: 2_147_483_648,
+		uploaded_today_bytes: 0,
+		daily_upload_limit_bytes: 750_000_000_000,
 		link: null,
 		last_error: null,
 		checked_at: '2026-08-13T10:00:30Z',
@@ -64,6 +66,29 @@ describe('The Drive section of the account page', () => {
 
 		expect(view.stage).toBe('unconnected')
 		expect(view.link).toBeNull()
+	})
+
+	it('carries the day\u2019s bytes so a stopped backup has a figure behind it', () => {
+		const busy = driveView(status({ uploaded_today_bytes: 675_000_000_000 }))
+
+		expect(busy.day.sentBytes).toBe(675_000_000_000)
+		expect(busy.day.limitBytes).toBe(750_000_000_000)
+		expect(busy.day.closing).toBe(true)
+		expect(busy.day.spent).toBe(false)
+	})
+
+	it('says the day is spent instead of leaving the bar at almost full', () => {
+		const spent = driveView(status({ uploaded_today_bytes: 750_000_000_000 }))
+
+		expect(spent.day.spent).toBe(true)
+		expect(spent.day.freeBytes).toBe(0)
+		expect(spent.day.share).toBe(1)
+		expect(spent.broken).toBe(false)
+	})
+
+	it('shows no day at all while the page is still loading', () => {
+		expect(driveView(null).day.spent).toBe(false)
+		expect(driveView(null).day.limitBytes).toBe(0)
 	})
 
 	it('shows a withdrawn access as connected and broken', () => {

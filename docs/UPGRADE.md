@@ -1,16 +1,29 @@
 # Upgrade from the old name
 
-As of 2026-08-15. **An installation still called `mcpanel` becomes CraftPanel on the next run of
-`install.sh`: the same worlds, the same database, the same uids.**
+As of 2026-08-24. **An installation still called `mcpanel` can be moved to CraftPanel by
+`install.sh` — the same worlds, the same database, the same uids — and it is moved only when
+somebody has said so. Not by itself, and not on Enter.**
 
-`install.sh` recognizes the old installation, says what it is going to do and asks once; Enter
-means yes. A run without a terminal (`CRAFTPANEL_NONINTERACTIVE=1`, `curl … | bash` in a script)
-**does not upgrade**: it says that it is leaving the old installation alone and carries on with
-the usual install. If you want the upgrade unattended, set `CRAFTPANEL_UPGRADE=yes`.
+`install.sh` recognizes the old installation and first writes down what moving it would do:
+**every Minecraft server it is running is told to save and shut down, and stays stopped**, and
+**that installation is renamed** — data directory, configuration, both services, every account,
+from `mcpanel` to `craftpanel`. Then it asks, and **the default is no**. A run where somebody only
+presses Enter leaves the old installation running and untouched and goes on to install CraftPanel
+beside it. Moving it takes a typed `y`, or `CRAFTPANEL_UPGRADE=yes` — which is also the only way
+in a run without a terminal (`CRAFTPANEL_NONINTERACTIVE=1`, `curl … | bash` in a script), where
+the installer says it is leaving `mcpanel` alone and carries on with the ordinary install.
 
 That is deliberate: on one machine the installation people use and a second one for trying things
-out may stand side by side (`scripts/acceptance.sh` does exactly that). An upgrade stops
-Minecraft servers; that happens only when somebody has said so.
+out may stand side by side (`scripts/acceptance.sh` does exactly that). What is on the other side
+of that question is somebody else's servers going down and somebody else's installation losing
+its name. One keystroke is not enough to ask for that.
+
+**Once CraftPanel is installed on this machine, the question is not asked at all any more.** Two
+accounts of the same purpose cannot both own the files, so the pre-check (section 2, step 1) would
+refuse the move; a run that asked anyway would be asking for an answer it could not carry out.
+Such a run says in one line that something under the old name is still there, points here, and
+goes on with the ordinary update. `CRAFTPANEL_UPGRADE=yes` still forces the attempt, and then the
+pre-check names which of the two has to be cleared up first.
 
 ---
 
@@ -56,8 +69,9 @@ the worlds.
 8. **Rename every `mcp-` account and its group.** The home directory is derived from the existing
    entry (only `/var/lib/mcpanel` → `/var/lib/craftpanel`), **not** from the account name: the id
    in the name is lower-case, the directory carries it upper-case.
-9. **Move the configuration** and replace the names in it. The bind address, the port range and
-   everything else stay as the operator set them.
+9. **Move the configuration** and replace the names in it. The bind address, the data directory and
+   everything else stay as the operator set them. The range the servers' ports come out of is not in
+   that file — it is a panel setting and moves with `panel.db`.
 10. **Write the units, take the drop-ins along.** The installer writes the two unit files anew,
     they are its own. The drop-ins are not: they belong to the operator and move one by one; in
     file name and content only `MCPANEL_` → `CRAFTPANEL_`, `MCPanel` → `CraftPanel`,
@@ -113,7 +127,10 @@ unchanged: if the operator has entered something of his own there, it stays.
 Every step first asks whether it still has anything to do. After a successful upgrade `install.sh`
 finds nothing old any more and offers the usual **update / uninstall** again. If a run breaks off
 in the middle, the next one carries on from there: no step is run twice, and none assumes that
-the previous one has just run.
+the previous one has just run. And if something under the old name is left standing on purpose —
+a stray `mcp-` account, a directory nobody cleared away — it is not turned into a question on
+every update run: CraftPanel is installed by then, and the last paragraph at the top of this
+document says why that settles it.
 
 The upgrade aborts instead of carrying on half finished when: a server does not stop, a service
 does not stay down, a target name is already taken, both data directories contain data, `usermod`

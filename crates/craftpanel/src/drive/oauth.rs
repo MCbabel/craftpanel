@@ -1,9 +1,13 @@
 use std::fmt;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
+
+use futures::future::BoxFuture;
 
 use crate::model::{DriveLinkState, Timestamp};
 
 use super::http::{DriveError, Http, Result};
+use super::retry::Waiting;
 
 pub const SCOPE: &str = "https://www.googleapis.com/auth/drive.file";
 
@@ -44,7 +48,10 @@ pub struct Credentials {
 pub struct Access {
     token: Secret,
     expires_at: Timestamp,
+    minted: u64,
 }
+
+static MINTED: AtomicU64 = AtomicU64::new(0);
 
 impl Access {
     pub fn expose(&self) -> &str {
@@ -55,6 +62,16 @@ impl Access {
         now.as_datetime() + time::Duration::seconds(EARLY.as_secs() as i64)
             < self.expires_at.as_datetime()
     }
+
+    pub fn newer_than(&self, other: &Self) -> bool {
+        self.minted > other.minted
+    }
+}
+
+pub trait Bearer: Sync {
+    fn token(&self) -> BoxFuture<'_, Result<Access>>;
+
+    fn renew<'a>(&'a self, stale: &'a Access) -> BoxFuture<'a, Result<Access>>;
 }
 
 #[derive(Debug, Clone)]
@@ -139,9 +156,15 @@ pub struct Tokens {
     pub access: Access,
 }
 
-pub async fn refresh(http: &Http, credentials: &Credentials, token: &Secret) -> Result<Access> {
+pub async fn refresh(
+    http: &Http,
+    credentials: &Credentials,
+    token: &Secret,
+    over: &Waiting<'_>,
+) -> Result<Access> {
     let answer: TokenAnswer = http
-        .form(
+        .form_again(
+            over,
             "/token",
             &[
                 ("client_id", &credentials.client_id),
@@ -168,7 +191,11 @@ pub async fn revoke(http: &Http, token: &Secret) -> Result<()> {
 fn access_of(answer: &TokenAnswer) -> Result<Access> {
     let token = Secret::parse(&answer.access_token)
         .ok_or_else(|| DriveError::Unreadable("Google sent an empty access token".to_owned()))?;
-    Ok(Access { token, expires_at: in_seconds(answer.expires_in.unwrap_or(3600).max(0)) })
+    Ok(Access {
+        token,
+        expires_at: in_seconds(answer.expires_in.unwrap_or(3600).max(0)),
+        minted: MINTED.fetch_add(1, Ordering::Relaxed),
+    })
 }
 
 fn in_seconds(seconds: i64) -> Timestamp {

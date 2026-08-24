@@ -58,6 +58,41 @@ impl Keys {
         tokio::fs::metadata(self.refresh_token_path(user)).await.ok()?.modified().ok()
     }
 
+    pub fn sessions_dir(&self, user: Id) -> PathBuf {
+        self.user_dir(user).join("sessions")
+    }
+
+    pub fn session_path(&self, user: Id, backup: Id) -> PathBuf {
+        self.sessions_dir(user).join(backup.to_string())
+    }
+
+    pub async fn read_session(&self, user: Id, backup: Id) -> Option<Secret> {
+        read(&self.session_path(user, backup)).await
+    }
+
+    pub async fn write_session(&self, user: Id, backup: Id, address: &Secret) -> io::Result<()> {
+        tokio::fs::create_dir_all(self.user_dir(user)).await?;
+        set_mode(&self.user_dir(user), 0o700).await?;
+        write(&self.sessions_dir(user), &self.session_path(user, backup), address).await
+    }
+
+    pub async fn forget_session(&self, user: Id, backup: Id) -> io::Result<()> {
+        forget(&self.session_path(user, backup)).await
+    }
+
+    pub async fn sessions_of(&self, user: Id) -> Vec<Id> {
+        let Ok(mut entries) = tokio::fs::read_dir(self.sessions_dir(user)).await else {
+            return Vec::new();
+        };
+        let mut held = Vec::new();
+        while let Ok(Some(entry)) = entries.next_entry().await {
+            if let Some(backup) = entry.file_name().to_str().and_then(|name| name.parse().ok()) {
+                held.push(backup);
+            }
+        }
+        held
+    }
+
     pub async fn forget_user(&self, user: Id) -> io::Result<()> {
         match tokio::fs::remove_dir_all(self.user_dir(user)).await {
             Err(err) if err.kind() == io::ErrorKind::NotFound => Ok(()),
@@ -168,5 +203,54 @@ mod tests {
         keys.forget_user(ben).await.expect("removing Ben's directory");
         assert!(!keys.user_dir(ben).exists());
         keys.forget_user(ben).await.expect("twice is not an error");
+    }
+
+    #[tokio::test]
+    async fn an_upload_address_is_kept_as_tightly_as_a_token() {
+        let scratch = Scratch::new();
+        let keys = Keys::in_dir(&scratch.0);
+        let (anna, backup) = (Id::new(), Id::new());
+        let address =
+            Secret::parse("https://www.googleapis.com/upload/drive/v3/files?upload_id=ADPycd")
+                .expect("an address");
+
+        assert!(keys.read_session(anna, backup).await.is_none(), "nothing is under way");
+        assert!(keys.sessions_of(anna).await.is_empty());
+
+        keys.write_session(anna, backup, &address).await.expect("keeping it");
+
+        assert_eq!(mode(&keys.user_dir(anna)), 0o700, "the account directory");
+        assert_eq!(mode(&keys.sessions_dir(anna)), 0o700, "the sessions directory");
+        assert_eq!(mode(&keys.session_path(anna, backup)), 0o600, "the address itself");
+        assert_eq!(
+            keys.read_session(anna, backup).await.expect("an address").expose(),
+            address.expose()
+        );
+        assert_eq!(keys.sessions_of(anna).await, vec![backup]);
+
+        keys.forget_session(anna, backup).await.expect("letting go");
+        assert!(keys.read_session(anna, backup).await.is_none());
+        keys.forget_session(anna, backup).await.expect("twice is not an error");
+    }
+
+    #[tokio::test]
+    async fn letting_go_of_an_account_lets_go_of_its_open_uploads() {
+        let scratch = Scratch::new();
+        let keys = Keys::in_dir(&scratch.0);
+        let (anna, backup) = (Id::new(), Id::new());
+
+        keys.write_refresh_token(anna, &Secret::parse("1//anna").expect("a token"))
+            .await
+            .expect("Anna's token");
+        keys.write_session(anna, backup, &Secret::parse("https://upload").expect("an address"))
+            .await
+            .expect("Anna's session");
+
+        keys.forget_user(anna).await.expect("removing her directory");
+        assert!(
+            keys.read_session(anna, backup).await.is_none(),
+            "an address that outlives the account it writes for is a key left in a door"
+        );
+        assert!(keys.sessions_of(anna).await.is_empty());
     }
 }

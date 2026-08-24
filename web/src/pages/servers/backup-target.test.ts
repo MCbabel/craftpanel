@@ -6,20 +6,24 @@ import {
 	backupImpossible,
 	driveFactsOf,
 	needsOwnersDrive,
+	noLongerOurs,
 	notRestorable,
 	openableInDrive,
 	targetIsChoosable,
+	unconfirmed,
 } from './backup-target'
 
 function target(over: Partial<BackupTarget> = {}): BackupTarget {
 	return { target: 'local', effective_target: 'local', policy: 'user_choice', reason: 'ok', ...over }
 }
 
-describe('The three fields on a row', () => {
+describe('The four fields on a row', () => {
 	it('reads a row without the fields as local', () => {
 		expect(driveFactsOf({ id: 'a', name: 'old' })).toEqual({
 			location: 'local',
 			state: null,
+			verified: null,
+			contentChanged: false,
 			webLink: null,
 		})
 		expect(driveFactsOf(null).location).toBe('local')
@@ -27,20 +31,66 @@ describe('The three fields on a row', () => {
 		expect(driveFactsOf('nonsense').location).toBe('local')
 	})
 
-	it('reads place, state and link when they are there', () => {
+	it('reads place, state, confirmation and link when they are there', () => {
 		const facts = driveFactsOf({
 			location: 'drive',
 			drive_state: 'present',
+			drive_verified: true,
 			drive_web_link: 'https://drive.google.com/file/d/abc/view',
 		})
 
 		expect(facts).toEqual({
 			location: 'drive',
 			state: 'present',
+			verified: true,
+			contentChanged: false,
 			webLink: 'https://drive.google.com/file/d/abc/view',
 		})
 		expect(openableInDrive(facts)).toBe(true)
 		expect(notRestorable(facts)).toBe(false)
+		expect(unconfirmed(facts)).toBe(false)
+		expect(noLongerOurs(facts)).toBe(false)
+	})
+
+	it('says out loud which file in the Drive is no longer the backup', () => {
+		const swapped = driveFactsOf({
+			location: 'drive',
+			drive_state: 'present',
+			drive_verified: true,
+			drive_content_changed: true,
+		})
+		expect(noLongerOurs(swapped)).toBe(true)
+		expect(unconfirmed(swapped)).toBe(false)
+
+		const sound = driveFactsOf({
+			location: 'drive',
+			drive_state: 'present',
+			drive_verified: true,
+			drive_content_changed: false,
+		})
+		expect(noLongerOurs(sound)).toBe(false)
+
+		const olderPanel = driveFactsOf({ location: 'drive', drive_state: 'present' })
+		expect(olderPanel.contentChanged).toBe(false)
+		expect(noLongerOurs(olderPanel)).toBe(false)
+		expect(noLongerOurs(driveFactsOf({ id: 'a' }))).toBe(false)
+	})
+
+	it('says out loud which backup nobody has confirmed', () => {
+		const nothingChecked = driveFactsOf({
+			location: 'drive',
+			drive_state: 'present',
+			drive_verified: false,
+		})
+		expect(unconfirmed(nothingChecked)).toBe(true)
+
+		const olderPanel = driveFactsOf({ location: 'drive', drive_state: 'present' })
+		expect(olderPanel.verified).toBeNull()
+		expect(unconfirmed(olderPanel)).toBe(false)
+
+		const uploading = driveFactsOf({ location: 'drive', drive_state: null, drive_verified: false })
+		expect(unconfirmed(uploading)).toBe(false)
+		expect(unconfirmed(driveFactsOf({ id: 'a' }))).toBe(false)
 	})
 
 	it('does not take a state the contract does not know', () => {

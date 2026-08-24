@@ -1,0 +1,13 @@
+{
+  "error": {
+    "errors": [
+      {
+        "domain": "usageLimits",
+        "reason": "sharingRateLimitExceeded",
+        "message": "Rate limit exceeded. User message: \"Sorry, you have exceeded your sharing quota.\""
+      }
+    ],
+    "code": 403,
+    "message": "Rate limit exceeded."
+  }
+}

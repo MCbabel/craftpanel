@@ -53,6 +53,12 @@
   "account.drive.connected-intro": {
     "defaultMessage": "Deine Sicherungen wandern in dein eigenes Drive. Dort kannst du sie selbst öffnen, herunterladen und löschen."
   },
+  "account.drive.day-full.body": {
+    "defaultMessage": "Google nimmt von einem Konto 750 GB am Tag an. Sicherungen in dein Drive hören hier auf, statt gegen eine Wand zu laufen; ein halb geschicktes Archiv bleibt liegen und wird dort fortgesetzt, wo es aufgehört hat, sobald Google wieder annimmt. Wann das ist, schreibt Google nicht auf — dieses Panel zählt den Tag ab Mitternacht UTC."
+  },
+  "account.drive.day-full.header": {
+    "defaultMessage": "Der heutige Anteil bei Google ist aufgebraucht"
+  },
   "account.drive.disconnect": {
     "defaultMessage": "Verbindung trennen"
   },
@@ -79,6 +85,18 @@
   },
   "account.drive.fact.account-unknown": {
     "defaultMessage": "Noch nicht bekannt"
+  },
+  "account.drive.fact.day": {
+    "defaultMessage": "Heute zu Google geschickt"
+  },
+  "account.drive.fact.day-free": {
+    "defaultMessage": "Google nimmt von diesem Konto heute noch {free} an."
+  },
+  "account.drive.fact.day-spent": {
+    "defaultMessage": "Google nimmt von diesem Konto heute nichts mehr an."
+  },
+  "account.drive.fact.day-value": {
+    "defaultMessage": "{sent} von {limit}"
   },
   "account.drive.fact.folder": {
     "defaultMessage": "Ordner"
@@ -314,6 +332,9 @@
   "admin.drive.column.checked": {
     "defaultMessage": "Zuletzt geprüft"
   },
+  "admin.drive.column.day": {
+    "defaultMessage": "Heute geschickt"
+  },
   "admin.drive.column.state": {
     "defaultMessage": "Zustand"
   },
@@ -337,6 +358,9 @@
   },
   "admin.drive.cut.files": {
     "defaultMessage": "Seine Sicherungen bleiben in seinem Drive. Es gibt hier keinen Knopf, der Dateien in fremdem Speicher löscht, und das ist Absicht — er kann sie sehen und selbst wegwerfen."
+  },
+  "admin.drive.day-value": {
+    "defaultMessage": "{sent} von {limit}"
   },
   "admin.drive.folder-hint": {
     "defaultMessage": "Der Ordner, den das Panel im Drive jedes Nutzers anlegt. Benennst du ihn hier um, werden bereits vorhandene Ordner nicht umbenannt."
@@ -1967,6 +1991,15 @@
   "craftpanel.access.role-viewer-description": {
     "defaultMessage": "Der Konsole zusehen und den Server starten oder stoppen. Keine Änderungen."
   },
+  "craftpanel.backups.abuse-fetch-anyway": {
+    "defaultMessage": "Risiko annehmen und trotzdem holen"
+  },
+  "craftpanel.backups.abuse-header": {
+    "defaultMessage": "Google führt dieses Archiv als schädlich"
+  },
+  "craftpanel.backups.abuse-warning": {
+    "defaultMessage": "Google hat dieses Archiv geprüft und nennt es Schadsoftware oder Spam. Es wird nur herausgegeben, wenn du ausdrücklich sagst, dass du das Risiko eines möglicherweise schädlichen Downloads auf dich nimmst. Wenn du keine verdächtige Mod und kein verdächtiges Plugin eingepackt hast, stelle lieber eine ältere Sicherung wieder her."
+  },
   "craftpanel.backups.action-failed": {
     "defaultMessage": "Die Aktion wurde abgelehnt"
   },
@@ -1975,6 +2008,12 @@
   },
   "craftpanel.backups.busy": {
     "defaultMessage": "Es läuft bereits eine Sicherung."
+  },
+  "craftpanel.backups.carry-on-fetching": {
+    "defaultMessage": "Ein Abbruch muss hier nicht von vorn anfangen: Solange sich das Archiv im Drive nicht geändert hat, bleibt liegen, was schon auf der Platte ist, und das Panel holt nur den Rest."
+  },
+  "craftpanel.backups.carry-on-sending": {
+    "defaultMessage": "Ein Abbruch muss hier nicht von vorn anfangen: Solange Google das halb geschickte Archiv noch hält, fragt das Panel nach, wie weit es gekommen ist, und schickt nur den Rest."
   },
   "craftpanel.backups.clear-selection": {
     "defaultMessage": "Auswahl aufheben"
@@ -2000,11 +2039,17 @@
   "craftpanel.backups.drive-broken.not-connected-owner": {
     "defaultMessage": "Du musst ein Google-Konto verbinden, bevor dieser Server gesichert werden kann: seine Sicherungen gehen in dein Google Drive, und solange keines verbunden ist, schlägt jede Sicherung dieses Servers fehl."
   },
+  "craftpanel.backups.drive-changed-hint": {
+    "defaultMessage": "Die Datei in deinem Google Drive ist nicht mehr das Archiv, das das Panel dort abgelegt hat — irgendetwas hat sie seither überschrieben. Von hier ist sie nicht wiederherstellbar."
+  },
   "craftpanel.backups.drive-connect": {
     "defaultMessage": "Google Drive verbinden"
   },
   "craftpanel.backups.drive-gone-hint": {
     "defaultMessage": "Leg sie in deinem Drive zurück, um sie von hier wiederherzustellen."
+  },
+  "craftpanel.backups.drive-unconfirmed-hint": {
+    "defaultMessage": "Unbestätigt: Google hat keine Prüfsumme genannt, also sagt nichts, dass sie heil angekommen ist."
   },
   "craftpanel.backups.empty-description": {
     "defaultMessage": "Eine Sicherung enthält das ganze Serververzeichnis und lässt sich jederzeit wiederherstellen."
@@ -2068,6 +2113,9 @@
   },
   "craftpanel.backups.selected": {
     "defaultMessage": "{count} ausgewählt"
+  },
+  "craftpanel.backups.state.changed": {
+    "defaultMessage": "Nicht mehr diese Sicherung"
   },
   "craftpanel.backups.state.in-drive": {
     "defaultMessage": "In Google Drive"
@@ -2584,6 +2632,21 @@
   },
   "craftpanel.settings.network.swap-needs-give-back": {
     "defaultMessage": "Solange diese Adresse steht, lässt sich der primäre Port nicht verschieben: wohin der Tunnel zeigt, liegt bei playit.gg und ist von hier nicht zu ändern. Der Besitzer oder ein Panel-Administrator gibt die Adresse auf der Übersichtsseite zurück; bis dahin verweigert das Panel den Wechsel."
+  },
+  "format.decimal-bytes.0": {
+    "defaultMessage": "{count, plural, one {# Byte} other {# Bytes}}"
+  },
+  "format.decimal-bytes.1": {
+    "defaultMessage": "{count, number} kB"
+  },
+  "format.decimal-bytes.2": {
+    "defaultMessage": "{count, number} MB"
+  },
+  "format.decimal-bytes.3": {
+    "defaultMessage": "{count, number} GB"
+  },
+  "format.decimal-bytes.4": {
+    "defaultMessage": "{count, number} TB"
   },
   "panel.copy.failed": {
     "defaultMessage": "Es wurde nichts kopiert"

@@ -15,8 +15,16 @@ The installer asks for the web port, the port range for game servers and an admi
 creates the system accounts and the two systemd units, and prints the generated password **once**.
 
 Run it again and it offers three things: update, uninstall, or nothing. An update leaves running
-Minecraft servers running; see [The supervisor](#the-supervisor). An uninstall asks separately
-whether the worlds and the database should go too.
+Minecraft servers running; see [The supervisor](#the-supervisor). An uninstall asks the running
+servers to save and stop first, then counts what lies in the data directory — worlds, backups,
+playit and Drive keys, fetched Java runtimes, system accounts — and asks separately whether all of
+that goes with it.
+
+Kept data is picked up again. Where an earlier uninstall left `/var/lib/craftpanel` and
+`/etc/craftpanel/config.toml` standing, a later install takes them as they are: it asks nothing the
+configuration already answers, makes no second administrator over a database that has one, and
+names the accounts you sign in with. A password nobody remembers is set from the terminal with
+`craftpanel admin passwd --username NAME --print-password`.
 
 **Requirements:** Linux with systemd and cgroup v2. The installer checks both and says what is
 missing. A Java runtime is no longer one of them: the panel fetches the one a game version needs —

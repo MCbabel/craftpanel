@@ -25,6 +25,8 @@ export interface DriveStatus {
 	folder_name: string
 	storage_limit_bytes: number | null
 	storage_usage_bytes: number | null
+	uploaded_today_bytes: number
+	daily_upload_limit_bytes: number
 	link: DriveLink | null
 	last_error: string | null
 	checked_at: Rfc3339 | null
@@ -37,6 +39,8 @@ export interface DriveOverview {
 	google_email: string | null
 	storage_limit_bytes: number | null
 	storage_usage_bytes: number | null
+	uploaded_today_bytes: number
+	daily_upload_limit_bytes: number
 	backups: number
 	backup_bytes: number
 	last_error: string | null
@@ -198,4 +202,14 @@ export function storageShare(status: DriveStatus | DriveOverview): number | null
 	const limit = status.storage_limit_bytes
 	if (limit === null || limit <= 0) return null
 	return Math.min(1, Math.max(0, (status.storage_usage_bytes ?? 0) / limit))
+}
+
+export function dayShare(status: DriveStatus | DriveOverview): number {
+	const limit = status.daily_upload_limit_bytes
+	if (limit <= 0) return 0
+	return Math.min(1, Math.max(0, status.uploaded_today_bytes / limit))
+}
+
+export function dayLeft(status: DriveStatus | DriveOverview): number {
+	return Math.max(0, status.daily_upload_limit_bytes - status.uploaded_today_bytes)
 }

@@ -440,7 +440,7 @@ fewer:
 | 12 fields `UserProfileContext` | `UserProfilePageLayout` is never embedded | harmless |
 
 `BrowseManagerContext` is the place where a naive comparison throws 18 false alarms:
-`browse-manager.ts:525` spreads the result of Modrinth's `useBrowseSearch` in with
+`browse-manager.ts:453` spreads the result of Modrinth's `useBrowseSearch` in with
 `...searchState`. Search only for keys in the file and you report `totalHits`, `setPage`,
 `currentPage` and fifteen more as missing. They are there.
 

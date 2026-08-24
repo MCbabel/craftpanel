@@ -1,0 +1,33 @@
+-- Section 22: what went up gets checked against what came back.
+--
+-- The answer to a finished resumable upload carries the metadata of the file
+-- Google now holds, and with it, when Google names one, the checksum of what it
+-- stored ("md5Checksum: Output only. The MD5 checksum for the content of the
+-- file"). Until now that answer was read and thrown away — drive/mod.rs turned
+-- the whole reply into `Ok(uploaded.id)`. A mangled upload therefore counted as a
+-- backup, and it would have come out at the one moment that must not fail: the
+-- restore. The other direction has always checked (a download whose md5 differs
+-- is deleted on the spot), so this column closes the circle.
+--
+-- NULL is not a hidden "not yet". It is the visible state *nobody confirmed this
+-- one*, and the panel shows it (`Backup.drive_verified`). Google promises no
+-- checksum for a session it has just finished: the guide says the last chunk is
+-- answered "along with any metadata associated with the resource" and names not
+-- one field (developers.google.com/workspace/drive/api/guides/manage-uploads),
+-- and the reference gives each checksum a condition instead of a promise — the
+-- MD5 "is only applicable to files with binary content in Google Drive", the
+-- SHA-256 is there "if available"
+-- (developers.google.com/workspace/drive/api/reference/rest/v3/files). So an
+-- upload can finish with nothing to compare against; passing that off as sound
+-- would repeat the very fault this column fixes, one floor higher. Every row
+-- uploaded before this migration is exactly that case, which is why there is no
+-- backfill and can be none: their contents really never were checked.
+--
+-- Deliberately not a value of `drive_state`. That column says whether the file is
+-- still in the user's Drive and the hourly sweep rewrites it every round; a
+-- confirmation is a fact about one moment of one upload and has to survive the
+-- sweep. The two answer different questions, so they are two columns.
+--
+-- Lower-case hex, the way Google writes it and the way hex::encode writes ours.
+
+ALTER TABLE backups ADD COLUMN drive_md5 TEXT;

@@ -353,6 +353,7 @@ export type AfterPageQuery = { page_size?: number; after?: string }
 
 export type ServerListQuery = { scope?: 'visible' | 'all' }
 export type DeleteServerQuery = { keep_backups?: boolean }
+export type RetryBackupQuery = { acknowledge_abuse?: boolean }
 export type UserSearchQuery = { query: string; limit?: number }
 export type AllOperationsQuery = BeforePageQuery & { state?: 'active' | 'all'; server_id?: Ulid[] }
 export type ServerOperationsQuery = BeforePageQuery & {
@@ -920,9 +921,15 @@ const backups = {
 			},
 		),
 
-	retry: (serverId: Ulid, backupId: Ulid, options: Cancellable = {}) =>
+	retry: (
+		serverId: Ulid,
+		backupId: Ulid,
+		query: RetryBackupQuery = {},
+		options: Cancellable = {},
+	) =>
 		requestJson<RetryBackupResponse>(serverPath(serverId, `/backups/${segment(backupId)}/retry`), {
 			method: 'POST',
+			query,
 			signal: options.signal,
 		}),
 

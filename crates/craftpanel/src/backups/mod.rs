@@ -83,6 +83,7 @@ pub struct Backups {
     helper: Helper,
     disks: Disks,
     drive: Arc<Drive>,
+    warned: std::sync::Mutex<std::collections::BTreeSet<Id>>,
 }
 
 impl Backups {
@@ -103,6 +104,7 @@ impl Backups {
             helper,
             disks,
             drive,
+            warned: std::sync::Mutex::default(),
         })
     }
 
@@ -401,6 +403,7 @@ impl Backups {
         }
 
         let path = self.archive_of(server, backup);
+        crate::drive::drop_the_part(&with_suffix(&path, ".part")).await;
         if let Err(err) = tokio::fs::remove_file(&path).await {
             if err.kind() != std::io::ErrorKind::NotFound {
                 tracing::warn!("{} stays behind: {err}", path.display());
@@ -451,6 +454,14 @@ impl Backups {
             }
             _ => {}
         }
+        if source.drive_content_changed_at.is_some() {
+            return Err(Failure::conflict(
+                "backup_not_restorable",
+                "the file of this backup in your Google Drive is no longer the archive the panel \
+                 put there; whatever lies under it now is not this backup and will not be \
+                 unpacked over your world",
+            ));
+        }
         self.operations.guard_write(server).await.map_err(relay)?;
         self.check_quota(server, 1).await?;
         self.check_space(server).await?;
@@ -476,7 +487,13 @@ impl Backups {
         })
     }
 
-    pub async fn retry(self: &Arc<Self>, server: Id, backup: Id, by: Id) -> Result<RetryAccepted> {
+    pub async fn retry(
+        self: &Arc<Self>,
+        server: Id,
+        backup: Id,
+        by: Id,
+        acknowledge_abuse: bool,
+    ) -> Result<RetryAccepted> {
         let row = self.mine(server, backup).await?;
         let last = store::newest_run(&self.pool, backup)
             .await?
@@ -491,10 +508,12 @@ impl Backups {
 
         match last.operation_type {
             BackupOperationType::Create => {
-                self.check_space(server).await?;
-
                 let path = self.archive_of(server, backup);
-                tokio::fs::remove_file(&path).await.ok();
+                if self.drive.resumable(backup, &path, Timestamp::now()).await.is_none() {
+                    self.check_space(server).await?;
+                    self.drive.forget_session(backup).await;
+                    tokio::fs::remove_file(&path).await.ok();
+                }
 
                 let mut new = NewOperation::new(server, OperationKind::BackupCreate, Some(by));
                 new.target_id = Some(backup);
@@ -537,6 +556,9 @@ impl Backups {
                             return Err(failure);
                         }
                     }
+                }
+                if acknowledge_abuse {
+                    self.warned.lock().expect("the abuse lock").insert(restore.id);
                 }
 
                 self.spawn(restore.id);
@@ -581,9 +603,22 @@ impl Backups {
             Turn::Gone => return,
         }
 
-        let outcome = match self.pack(id, server, backup).await {
-            Ok(size) => self.deliver(id, server, backup, size).await.map(|_| ()),
-            Err(other) => Err(other),
+        let archive = self.archive_of(server, backup);
+        let carried = self.drive.resumable(backup, &archive, Timestamp::now()).await;
+        if let Some(size) = carried {
+            tracing::info!(
+                %server, %backup, size,
+                "the archive of an interrupted upload is still here and is being carried on \
+                 instead of packed again"
+            );
+        }
+
+        let outcome = match carried {
+            Some(size) => self.deliver(id, server, backup, size).await.map(|_| ()),
+            None => match self.pack(id, server, backup).await {
+                Ok(size) => self.deliver(id, server, backup, size).await.map(|_| ()),
+                Err(other) => Err(other),
+            },
         };
 
         match outcome {
@@ -591,12 +626,14 @@ impl Backups {
                 let _ = self.operations.finish(id).await;
             }
             Err(Ended::CalledOff) => {
-                tokio::fs::remove_file(self.archive_of(server, backup)).await.ok();
+                self.drive.forget_session(backup).await;
+                tokio::fs::remove_file(&archive).await.ok();
                 self.forget(server, backup).await.ok();
                 let _ = self.operations.cancelled(id).await;
             }
             Err(Ended::Failed(error)) => {
-                tokio::fs::remove_file(self.archive_of(server, backup)).await.ok();
+                self.drive.forget_session(backup).await;
+                tokio::fs::remove_file(&archive).await.ok();
                 let _ = self.operations.fail(id, error).await;
             }
         }
@@ -627,15 +664,22 @@ impl Backups {
             .await;
         watcher.abort();
 
-        let file_id = match uploaded {
-            Ok(file_id) => file_id,
+        let stored = match uploaded {
+            Ok(stored) => stored,
             Err(crate::drive::http::DriveError::Cancelled) => return Err(Ended::CalledOff),
             Err(err) => return Err(Ended::drive(&err)),
         };
 
-        store::finish_upload(&self.pool, backup, &file_id, size, Timestamp::now())
-            .await
-            .map_err(|_| Ended::gone())?;
+        store::finish_upload(
+            &self.pool,
+            backup,
+            &stored.file_id,
+            size,
+            stored.md5.as_deref(),
+            Timestamp::now(),
+        )
+        .await
+        .map_err(|_| Ended::gone())?;
         if let Err(err) = tokio::fs::remove_file(&archive).await {
             if err.kind() != std::io::ErrorKind::NotFound {
                 tracing::warn!("{} stays behind after the upload: {err}", archive.display());
@@ -750,6 +794,7 @@ impl Backups {
                 let _ = self.operations.fail(id, error).await;
             }
         }
+        self.warned.lock().expect("the abuse lock").remove(&id);
         self.announce(server).await;
     }
 
@@ -902,17 +947,27 @@ impl Backups {
         let progress = Arc::new(archive::Progress::default());
         let watcher =
             self.watch_between(id, Arc::clone(&progress), known.bytes().unwrap_or(0), 0.0, 0.39);
-        let brought = self.drive.fetch_archive(server, &file_id, &part, &progress).await;
+        let warned = self.warned.lock().expect("the abuse lock").remove(&id);
+        let recorded = crate::drive::Recorded {
+            bytes: (row.size_bytes > 0).then(|| row.size_bytes as u64),
+            md5: row.drive_md5.as_deref(),
+        };
+        let brought = self
+            .drive
+            .fetch_archive(server, &file_id, &part, &progress, recorded, warned)
+            .await;
         watcher.abort();
 
         match brought {
             Ok(_) => {}
             Err(crate::drive::http::DriveError::Cancelled) => {
-                tokio::fs::remove_file(&part).await.ok();
+                crate::drive::drop_the_part(&part).await;
                 return Err(Ended::CalledOff);
             }
             Err(err) => {
-                tokio::fs::remove_file(&part).await.ok();
+                if !worth_carrying_on(&err) {
+                    crate::drive::drop_the_part(&part).await;
+                }
                 return Err(Ended::drive(&err));
             }
         }
@@ -990,6 +1045,7 @@ impl Backups {
                 let step = Step {
                     bytes_processed: Some(progress.bytes()),
                     files_processed: Some(progress.files()),
+                    message: Some(progress.holdup().unwrap_or_default()),
                     progress: (total > 0).then(|| {
                         let share = (progress.done() as f64 / total as f64).clamp(0.0, 1.0);
                         (floor + share * (ceiling - floor)).clamp(floor, ceiling)
@@ -1065,6 +1121,13 @@ impl Backups {
     pub async fn recover(self: &Arc<Self>) -> Result<Vec<Id>> {
         for (server, backup) in store::interrupted_creates(&self.pool).await? {
             let part = self.archive_of(server, backup);
+            if self.drive.resumable(backup, &part, Timestamp::now()).await.is_some() {
+                tracing::info!(
+                    "{} is half in Google's hands already and stays where it is",
+                    part.display()
+                );
+                continue;
+            }
             match tokio::fs::remove_file(&part).await {
                 Ok(()) => tracing::info!("{} was never finished and is gone", part.display()),
                 Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
@@ -1106,7 +1169,13 @@ impl Ended {
             code: code.to_owned(),
             message: err.to_string(),
             step: match code {
-                "drive_unavailable" => OperationErrorStep::Download,
+                "drive_unavailable"
+                | "drive_checksum_mismatch"
+                | "drive_unconfirmed"
+                | "drive_file_replaced"
+                | "drive_abuse_blocked" => {
+                    OperationErrorStep::Download
+                }
                 _ => OperationErrorStep::Filesystem,
             },
         })
@@ -1189,6 +1258,18 @@ pub fn safety_name_for(original: &str) -> String {
 fn shut(dir: &Path) -> std::io::Result<()> {
     use std::os::unix::fs::PermissionsExt;
     std::fs::set_permissions(dir, std::fs::Permissions::from_mode(0o700))
+}
+
+fn worth_carrying_on(err: &crate::drive::http::DriveError) -> bool {
+    use crate::drive::http::DriveError;
+
+    !matches!(
+        err,
+        DriveError::Gone
+            | DriveError::Abusive(_)
+            | DriveError::Unreadable(_)
+            | DriveError::Replaced(_)
+    )
 }
 
 fn with_suffix(path: &Path, suffix: &str) -> PathBuf {

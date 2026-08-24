@@ -8,11 +8,24 @@ pub enum RunState {
     Starting,
     Running,
     Stopping,
+    Terminated,
     Crashed,
     OutOfMemory,
 }
 
 impl RunState {
+    pub fn after_exit(code: Option<i32>, signal: Option<i32>, oom_killed: bool) -> Self {
+        if oom_killed {
+            Self::OutOfMemory
+        } else if code == Some(0) {
+            Self::Stopped
+        } else if signal == Some(libc::SIGTERM) || code == Some(128 + libc::SIGTERM) {
+            Self::Terminated
+        } else {
+            Self::Crashed
+        }
+    }
+
     pub fn is_live(self) -> bool {
         matches!(self, Self::Installing | Self::Starting | Self::Running | Self::Stopping)
     }
@@ -21,11 +34,11 @@ impl RunState {
         use RunState::*;
         match (self, next) {
             (a, b) if a == b => false,
-            (Stopped | Crashed | OutOfMemory, Installing | Starting) => true,
+            (Stopped | Terminated | Crashed | OutOfMemory, Installing | Starting) => true,
             (Installing, Starting | Stopped | Crashed) => true,
-            (Starting, Running | Stopping | Crashed | OutOfMemory | Stopped) => true,
-            (Running, Stopping | Crashed | OutOfMemory | Stopped) => true,
-            (Stopping, Stopped | Crashed | OutOfMemory) => true,
+            (Starting, Running | Stopping | Terminated | Crashed | OutOfMemory | Stopped) => true,
+            (Running, Stopping | Terminated | Crashed | OutOfMemory | Stopped) => true,
+            (Stopping, Stopped | Terminated | Crashed | OutOfMemory) => true,
             _ => false,
         }
     }
@@ -40,6 +53,7 @@ pub struct ConsoleLine {
 
 #[cfg(test)]
 mod tests {
+    use super::RunState;
     use super::RunState::*;
 
     #[test]
@@ -66,15 +80,42 @@ mod tests {
     }
 
     #[test]
+    fn an_ending_the_process_ran_itself_on_a_sigterm_is_no_crash() {
+        assert_eq!(RunState::after_exit(Some(0), None, false), Stopped);
+        assert_eq!(
+            RunState::after_exit(Some(143), None, false),
+            Terminated,
+            "the shutdown hook ran and the jvm left with 128 + SIGTERM"
+        );
+        assert_eq!(
+            RunState::after_exit(None, Some(15), false),
+            Terminated,
+            "and one that carries no handler is ended by the same order"
+        );
+    }
+
+    #[test]
+    fn everything_else_that_ends_badly_is_still_a_crash() {
+        assert_eq!(RunState::after_exit(Some(1), None, false), Crashed);
+        assert_eq!(RunState::after_exit(Some(127), None, false), Crashed, "no java on the path");
+        assert_eq!(RunState::after_exit(None, Some(6), false), Crashed, "the jvm aborted");
+        assert_eq!(RunState::after_exit(None, Some(9), false), Crashed, "a SIGKILL from outside");
+        assert_eq!(RunState::after_exit(Some(137), None, false), Crashed, "and one a wrapper saw");
+        assert_eq!(RunState::after_exit(None, Some(9), true), OutOfMemory, "the memory ceiling");
+    }
+
+    #[test]
     fn a_state_never_becomes_itself() {
-        for state in [Stopped, Installing, Starting, Running, Stopping, Crashed, OutOfMemory] {
+        for state in
+            [Stopped, Installing, Starting, Running, Stopping, Terminated, Crashed, OutOfMemory]
+        {
             assert!(!state.can_become(state));
         }
     }
 
     #[test]
     fn a_dead_server_can_only_start_again() {
-        for dead in [Stopped, Crashed, OutOfMemory] {
+        for dead in [Stopped, Terminated, Crashed, OutOfMemory] {
             assert!(dead.can_become(Starting));
             assert!(!dead.can_become(Running));
             assert!(!dead.can_become(Stopping));

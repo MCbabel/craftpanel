@@ -2,6 +2,8 @@ use std::time::Duration;
 
 use serde::de::DeserializeOwned;
 
+use super::retry::{Pace, Setback, Spent, Waiting};
+
 pub const OAUTH: &str = "https://oauth2.googleapis.com";
 pub const API: &str = "https://www.googleapis.com";
 
@@ -24,6 +26,12 @@ pub enum DriveError {
     #[error("Google is turning us away for the moment")]
     RateLimited,
 
+    #[error("Google is holding this account back: {0}")]
+    Throttled(String),
+
+    #[error("this account has sent Google as much as Google takes in a day: {0}")]
+    DayFull(String),
+
     #[error("nobody has confirmed the code yet")]
     Pending { slow_down: bool },
 
@@ -36,14 +44,32 @@ pub enum DriveError {
     #[error("Google does not know that any more")]
     Gone,
 
+    #[error("the upload session ran out at Google and has to be opened again")]
+    SessionOver,
+
+    #[error("Google has this file down as malware or spam: {0}")]
+    Abusive(String),
+
     #[error("Google refused the call: {detail}")]
     Refused { status: u16, reason: String, detail: String },
 
     #[error("the run was called off")]
     Cancelled,
 
+    #[error("another run is already sending this backup to Google")]
+    Busy,
+
     #[error("Google answered in a shape we do not understand: {0}")]
     Unreadable(String),
+
+    #[error("what lies in the Drive is not what left this machine: {0}")]
+    Damaged(String),
+
+    #[error("nothing says what lies in the Drive: {0}")]
+    Unconfirmed(String),
+
+    #[error("the file in the Drive is no longer the archive the panel put there: {0}")]
+    Replaced(String),
 
     #[error("the HTTP client could not be set up: {0}")]
     Setup(String),
@@ -57,6 +83,7 @@ impl DriveError {
     pub fn is_worth_repeating(&self) -> bool {
         match self {
             Self::Unreachable(_) | Self::RateLimited => true,
+            Self::Refused { status: 507, .. } => false,
             Self::Refused { status, .. } => *status >= 500,
             _ => false,
         }
@@ -66,7 +93,15 @@ impl DriveError {
         match self {
             Self::Revoked(_) => "drive_revoked",
             Self::QuotaFull(_) => "drive_quota_exceeded",
+            Self::Throttled(_) => "drive_throttled",
+            Self::DayFull(_) => "drive_day_full",
             Self::Gone => "drive_file_missing",
+            Self::SessionOver => "drive_session_expired",
+            Self::Abusive(_) => "drive_abuse_blocked",
+            Self::Damaged(_) => "drive_checksum_mismatch",
+            Self::Unconfirmed(_) => "drive_unconfirmed",
+            Self::Replaced(_) => "drive_file_replaced",
+            Self::Busy => "drive_busy",
             _ => "drive_unavailable",
         }
     }
@@ -80,24 +115,39 @@ pub struct Http {
     uploads: reqwest::Client,
     oauth: String,
     api: String,
+    pace: Pace,
 }
 
 impl Http {
     pub fn against(oauth: impl Into<String>, api: impl Into<String>) -> Result<Self> {
-        let build = |timeout: Duration| {
+        let build = |timeout: Duration, redirects: reqwest::redirect::Policy| {
             reqwest::Client::builder()
                 .user_agent(AGENT)
                 .connect_timeout(CONNECT_TIMEOUT)
                 .timeout(timeout)
+                .redirect(redirects)
                 .build()
                 .map_err(|err| DriveError::Setup(err.to_string()))
         };
         Ok(Self {
-            client: build(CALL_TIMEOUT)?,
-            uploads: build(CHUNK_TIMEOUT)?,
+            client: build(CALL_TIMEOUT, reqwest::redirect::Policy::default())?,
+            uploads: build(CHUNK_TIMEOUT, reqwest::redirect::Policy::none())?,
             oauth: oauth.into(),
             api: api.into(),
+            pace: if cfg!(test) { Pace::HURRIED } else { Pace::REAL },
         })
+    }
+
+    pub fn briefly<'a>(&self, doing: &'a str) -> Waiting<'a> {
+        Waiting::on(self.pace.brief, doing)
+    }
+
+    pub fn patiently<'a>(&self, doing: &'a str) -> Waiting<'a> {
+        Waiting::on(self.pace.patient, doing)
+    }
+
+    pub fn over_the_run(&self) -> Spent {
+        Spent::of(self.pace.run)
     }
 
     pub fn oauth_url(&self, path: &str) -> String {
@@ -121,22 +171,74 @@ impl Http {
         path: &str,
         fields: &[(&str, &str)],
     ) -> Result<T> {
-        let response = self
-            .client
-            .post(self.oauth_url(path))
-            .header(reqwest::header::CONTENT_TYPE, "application/x-www-form-urlencoded")
-            .body(encode(fields))
-            .send()
-            .await
-            .map_err(unreachable)?;
-
-        let status = response.status().as_u16();
-        let body = response.bytes().await.map_err(unreachable)?;
-        if (200..300).contains(&status) {
-            return read(&body);
-        }
-        Err(oauth_refusal(status, &body))
+        self.form_again(&Waiting::once(), path, fields).await
     }
+
+    pub async fn form_again<T: DeserializeOwned>(
+        &self,
+        over: &Waiting<'_>,
+        path: &str,
+        fields: &[(&str, &str)],
+    ) -> Result<T> {
+        let url = self.oauth_url(path);
+        let form = encode(fields);
+
+        over.keep_trying(|| async {
+            let response = self
+                .client
+                .post(&url)
+                .header(reqwest::header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+                .body(form.clone())
+                .send()
+                .await
+                .map_err(|err| Setback::plain(unreachable(err)))?;
+
+            let status = response.status().as_u16();
+            let after = told_to_wait(response.headers());
+            let body = response.bytes().await.map_err(|err| Setback::plain(unreachable(err)))?;
+            if (200..300).contains(&status) {
+                return read(&body).map_err(Setback::plain);
+            }
+            Err(Setback { error: oauth_refusal(status, &body), after })
+        })
+        .await
+    }
+
+    pub async fn send_again(
+        &self,
+        over: &Waiting<'_>,
+        make: impl Fn() -> reqwest::RequestBuilder,
+    ) -> Result<reqwest::Response> {
+        over.keep_trying(|| async {
+            let response =
+                make().send().await.map_err(|err| Setback::plain(unreachable(err)))?;
+
+            let status = response.status().as_u16();
+            if !worth_a_look(status) {
+                return Ok(response);
+            }
+            let after = told_to_wait(response.headers());
+            let body = response.bytes().await.map_err(|err| Setback::plain(unreachable(err)))?;
+            Err(Setback { error: api_refusal(status, &body), after })
+        })
+        .await
+    }
+}
+
+fn worth_a_look(status: u16) -> bool {
+    status == 403 || status == 429 || status >= 500
+}
+
+pub fn told_to_wait(headers: &reqwest::header::HeaderMap) -> Option<Duration> {
+    let said = headers.get(reqwest::header::RETRY_AFTER)?.to_str().ok()?.trim().to_owned();
+    if let Ok(seconds) = said.parse::<u64>() {
+        return Some(Duration::from_secs(seconds));
+    }
+
+    let when = time::OffsetDateTime::parse(&said, &time::format_description::well_known::Rfc2822)
+        .ok()?;
+    let ahead = when - time::OffsetDateTime::now_utc();
+    (ahead > time::Duration::ZERO).then(|| Duration::from_secs(ahead.whole_seconds() as u64))
 }
 
 pub fn encode(fields: &[(&str, &str)]) -> String {
@@ -228,10 +330,9 @@ pub fn api_refusal(status: u16, body: &[u8]) -> DriveError {
 
     match reason.as_str() {
         "storageQuotaExceeded" => DriveError::QuotaFull(shorten(&detail)),
-        "rateLimitExceeded" | "userRateLimitExceeded" | "sharingRateLimitExceeded" => {
-            DriveError::RateLimited
-        }
-        "uploadLimitExceeded" | "teamDriveFileLimitExceeded" => {
+        "rateLimitExceeded" | "userRateLimitExceeded" => DriveError::RateLimited,
+        "cannotDownloadAbusiveFile" => DriveError::Abusive(shorten(&detail)),
+        "sharingRateLimitExceeded" | "uploadLimitExceeded" | "teamDriveFileLimitExceeded" => {
             DriveError::Refused { status, reason, detail: shorten(&detail) }
         }
         _ if status == 429 => DriveError::RateLimited,
@@ -290,10 +391,37 @@ mod tests {
     }
 
     #[test]
+    fn the_two_403s_google_tells_us_not_to_repeat_are_not_repeated() {
+        let abusive =
+            api_refusal(403, include_bytes!("testdata/cannot_download_abusive_file.json"));
+        assert!(matches!(abusive, DriveError::Abusive(_)), "{abusive:?}");
+        assert!(!abusive.is_worth_repeating(), "only a person can lift this one");
+        assert_eq!(abusive.operation_code(), "drive_abuse_blocked");
+        assert!(abusive.to_string().contains("malware"), "{abusive}");
+
+        let sharing = api_refusal(403, include_bytes!("testdata/sharing_rate_limit_exceeded.json"));
+        assert!(
+            matches!(&sharing, DriveError::Refused { reason, .. }
+                if reason == "sharingRateLimitExceeded"),
+            "{sharing:?}"
+        );
+        assert!(
+            !sharing.is_worth_repeating(),
+            "guides/handle-errors puts sharingRateLimitExceeded among the ones not to retry"
+        );
+    }
+
+    #[test]
     fn the_daily_upload_ceiling_is_not_repeated() {
         let err = api_refusal(403, include_bytes!("testdata/upload_limit_exceeded.json"));
         assert!(matches!(&err, DriveError::Refused { reason, .. } if reason == "uploadLimitExceeded"));
         assert!(!err.is_worth_repeating());
+
+        let full = api_refusal(507, b"{}");
+        assert!(
+            !full.is_worth_repeating(),
+            "22.15 says a Drive with no room left is never asked twice"
+        );
     }
 
     #[test]
@@ -372,6 +500,70 @@ mod tests {
             "/drive/v3/files?alt=media"
         );
         assert_eq!(encode(&[]), "");
+    }
+
+    #[test]
+    fn a_retry_after_is_read_in_both_shapes_google_could_send_it_in() {
+        let header = |value: &str| {
+            let mut headers = reqwest::header::HeaderMap::new();
+            headers.insert(reqwest::header::RETRY_AFTER, value.parse().expect("a header"));
+            headers
+        };
+
+        assert_eq!(told_to_wait(&header("30")), Some(Duration::from_secs(30)));
+        assert_eq!(told_to_wait(&header(" 5 ")), Some(Duration::from_secs(5)));
+        assert_eq!(
+            told_to_wait(&reqwest::header::HeaderMap::new()),
+            None,
+            "Google is not documented to send it at all, and then we pick the wait ourselves"
+        );
+        assert_eq!(told_to_wait(&header("soon")), None, "nonsense is not a wait");
+
+        let ahead = time::OffsetDateTime::now_utc() + time::Duration::seconds(120);
+        let spelled = ahead
+            .format(&time::format_description::well_known::Rfc2822)
+            .expect("a date");
+        let read = told_to_wait(&header(&spelled)).expect("a date is a wait too");
+        assert!(
+            read > Duration::from_secs(60) && read <= Duration::from_secs(120),
+            "a date two minutes out came back as {read:?}"
+        );
+
+        let past = time::OffsetDateTime::now_utc() - time::Duration::hours(1);
+        let spelled = past
+            .format(&time::format_description::well_known::Rfc2822)
+            .expect("a date");
+        assert_eq!(told_to_wait(&header(&spelled)), None, "a date gone by is not a wait");
+    }
+
+    #[test]
+    fn the_answers_that_are_worth_waiting_out_are_the_ones_google_names() {
+        assert!(worth_a_look(403), "a 403 has to be read before it is believed");
+        assert!(worth_a_look(429));
+        assert!(worth_a_look(500) && worth_a_look(503) && worth_a_look(504));
+        assert!(!worth_a_look(308), "a 308 is how a resumable upload carries on");
+        assert!(!worth_a_look(404), "a gone file is an answer, not a bad moment");
+        assert!(!worth_a_look(200) && !worth_a_look(401));
+    }
+
+    #[test]
+    fn the_backoff_this_panel_runs_on_is_the_one_google_writes_down() {
+        let plan = super::super::retry::Backoff::PATIENT;
+        assert_eq!(plan.first, Duration::from_secs(1), "Google's own first step is a second");
+        assert_eq!(plan.ceiling, Duration::from_secs(64), "\"typically 32 or 64 seconds\"");
+        assert!(plan.tries > 1 && plan.tries <= 10, "{} tries", plan.tries);
+        assert!(
+            plan.budget >= Duration::from_secs(60) && plan.budget <= Duration::from_secs(15 * 60),
+            "a run may not hang for {:?}",
+            plan.budget
+        );
+
+        let brief = super::super::retry::Backoff::BRIEF;
+        assert!(
+            brief.budget <= Duration::from_secs(30),
+            "a page waiting on an answer may not be held for {:?}",
+            brief.budget
+        );
     }
 
     #[test]
