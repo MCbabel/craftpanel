@@ -7,7 +7,6 @@ use axum::body::Body;
 use axum::http::header::{CONTENT_TYPE, COOKIE};
 use axum::http::{Request, Response};
 use craftpanel_proto::{HelperErrorCode, HelperOk, HelperRequest, HelperResponse};
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::SqlitePool;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::UnixListener;
@@ -16,20 +15,7 @@ use crate::config::Config;
 use crate::model::{CpuMode, Id, PanelRole, Timestamp, UserLimits};
 use crate::AppState;
 
-pub async fn test_pool() -> SqlitePool {
-    let options = SqliteConnectOptions::new().in_memory(true).foreign_keys(true);
-    let pool = SqlitePoolOptions::new()
-        .max_connections(1)
-        .min_connections(1)
-        .idle_timeout(None)
-        .max_lifetime(None)
-        .connect_with(options)
-        .await
-        .expect("opening the test database");
-
-    sqlx::migrate!("./migrations").run(&pool).await.expect("running the migrations");
-    pool
-}
+pub use crate::ops::testing::schema as test_pool;
 
 pub const PASSWORD: &str = "korrekthorsebatterystaple";
 

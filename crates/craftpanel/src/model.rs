@@ -1499,6 +1499,7 @@ trait WireEnum: Copy + 'static {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ops::testing::schema;
 
     fn snake_case(ident: &str) -> String {
         let mut out = String::new();
@@ -2330,19 +2331,6 @@ mod tests {
             ServerStatus::from_str("suspended").unwrap_err().to_string(),
             "\"suspended\" is not a valid ServerStatus"
         );
-    }
-
-    async fn schema() -> sqlx::SqlitePool {
-        let options = sqlx::sqlite::SqliteConnectOptions::new().in_memory(true).foreign_keys(true);
-        let pool = sqlx::sqlite::SqlitePoolOptions::new()
-            .max_connections(1)
-            .idle_timeout(None)
-            .max_lifetime(None)
-            .connect_with(options)
-            .await
-            .expect("an in-memory database");
-        sqlx::migrate!("./migrations").run(&pool).await.expect("the migrations apply");
-        pool
     }
 
     async fn a_user(pool: &sqlx::SqlitePool, id: Id) {

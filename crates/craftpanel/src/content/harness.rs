@@ -17,19 +17,7 @@ use crate::model::{Id, Timestamp};
 
 pub const FILE_BODY: &[u8] = b"the bytes of a mod jar";
 
-pub async fn schema() -> SqlitePool {
-    let options = sqlx::sqlite::SqliteConnectOptions::new().in_memory(true).foreign_keys(true);
-    let pool = sqlx::sqlite::SqlitePoolOptions::new()
-        .max_connections(1)
-        .min_connections(1)
-        .idle_timeout(None)
-        .max_lifetime(None)
-        .connect_with(options)
-        .await
-        .expect("an in-memory database");
-    sqlx::migrate!("./migrations").run(&pool).await.expect("the migrations apply");
-    pool
-}
+pub use crate::ops::testing::schema;
 
 pub struct DataDir(PathBuf);
 

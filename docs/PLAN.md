@@ -112,11 +112,11 @@ right at the start and the second caller waits its turn instead. Without that th
 `500` where the contract calls for a queue (`crates/craftpanel/src/ops/store.rs:157-164`).
 
 That has a consequence for the tests, and it matters more than it sounds: an in-memory database
-lives only as long as the connection that opened it, so the test pool holds **one** connection, and
-one connection lines every statement up behind the last and hides exactly what two writers do
-to each other. A test about concurrent writers therefore needs a file on disk and several
-connections; otherwise the yardstick comes out of the thing being measured
-(`crates/craftpanel/src/ops/testing.rs:31-48`).
+lives only as long as the connection that opened it, and a pool throws that connection away when
+the run holding it is cut off inside `acquire` — the next statement opens an empty database and
+the test reads `no such table`. So every test gets a **file of its own**, and the pool still holds
+**one** connection, which hides exactly what two writers do to each other: a test about concurrent
+writers needs several connections, or the yardstick comes out of the thing being measured (`crates/craftpanel/src/ops/testing.rs:15-72`).
 
 **Running servers.** Every Minecraft server is a process of its own with a directory of its
 own, whose output is read along and whose input is served. **No Docker**: that would be a

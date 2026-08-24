@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use sqlx::SqlitePool;
@@ -13,16 +13,47 @@ use crate::model::{
 use super::Operations;
 
 pub async fn schema() -> SqlitePool {
-    let options = sqlx::sqlite::SqliteConnectOptions::new().in_memory(true).foreign_keys(true);
+    let options = sqlx::sqlite::SqliteConnectOptions::new()
+        .filename(a_database_of_its_own())
+        .create_if_missing(true)
+        .journal_mode(sqlx::sqlite::SqliteJournalMode::Memory)
+        .page_size(1024)
+        .synchronous(sqlx::sqlite::SqliteSynchronous::Off)
+        .foreign_keys(true);
     let pool = sqlx::sqlite::SqlitePoolOptions::new()
         .max_connections(1)
-        .idle_timeout(None)
-        .max_lifetime(None)
         .connect_with(options)
         .await
-        .expect("an in-memory database");
+        .expect("a database of its own");
     sqlx::migrate!("./migrations").run(&pool).await.expect("the migrations apply");
     pool
+}
+
+fn a_database_of_its_own() -> PathBuf {
+    static DIRECTORY: OnceLock<PathBuf> = OnceLock::new();
+    let directory = DIRECTORY.get_or_init(|| {
+        forget_databases_of_earlier_runs();
+        let path =
+            std::env::temp_dir().join(format!("craftpanel-schemas-{}", std::process::id()));
+        std::fs::create_dir_all(&path).expect("a place for the test databases");
+        path
+    });
+    directory.join(format!("{}.db", COUNTER.fetch_add(1, Ordering::Relaxed)))
+}
+
+fn forget_databases_of_earlier_runs() {
+    let Ok(entries) = std::fs::read_dir(std::env::temp_dir()) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        let Some(pid) = name.strip_prefix("craftpanel-schemas-") else {
+            continue;
+        };
+        if !std::path::Path::new("/proc").join(pid).exists() {
+            std::fs::remove_dir_all(entry.path()).ok();
+        }
+    }
 }
 
 pub async fn busy_schema(dir: &DataDir) -> SqlitePool {
@@ -163,11 +194,42 @@ pub async fn operations() -> (Arc<Operations>, DataDir, SqlitePool) {
 pub async fn cut_off<T>(task: tokio::task::JoinHandle<T>, pool: &SqlitePool) {
     task.abort();
     let _ = task.await;
-    for _ in 0..2_000 {
-        if pool.num_idle() > 0 || pool.size() < pool.options().get_max_connections() {
-            return;
+    pool.acquire().await.expect("a connection back from the run that was cut off");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn a_test_database_outlives_the_connection_a_cut_off_run_was_holding() {
+        let pool = schema().await;
+        let tables = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name";
+        let before: Vec<String> =
+            sqlx::query_scalar(tables).fetch_all(&pool).await.expect("the table list");
+        assert!(before.iter().any(|name| name == "drive_uploads"), "{before:?}");
+
+        for round in 0..200 {
+            let mut running = Vec::new();
+            for _ in 0..8 {
+                let pool = pool.clone();
+                running.push(tokio::spawn(async move {
+                    loop {
+                        let _: Result<(i64,), _> =
+                            sqlx::query_as("SELECT count(*) FROM drive_uploads")
+                                .fetch_one(&pool)
+                                .await;
+                    }
+                }));
+            }
+            tokio::time::sleep(Duration::from_micros(200 + round % 977)).await;
+            for task in running {
+                cut_off(task, &pool).await;
+            }
+
+            let after: Vec<String> =
+                sqlx::query_scalar(tables).fetch_all(&pool).await.expect("the table list");
+            assert_eq!(after, before, "round {round} threw the database away with a connection");
         }
-        tokio::time::sleep(Duration::from_millis(1)).await;
     }
-    panic!("a run that was cut off never handed its database connection back");
 }
